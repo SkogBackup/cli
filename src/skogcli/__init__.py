@@ -1,6 +1,12 @@
 import typer
 
-app = typer.Typer()
+# Configure context settings to show help on empty calls
+context_settings = {
+    "help_option_names": ["--help", "-h"],
+    "auto_envvar_prefix": "SKOGCLI",
+}
+
+app = typer.Typer(context_settings=context_settings)
 
 def complete_color(ctx: typer.Context, args: list[str], incomplete: str):
     colors = ["red", "green", "blue", "yellow"]
