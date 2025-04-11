@@ -1,4 +1,5 @@
 import typer
+from typing import Optional
 
 # Configure context settings for help options
 context_settings = {
@@ -11,20 +12,22 @@ app = typer.Typer(
     no_args_is_help=True
 )
 
-def complete_color(ctx: typer.Context, args: list[str], incomplete: str):
-    colors = ["red", "green", "blue", "yellow"]
-    return [color for color in colors if color.startswith(incomplete)]
+@app.command()
+def hello(name: Optional[str] = typer.Argument(None, help="Name to greet")):
+    """
+    Say hello to someone or the world.
+    """
+    if name:
+        typer.echo(f"Hello {name}!")
+    else:
+        typer.echo("Hello World!")
 
 @app.command()
-def example(
-    color: str = typer.Option(
-        None, 
-        help="Choose a color", 
-        autocompletion=complete_color
-    )
-):
-    """Example command with tab completion."""
-    typer.echo(f"You chose: {color}")
+def version():
+    """
+    Show the current version of the application.
+    """
+    typer.echo("SkogCLI v0.1.0")
 
 def main() -> None:
     app()
