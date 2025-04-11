@@ -1,13 +1,14 @@
 import typer
 
-# Configure context settings to show help on empty calls
+# Configure context settings for help options
 context_settings = {
     "help_option_names": ["--help", "-h"],
 }
 
+# Create app with no_args_is_help=True to show help on empty calls
 app = typer.Typer(
     context_settings=context_settings,
-    no_args_is_help=True  # This makes empty calls show help
+    no_args_is_help=True
 )
 
 def complete_color(ctx: typer.Context, args: list[str], incomplete: str):
