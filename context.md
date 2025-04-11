@@ -12,6 +12,19 @@ empty calls to a command should always return help - use the no_args_is_help=Tru
 - Use Enum classes for choice options
 - Set context_settings for consistent help behavior
 
+# Rich Integration
+- Use Rich for enhanced terminal output
+- Create tables with rich.table.Table for structured data display
+- Use console.print() for styled output
+- Format command output consistently across the application
+
+# Configuration Management
+- Implement a config command for managing application settings
+- Use --show to display current configuration
+- Use --set and --value for modifying configuration
+- Include a --reset option to restore defaults
+- Store configuration in a standard location (e.g., ~/.config/skogcli/config.json)
+
 # Testing with pytest
 - Run tests with `uv run pytest tests/`
 - Run specific test files with `uv run pytest tests/test_examples.py`
