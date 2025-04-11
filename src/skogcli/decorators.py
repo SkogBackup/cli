@@ -16,6 +16,12 @@ def with_explanation(explanation: str):
         # Store the explanation as an attribute on the function
         setattr(f, "_explanation", explanation)
         
-        # The original function remains unchanged
-        return f
+        @functools.wraps(f)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # The actual function logic is handled by the callback in __init__.py
+            return f(*args, **kwargs)
+        
+        # Transfer the explanation attribute to the wrapper
+        setattr(wrapper, "_explanation", explanation)
+        return wrapper
     return decorator

@@ -17,7 +17,8 @@ def show_explanation_callback(ctx: typer.Context):
     # Only run for commands, not the main app
     if ctx.invoked_subcommand is None and hasattr(ctx.command, "callback"):
         callback = ctx.command.callback
-        if hasattr(callback, "_explanation") and not ctx.args:
+        if hasattr(callback, "_explanation") and len(ctx.args) == 0 and len(ctx.params) == 1:
+            # Only show explanation when no arguments are provided (just the ctx)
             typer.echo(callback._explanation)
             typer.echo("\nCommand help:")
             ctx.invoke(ctx.command.get_help)
