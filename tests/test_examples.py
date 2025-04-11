@@ -19,9 +19,9 @@ def test_examples_basic():
     # Test with formal flag
     result = runner.invoke(app, ["examples", "basic", "--formal", "skogix"])
     assert result.exit_code == 0
-    assert "Good day, skogix." in result.stdout
+    assert "Greetings, skogix!" in result.stdout
     
     # Test with both count and formal
     result = runner.invoke(app, ["examples", "basic", "--count", "2", "--formal", "skogix"])
     assert result.exit_code == 0
-    assert result.stdout.count("Good day, skogix.") == 2
+    assert result.stdout.count("Greetings, skogix!") == 2
