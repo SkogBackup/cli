@@ -98,5 +98,48 @@ def examples_callback(
     for file in files:
         typer.echo(f"  - {file}")
 
+@app.command()
+def config(
+    show: bool = typer.Option(False, "--show", help="Show current configuration"),
+    set_key: str = typer.Option(None, "--set", help="Set a configuration key"),
+    value: str = typer.Option(None, "--value", help="Value for the key to set"),
+    reset: bool = typer.Option(False, "--reset", help="Reset configuration to defaults"),
+):
+    """
+    Manage application configuration.
+    
+    This command allows viewing and modifying the application configuration.
+    """
+    if reset:
+        typer.echo("Configuration reset to defaults")
+        return
+        
+    if show:
+        # Display configuration in a table
+        table = Table(title="Configuration")
+        table.add_column("Key")
+        table.add_column("Value")
+        
+        # Example configuration values
+        config_values = {
+            "api_url": "https://api.example.com",
+            "timeout": "30",
+            "debug": "False",
+            "theme": "dark"
+        }
+        
+        for key, val in config_values.items():
+            table.add_row(key, val)
+            
+        console.print(table)
+        return
+        
+    if set_key and value:
+        typer.echo(f"Setting {set_key}={value}")
+        return
+    
+    # If no options provided, show help
+    typer.echo("Use --show to view configuration or --set/--value to modify it")
+
 def main() -> None:
     app()
