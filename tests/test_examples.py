@@ -1,6 +1,6 @@
 import pytest
 from typer.testing import CliRunner
-from skogcli import app
+from src.skogcli import app
 
 runner = CliRunner()
 
