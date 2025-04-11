@@ -73,4 +73,4 @@ def test_examples_callback():
     # Test with no files
     result = runner.invoke(app, ["examples", "callback"])
     assert result.exit_code == 0
-    assert "No files to process" in result.stdout
+    assert "No files provided" in result.stdout
