@@ -1,4 +1,5 @@
 import pytest
+import typer
 from typer.testing import CliRunner
 from src.skogcli import app, Format
 from src.skogcli.decorators import with_explanation
