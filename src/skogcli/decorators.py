@@ -13,15 +13,9 @@ def with_explanation(explanation: str):
         explanation: The explanation text to display
     """
     def decorator(f: Callable) -> Callable:
-        @functools.wraps(f)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            # Check if no arguments were provided
-            ctx = typer.Context.get_current()
-            if ctx and not ctx.invoked_subcommand and not ctx.args:
-                typer.echo(explanation)
-                typer.echo("\nCommand help:")
-                ctx.invoke(ctx.command.get_help)
-                return None
-            return f(*args, **kwargs)
-        return wrapper
+        # Store the explanation as an attribute on the function
+        setattr(f, "_explanation", explanation)
+        
+        # The original function remains unchanged
+        return f
     return decorator

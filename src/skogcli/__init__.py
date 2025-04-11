@@ -11,12 +11,30 @@ context_settings = {
     "help_option_names": ["--help", "-h"],
 }
 
+# Create a callback to handle explanations
+def show_explanation_callback(ctx: typer.Context):
+    """Show explanation for commands if available and no args provided."""
+    # Only run for commands, not the main app
+    if ctx.invoked_subcommand is None and hasattr(ctx.command, "callback"):
+        callback = ctx.command.callback
+        if hasattr(callback, "_explanation") and not ctx.args:
+            typer.echo(callback._explanation)
+            typer.echo("\nCommand help:")
+            ctx.invoke(ctx.command.get_help)
+            raise typer.Exit()
+
 # Create app with no_args_is_help=True to show help on empty calls
 app = typer.Typer(
     context_settings=context_settings,
     no_args_is_help=True,
     help="SkogCLI - A demonstration of Typer capabilities"
 )
+
+# Add the callback to the app
+@app.callback()
+def app_callback(ctx: typer.Context):
+    """SkogCLI - A demonstration of Typer capabilities."""
+    show_explanation_callback(ctx)
 
 # Create a console for rich output
 console = Console()
@@ -50,6 +68,13 @@ examples_app = typer.Typer(
     help="Example commands demonstrating Typer features", 
     no_args_is_help=True
 )
+
+# Add the callback to the examples app
+@examples_app.callback()
+def examples_callback(ctx: typer.Context):
+    """Example commands demonstrating Typer features."""
+    show_explanation_callback(ctx)
+
 app.add_typer(examples_app, name="examples")
 
 @examples_app.command("basic")
