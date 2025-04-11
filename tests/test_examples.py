@@ -1,6 +1,7 @@
 import pytest
 from typer.testing import CliRunner
 from src.skogcli import app, Format
+from src.skogcli.decorators import with_explanation
 
 runner = CliRunner()
 
@@ -74,3 +75,27 @@ def test_examples_callback():
     result = runner.invoke(app, ["examples", "callback"])
     assert result.exit_code == 0
     assert "No files provided" in result.stdout
+
+def test_with_explanation_decorator():
+    """Test the with_explanation decorator functionality."""
+    # Create a mock command with the decorator
+    @with_explanation("This is a test explanation for the command.")
+    def mock_command(ctx: typer.Context):
+        typer.echo("Command executed")
+    
+    # Create a test app with the decorated command
+    test_app = typer.Typer(no_args_is_help=True)
+    test_app.callback()(lambda: None)
+    test_app.command()(mock_command)
+    
+    # Test with no arguments (should show explanation and help)
+    result = runner.invoke(test_app, [])
+    assert result.exit_code == 0
+    assert "This is a test explanation for the command." in result.stdout
+    assert "Command help:" in result.stdout
+    
+    # Test with arguments (should execute normally)
+    result = runner.invoke(test_app, ["mock-command"])
+    assert result.exit_code == 0
+    assert "Command executed" in result.stdout
+    assert "This is a test explanation" not in result.stdout
