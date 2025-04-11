@@ -44,7 +44,10 @@ def version():
     typer.echo("SkogCLI v0.1.0")
 
 # Create a subcommand group
-examples_app = typer.Typer(help="Example commands demonstrating Typer features", no_args_is_help=True)
+examples_app = typer.Typer(
+    help="Example commands demonstrating Typer features", 
+    no_args_is_help=True
+)
 app.add_typer(examples_app, name="examples")
 
 @examples_app.command("basic")
