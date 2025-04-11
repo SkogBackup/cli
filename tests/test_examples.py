@@ -68,7 +68,7 @@ def test_examples_callback():
     assert "Processing 2 files:" in result.stdout
     assert "file1.txt" in result.stdout
     assert "file2.txt" in result.stdout
-    assert "Debug info" in result.stdout
+    assert "Verbose mode enabled" in result.stdout
     
     # Test with no files
     result = runner.invoke(app, ["examples", "callback"])
