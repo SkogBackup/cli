@@ -17,7 +17,7 @@ def complete_color(ctx: typer.Context, args: list[str], incomplete: str):
 @app.command()
 def example(
     color: str = typer.Option(
-        ..., 
+        None, 
         help="Choose a color", 
         autocompletion=complete_color
     )
