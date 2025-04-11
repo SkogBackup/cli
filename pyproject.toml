@@ -7,7 +7,9 @@ authors = [
     { name = "Emil Skogsund", email = "emil@skogsund.se" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.15.2",
+]
 
 [project.scripts]
 skogcli = "skogcli:main"
