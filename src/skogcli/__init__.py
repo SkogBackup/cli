@@ -4,6 +4,7 @@ from enum import Enum
 import rich
 from rich.console import Console
 from rich.table import Table
+from .decorators import with_explanation
 
 # Configure context settings for help options
 context_settings = {
@@ -27,6 +28,7 @@ class Format(str, Enum):
     TABLE = "table"
 
 @app.command()
+@with_explanation("A simple greeting command that says hello to a name you provide or to the world.")
 def hello(name: Optional[str] = typer.Argument(None, help="Name to greet")):
     """
     Say hello to someone or the world.
@@ -51,6 +53,7 @@ examples_app = typer.Typer(
 app.add_typer(examples_app, name="examples")
 
 @examples_app.command("basic")
+@with_explanation("A basic example showing how to use arguments and options in a Typer command.")
 def examples_basic(
     name: str = typer.Argument(..., help="Your name"),
     count: int = typer.Option(1, "--count", "-c", help="Number of greetings"),
@@ -99,6 +102,7 @@ def examples_callback(
         typer.echo(f"  - {file}")
 
 @app.command()
+@with_explanation("Configure application settings. Use --show to view current settings, --set and --value to modify them, or --reset to restore defaults.")
 def config(
     show: bool = typer.Option(False, "--show", help="Show current configuration"),
     set_key: str = typer.Option(None, "--set", help="Set a configuration key"),

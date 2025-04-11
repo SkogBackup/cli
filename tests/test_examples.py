@@ -100,3 +100,29 @@ def test_with_explanation_decorator():
     assert result.exit_code == 0
     assert "Command executed" in result.stdout
     assert "This is a test explanation" not in result.stdout
+
+def test_app_commands_with_explanation():
+    """Test that the main app commands with explanations work correctly."""
+    # Test hello command with no args (should show explanation)
+    result = runner.invoke(app, ["hello"])
+    assert result.exit_code == 0
+    assert "A simple greeting command" in result.stdout
+    assert "Command help:" in result.stdout
+    
+    # Test hello command with args (should execute normally)
+    result = runner.invoke(app, ["hello", "Skogix"])
+    assert result.exit_code == 0
+    assert "Hello Skogix!" in result.stdout
+    assert "A simple greeting command" not in result.stdout
+    
+    # Test config command with no args (should show explanation)
+    result = runner.invoke(app, ["config"])
+    assert result.exit_code == 0
+    assert "Configure application settings" in result.stdout
+    assert "Command help:" in result.stdout
+    
+    # Test examples basic command with no args (should show explanation)
+    result = runner.invoke(app, ["examples", "basic"])
+    assert result.exit_code == 0
+    assert "A basic example showing how to use arguments" in result.stdout
+    assert "Command help:" in result.stdout
