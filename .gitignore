@@ -5,7 +5,27 @@ build/
 dist/
 wheels/
 *.egg-info
+*.so
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
 
 # Virtual environments
 .venv
+venv/
+env/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Project specific
 .aider*
