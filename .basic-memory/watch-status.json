@@ -1,10 +1,43 @@
 {
   "running": true,
-  "start_time": "2025-04-12T13:00:07.302209",
-  "pid": 210000,
+  "start_time": "2025-04-12T13:02:23.416878",
+  "pid": 211594,
   "error_count": 0,
   "last_error": null,
-  "last_scan": null,
-  "synced_files": 0,
-  "recent_events": []
+  "last_scan": "2025-04-12T13:02:45.584244",
+  "synced_files": 4,
+  "recent_events": [
+    {
+      "timestamp": "2025-04-12T13:02:45.582953",
+      "path": "src/skogcli/settings.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T13:02:40.868121",
+      "path": "src/skogcli/memory.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T13:02:34.834217",
+      "path": "src/skogcli/decorators.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T13:02:28.703835",
+      "path": "src/skogcli/__init__.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "error": null
+    }
+  ]
 }
