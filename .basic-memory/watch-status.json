@@ -1,19 +1,10 @@
 {
   "running": true,
-  "start_time": "2025-04-12T10:35:35.335286",
-  "pid": 159938,
+  "start_time": "2025-04-12T13:00:07.302209",
+  "pid": 210000,
   "error_count": 0,
   "last_error": null,
-  "last_scan": "2025-04-12T12:44:12.124846",
-  "synced_files": 3,
-  "recent_events": [
-    {
-      "timestamp": "2025-04-12T12:44:12.123807",
-      "path": "src/skogcli/__pycache__/__init__.cpython-312.pyc",
-      "action": "modified",
-      "status": "success",
-      "checksum": "2008a2804d4bf50e34fb9ffcfe144b0b5f40703bf500e36953902137ec99e58a",
-      "error": null
-    }
-  ]
+  "last_scan": null,
+  "synced_files": 0,
+  "recent_events": []
 }
