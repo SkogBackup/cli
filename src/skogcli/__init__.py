@@ -5,6 +5,7 @@ import rich
 from rich.console import Console
 from rich.table import Table
 from .decorators import with_explanation
+from . import settings
 
 # Configure context settings for help options
 context_settings = {
@@ -134,14 +135,19 @@ def config(
     set_key: str = typer.Option(None, "--set", help="Set a configuration key"),
     value: str = typer.Option(None, "--value", help="Value for the key to set"),
     reset: bool = typer.Option(False, "--reset", help="Reset configuration to defaults"),
+    list_keys: bool = typer.Option(False, "--list-keys", help="List available configuration keys"),
 ):
     """
     Manage application configuration.
     
-    This command allows viewing and modifying the application configuration.
+    This command allows viewing and modifying the application configuration
+    stored in ~/.config/skogcli/config.json.
     """
     if reset:
-        typer.echo("Configuration reset to defaults")
+        if settings.reset_settings():
+            typer.echo("Configuration reset to defaults")
+        else:
+            typer.echo("Failed to reset configuration")
         return
         
     if show:
@@ -149,27 +155,60 @@ def config(
         table = Table(title="Configuration")
         table.add_column("Key")
         table.add_column("Value")
+        table.add_column("Type")
         
-        # Example configuration values
-        config_values = {
-            "api_url": "https://api.example.com",
-            "timeout": "30",
-            "debug": "False",
-            "theme": "dark"
-        }
+        # Get current settings
+        config_values = settings.list_settings()
         
         for key, val in config_values.items():
-            table.add_row(key, val)
+            table.add_row(key, str(val), type(val).__name__)
+            
+        console.print(table)
+        return
+    
+    if list_keys:
+        # Display available keys and their default values
+        table = Table(title="Available Configuration Keys")
+        table.add_column("Key")
+        table.add_column("Default Value")
+        table.add_column("Type")
+        
+        for key, val in settings.DEFAULT_SETTINGS.items():
+            table.add_row(key, str(val), type(val).__name__)
             
         console.print(table)
         return
         
-    if set_key and value:
-        typer.echo(f"Setting {set_key}={value}")
+    if set_key:
+        if value is None:
+            typer.echo(f"Error: --value is required when using --set")
+            raise typer.Exit(1)
+            
+        if settings.set_setting(set_key, value):
+            typer.echo(f"Setting {set_key}={value}")
+        else:
+            typer.echo(f"Failed to set {set_key}")
         return
     
-    # If no options provided, show help
-    typer.echo("Use --show to view configuration or --set/--value to modify it")
+    # If no options provided, show current settings
+    if not any([show, set_key, reset, list_keys]):
+        show = True
+    
+    if show:
+        # Display configuration in a table
+        table = Table(title="Configuration")
+        table.add_column("Key")
+        table.add_column("Value")
+        table.add_column("Type")
+        
+        # Get current settings
+        config_values = settings.list_settings()
+        
+        for key, val in config_values.items():
+            table.add_row(key, str(val), type(val).__name__)
+            
+        console.print(table)
+        return
 
 def main() -> None:
     app()
