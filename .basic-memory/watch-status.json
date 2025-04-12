@@ -1,10 +1,27 @@
 {
-  "running": true,
-  "start_time": "2025-04-12T13:00:07.302209",
-  "pid": 210000,
-  "error_count": 0,
-  "last_error": null,
-  "last_scan": null,
-  "synced_files": 0,
-  "recent_events": []
+  "running": false,
+  "start_time": "2025-04-12T13:08:17.025953",
+  "pid": 215790,
+  "error_count": 1,
+  "last_error": "2025-04-12T13:15:29.067047",
+  "last_scan": "2025-04-12T13:12:47.990468",
+  "synced_files": 1,
+  "recent_events": [
+    {
+      "timestamp": "2025-04-12T13:15:29.067029",
+      "path": "",
+      "action": "sync",
+      "status": "error",
+      "checksum": null,
+      "error": "(sqlite3.OperationalError) attempt to write a readonly database\n[SQL: DELETE FROM entity WHERE entity.file_path = ?]\n[parameters: ('src/skogcli/__init__.py',)]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)"
+    },
+    {
+      "timestamp": "2025-04-12T13:12:47.987660",
+      "path": "CLAUDE.md",
+      "action": "modified",
+      "status": "success",
+      "checksum": "b3a56bdc0ffda81a23f1904be84c5ac858763e265ce7b71be5e117be264117aa",
+      "error": null
+    }
+  ]
 }
