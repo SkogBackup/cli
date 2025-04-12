@@ -1,18 +1,18 @@
 {
   "running": true,
-  "start_time": "2025-04-12T13:03:22.204168",
-  "pid": 212465,
+  "start_time": "2025-04-12T13:08:17.025953",
+  "pid": 215790,
   "error_count": 0,
   "last_error": null,
-  "last_scan": "2025-04-12T13:07:52.214329",
+  "last_scan": "2025-04-12T13:12:47.990468",
   "synced_files": 1,
   "recent_events": [
     {
-      "timestamp": "2025-04-12T13:07:52.211907",
+      "timestamp": "2025-04-12T13:12:47.987660",
       "path": "CLAUDE.md",
-      "action": "new",
+      "action": "modified",
       "status": "success",
-      "checksum": "5a1c5e95e0918dff69d042d0022417b9d40085ee9aef957fc930be3774e6081b",
+      "checksum": "b3a56bdc0ffda81a23f1904be84c5ac858763e265ce7b71be5e117be264117aa",
       "error": null
     }
   ]
