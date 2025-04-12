@@ -1,22 +1,62 @@
 {
   "running": true,
-  "start_time": "2025-04-12T08:52:58.836446",
-  "pid": 123743,
+  "start_time": "2025-04-12T08:46:36.920992",
+  "pid": 121434,
   "error_count": 0,
   "last_error": null,
-  "last_scan": "2025-04-12T09:28:46.671809",
-  "synced_files": 22,
+  "last_scan": "2025-04-12T09:30:19.988454",
+  "synced_files": 35,
   "recent_events": [
     {
-      "timestamp": "2025-04-12T09:28:46.669676",
-      "path": "src/skogcli/__pycache__/memory.cpython-312.pyc",
+      "timestamp": "2025-04-12T09:30:19.986120",
+      "path": "tests/__pycache__/test_memory.cpython-312-pytest-8.3.5.pyc",
       "action": "modified",
       "status": "success",
-      "checksum": "8471d7ee517652d152996c54026f75449f84f24a61ec0ee6a7f3b5e79b217d20",
+      "checksum": "8510503da6c15fbb60123198e4c3d343126bedc67d6b1d0fda2f528ca1d273a4",
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:28:46.547783",
+      "timestamp": "2025-04-12T09:30:14.704698",
+      "path": "tests/test_memory.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "cd9b7884f300d83f865c2e12dc5b41c187c8abb4ef8c0394149de42b64615519",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:29:55.635469",
+      "path": "src/skogcli/__pycache__/memory.cpython-312.pyc",
+      "action": "modified",
+      "status": "success",
+      "checksum": "3876309979638fd186717da1ded0f65c8dafbf0db967b2441b187e9a9176ecc4",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:29:55.412510",
+      "path": "tests/__pycache__/test_memory.cpython-312-pytest-8.3.5.pyc",
+      "action": "modified",
+      "status": "success",
+      "checksum": "87a08533e7d6daa564fcfb9f00e259d7523734ec6a42757a75ea69859922db47",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:29:50.159837",
+      "path": "src/skogcli/memory.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "27e07bea9980e3ba82374d1758248d3238217ac10032b4f89ad4c5c95bf7724e",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:29:21.227210",
+      "path": "tests/test_memory.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "5e35d612aa8d7feeb97157cee77cf1d0c3c1800489bb033660325c18e8229566",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:28:46.327458",
       "path": "tests/__pycache__/test_memory.cpython-312-pytest-8.3.5.pyc",
       "action": "modified",
       "status": "success",
@@ -24,7 +64,15 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:28:41.635864",
+      "timestamp": "2025-04-12T09:28:46.278660",
+      "path": "src/skogcli/__pycache__/memory.cpython-312.pyc",
+      "action": "modified",
+      "status": "success",
+      "checksum": "8471d7ee517652d152996c54026f75449f84f24a61ec0ee6a7f3b5e79b217d20",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T09:28:41.587410",
       "path": "src/skogcli/memory.py",
       "action": "modified",
       "status": "success",
@@ -32,7 +80,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:28:18.671201",
+      "timestamp": "2025-04-12T09:28:18.472755",
       "path": "tests/test_memory.py",
       "action": "modified",
       "status": "success",
@@ -40,15 +88,15 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:27:57.327018",
+      "timestamp": "2025-04-12T09:27:57.160129",
       "path": "tests/__pycache__/test_memory.cpython-312-pytest-8.3.5.pyc",
-      "action": "modified",
+      "action": "new",
       "status": "success",
       "checksum": "86b7c03fa9d9c3c90b15ceaf8156b1ead56fb7501ee4d18f88a1d8413a1af9fa",
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:27:49.511836",
+      "timestamp": "2025-04-12T09:27:49.638636",
       "path": "tests/test_memory.py",
       "action": "modified",
       "status": "success",
@@ -56,7 +104,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:23:05.747183",
+      "timestamp": "2025-04-12T09:23:05.856554",
       "path": "src/skogcli/__pycache__/__init__.cpython-312.pyc",
       "action": "modified",
       "status": "success",
@@ -64,7 +112,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:22:37.935755",
+      "timestamp": "2025-04-12T09:22:38.037078",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -72,7 +120,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:22:15.055777",
+      "timestamp": "2025-04-12T09:22:15.210902",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -80,7 +128,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:22:09.230596",
+      "timestamp": "2025-04-12T09:22:09.154485",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -88,7 +136,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:21:22.157099",
+      "timestamp": "2025-04-12T09:21:22.243597",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -96,7 +144,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:21:16.257417",
+      "timestamp": "2025-04-12T09:21:16.300509",
       "path": "src/skogcli/memory.py",
       "action": "modified",
       "status": "success",
@@ -104,7 +152,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:20:05.749833",
+      "timestamp": "2025-04-12T09:20:05.609891",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -112,7 +160,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:18:09.604120",
+      "timestamp": "2025-04-12T09:18:09.416005",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -120,7 +168,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:18:00.166737",
+      "timestamp": "2025-04-12T09:18:00.030594",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -128,7 +176,7 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T09:17:46.997078",
+      "timestamp": "2025-04-12T09:17:46.909434",
       "path": "src/skogcli/__init__.py",
       "action": "modified",
       "status": "success",
@@ -136,11 +184,35 @@
       "error": null
     },
     {
-      "timestamp": "2025-04-12T08:56:47.611297",
+      "timestamp": "2025-04-12T08:56:47.501583",
       "path": "skogcli/SkogCLI Memory Module Implementation.md",
       "action": "modified",
       "status": "success",
       "checksum": "a06b287e4cef4c94eeeda1447fbd98557f6e698a0b9fb1fb732602a336d17880",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T08:49:57.123841",
+      "path": "skogcli/SkogCLI Development Guidelines.md",
+      "action": "modified",
+      "status": "success",
+      "checksum": "6453190f312617da39d68f28805c378973d03454af87931029d2358ce7a5e924",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T08:48:37.459332",
+      "path": "skogcli/Basic Memory Project Management.md",
+      "action": "modified",
+      "status": "success",
+      "checksum": "8a0ea3afe957eccfd3432417b1873f86ab65cd6bc50496c433f3447a5ddecd05",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-12T08:48:29.248232",
+      "path": "skogcli/SkogCLI Project Testing Notes.md",
+      "action": "modified",
+      "status": "success",
+      "checksum": "ea3cad10c43effeb5fd68eb9d08aae72a6905f04b203c3db0ee562597f44a4f6",
       "error": null
     }
   ]

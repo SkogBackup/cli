@@ -57,3 +57,35 @@ def test_memory_read_command():
     result = runner.invoke(app, ["memory", "read", "test-note", "--raw"])
     assert result.exit_code == 0
     assert "Not implemented yet" in result.stdout
+
+def test_memory_search_command():
+    """Test the search command returns the expected output."""
+    # Test basic invocation
+    result = runner.invoke(app, ["memory", "search", "test query"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with help flag
+    result = runner.invoke(app, ["memory", "search", "--help"])
+    assert result.exit_code == 0
+    assert "Search across your knowledge base for specific content." in result.stdout
+    
+    # Test with permalink flag
+    result = runner.invoke(app, ["memory", "search", "test query", "--permalink"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with title flag
+    result = runner.invoke(app, ["memory", "search", "test query", "--title"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with after_date option
+    result = runner.invoke(app, ["memory", "search", "test query", "--after-date", "1 week"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with pagination options
+    result = runner.invoke(app, ["memory", "search", "test query", "--page", "2", "--page-size", "20"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout

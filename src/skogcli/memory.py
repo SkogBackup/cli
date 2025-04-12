@@ -77,3 +77,31 @@ def read(
       skogcli memory read "Long Document" --page 2 --page-size 20
     """
     typer.echo("Not implemented yet")
+
+@memory_app.command("search")
+@with_explanation("Search across your knowledge base for specific content.")
+def search(
+    query: str = typer.Argument(..., help="Search query"),
+    permalink: bool = typer.Option(False, "--permalink", help="Search permalink values"),
+    title: bool = typer.Option(False, "--title", help="Search title values"),
+    after_date: Optional[str] = typer.Option(None, "--after-date", help="Search results after date (e.g. '2d', '1 week')"),
+    page: int = typer.Option(1, "--page", help="Page number"),
+    page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
+):
+    """
+    Search across your knowledge base for specific content.
+    
+    Results will be displayed with titles and snippets.
+    
+    Examples:
+    
+    Basic search:
+      skogcli memory search "project ideas"
+      
+    Search only titles:
+      skogcli memory search "meeting" --title
+      
+    Search with date filter:
+      skogcli memory search "important" --after-date "1 week"
+    """
+    typer.echo("Not implemented yet")
