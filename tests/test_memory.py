@@ -89,3 +89,54 @@ def test_memory_search_command():
     result = runner.invoke(app, ["memory", "search", "test query", "--page", "2", "--page-size", "20"])
     assert result.exit_code == 0
     assert "Not implemented yet" in result.stdout
+
+def test_memory_list_command():
+    """Test the list command returns the expected output."""
+    # Test basic invocation
+    result = runner.invoke(app, ["memory", "list"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with help flag
+    result = runner.invoke(app, ["memory", "list", "--help"])
+    assert result.exit_code == 0
+    assert "List recent activity across your knowledge base." in result.stdout
+    
+    # Test with type option
+    result = runner.invoke(app, ["memory", "list", "--type", "entity"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with timeframe option
+    result = runner.invoke(app, ["memory", "list", "--timeframe", "30d"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with pagination options
+    result = runner.invoke(app, ["memory", "list", "--page", "2", "--page-size", "20", "--depth", "2", "--max-related", "15"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+
+def test_memory_sync_command():
+    """Test the sync command returns the expected output."""
+    # Test basic invocation
+    result = runner.invoke(app, ["memory", "sync"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with help flag
+    result = runner.invoke(app, ["memory", "sync", "--help"])
+    assert result.exit_code == 0
+    assert "Synchronize your knowledge files with the database." in result.stdout
+
+def test_memory_status_command():
+    """Test the status command returns the expected output."""
+    # Test basic invocation
+    result = runner.invoke(app, ["memory", "status"])
+    assert result.exit_code == 0
+    assert "Not implemented yet" in result.stdout
+    
+    # Test with help flag
+    result = runner.invoke(app, ["memory", "status", "--help"])
+    assert result.exit_code == 0
+    assert "Show sync status between files and the database." in result.stdout

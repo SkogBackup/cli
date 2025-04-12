@@ -105,3 +105,63 @@ def search(
       skogcli memory search "important" --after-date "1 week"
     """
     typer.echo("Not implemented yet")
+
+@memory_app.command("list")
+@with_explanation("List recent activity across your knowledge base.")
+def list_notes(
+    type: Optional[str] = typer.Option(None, "--type", help="Activity type (entity, observation, relation)"),
+    depth: int = typer.Option(1, "--depth", help="Depth of related entities"),
+    timeframe: str = typer.Option("7d", "--timeframe", help="Timeframe for recent activity (e.g., '7d', '2w')"),
+    page: int = typer.Option(1, "--page", help="Page number"),
+    page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
+    max_related: int = typer.Option(10, "--max-related", help="Maximum number of related items"),
+):
+    """
+    List recent activity across your knowledge base.
+    
+    Displays recently created or updated notes.
+    
+    Examples:
+    
+    List recent activity (default 7 days):
+      skogcli memory list
+      
+    List specific type:
+      skogcli memory list --type entity
+      
+    Custom timeframe:
+      skogcli memory list --timeframe 30d
+    """
+    typer.echo("Not implemented yet")
+
+@memory_app.command("sync")
+@with_explanation("Synchronize your knowledge files with the database.")
+def sync():
+    """
+    Synchronize your knowledge files with the database.
+    
+    This command will check for changes in your knowledge files
+    and update the database accordingly.
+    
+    Examples:
+    
+    Sync files:
+      skogcli memory sync
+    """
+    typer.echo("Not implemented yet")
+
+@memory_app.command("status")
+@with_explanation("Show sync status between files and the database.")
+def status():
+    """
+    Show sync status between files and the database.
+    
+    This command will display information about the synchronization
+    status between your knowledge files and the database.
+    
+    Examples:
+    
+    Check status:
+      skogcli memory status
+    """
+    typer.echo("Not implemented yet")
