@@ -1,0 +1,79 @@
+"""
+SkogCLI Memory Module - Local-first personal knowledge management.
+"""
+
+import typer
+from typing import Optional
+from rich.console import Console
+from .decorators import with_explanation
+
+# Create the memory command group
+memory_app = typer.Typer(
+    help="Local-first personal knowledge management",
+    no_args_is_help=True,
+)
+
+# Create a console for rich output
+console = Console()
+
+@memory_app.callback()
+def memory_callback(
+    ctx: typer.Context,
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", 
+        "-p", 
+        help="Specify which project to use",
+        envvar="BASIC_MEMORY_PROJECT"
+    ),
+):
+    """Local-first personal knowledge management."""
+    pass
+
+@memory_app.command("create")
+@with_explanation("Create or update a note in your knowledge base.")
+def create(
+    title: str = typer.Argument(..., help="Title of the note"),
+    folder: str = typer.Argument(..., help="Folder to create the note in"),
+    content: Optional[str] = typer.Option(None, "--content", "-c", help="Note content (if not provided, read from stdin)"),
+    tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Tags to apply to the note (comma-separated)"),
+):
+    """
+    Create or update a note in your knowledge base.
+    
+    Examples:
+    
+    Create from argument:
+      skogcli memory create "My Idea" notes --content "# My Idea\n\nThis is a great idea."
+      
+    Create with tags:
+      skogcli memory create "Meeting Notes" meetings --tags "work,important,2025"
+    """
+    typer.echo("Not implemented yet")
+
+@memory_app.command("read")
+@with_explanation("Read a note from your knowledge base.")
+def read(
+    identifier: str = typer.Argument(..., help="Note identifier"),
+    page: int = typer.Option(1, "--page", help="Page number"),
+    page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
+    raw: bool = typer.Option(False, "--raw", help="Display raw markdown without rendering"),
+):
+    """
+    Read a note from your knowledge base.
+    
+    The note will be rendered as rich markdown by default.
+    Use --raw to display the unprocessed markdown.
+    
+    Examples:
+    
+    Read a note:
+      skogcli memory read "My Note"
+      
+    Read raw markdown:
+      skogcli memory read "Meeting Notes" --raw
+      
+    Paginate content:
+      skogcli memory read "Long Document" --page 2 --page-size 20
+    """
+    typer.echo("Not implemented yet")

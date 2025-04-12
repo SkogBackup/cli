@@ -5,6 +5,7 @@ import rich
 from rich.console import Console
 from rich.table import Table
 from .decorators import with_explanation
+from .memory import memory_app
 
 # Configure context settings for help options
 context_settings = {
@@ -28,13 +29,13 @@ def show_explanation_callback(ctx: typer.Context):
 app = typer.Typer(
     context_settings=context_settings,
     no_args_is_help=True,
-    help="SkogCLI - A demonstration of Typer capabilities"
+    help="SkogCLI - Tools for personal knowledge management"
 )
 
 # Add the callback to the app
 @app.callback()
 def app_callback(ctx: typer.Context):
-    """SkogCLI - A demonstration of Typer capabilities."""
+    """SkogCLI - Tools for personal knowledge management."""
     show_explanation_callback(ctx)
 
 # Create a console for rich output
@@ -77,6 +78,9 @@ def examples_callback(ctx: typer.Context):
     show_explanation_callback(ctx)
 
 app.add_typer(examples_app, name="examples")
+
+# Add the memory subcommand
+app.add_typer(memory_app, name="memory")
 
 @examples_app.command("basic")
 @with_explanation("A basic example showing how to use arguments and options in a Typer command.")
