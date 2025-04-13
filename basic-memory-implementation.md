@@ -341,12 +341,18 @@ app.add_typer(memory_app, name="memory")
 ```bash
 # Create a note with inline content
 skogcli memory create "My Great Idea" notes --content "# My Great Idea\n\nThis is a brilliant idea I had."
+# or using the write alias
+skogcli memory write "My Great Idea" notes --content "# My Great Idea\n\nThis is a brilliant idea I had."
 
 # Create a note with tags
 skogcli memory create "Meeting Notes" meetings --tags "work,important,2025"
+# or using the write alias
+skogcli memory write "Meeting Notes" meetings --tags "work,important,2025"
 
 # Create a note from stdin (interactive mode)
 skogcli memory create "Weekly Update" reports
+# or using the write alias
+skogcli memory write "Weekly Update" reports
 ```
 
 ### Reading a Note
