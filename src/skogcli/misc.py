@@ -15,6 +15,7 @@ from rich.table import Table
 from rich import print as rprint
 from .decorators import with_explanation
 from .settings import get_setting, set_setting
+from .completion import get_script_names, get_script_types, get_script_templates
 
 console = Console()
 

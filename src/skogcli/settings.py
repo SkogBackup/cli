@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich import print as rprint
 from .decorators import with_explanation
+from .completion import get_config_keys
 
 console = Console()
 
