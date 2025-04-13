@@ -13,14 +13,32 @@ memory_app = typer.Typer(
 
 def get_memory_folders() -> List[str]:
     """Get a list of memory folders for completion."""
-    # This is a placeholder - in a real implementation, you would
-    # query basic-memory for the actual folders
+    # Try to get folders from basic-memory
+    try:
+        result = run_basic_memory(["tool", "list-folders", "--format", "json"])
+        if result.returncode == 0:
+            import json
+            folders_data = json.loads(result.stdout)
+            return [folder["name"] for folder in folders_data.get("folders", [])]
+    except Exception:
+        pass
+    
+    # Fallback to hardcoded list
     return ["notes", "meetings", "projects", "ideas", "research", "journal"]
 
 def get_memory_projects() -> List[str]:
     """Get a list of memory projects for completion."""
-    # This is a placeholder - in a real implementation, you would
-    # query basic-memory for the actual projects
+    # Try to get projects from basic-memory
+    try:
+        result = run_basic_memory(["tool", "list-projects", "--format", "json"])
+        if result.returncode == 0:
+            import json
+            projects_data = json.loads(result.stdout)
+            return [project["name"] for project in projects_data.get("projects", [])]
+    except Exception:
+        pass
+    
+    # Fallback to settings and defaults
     default_project = get_setting("memory.default_project")
     projects = ["default"]
     if default_project and default_project not in projects:
@@ -153,8 +171,26 @@ def write(
 
 def get_note_identifiers() -> List[str]:
     """Get a list of note identifiers for completion."""
-    # This is a placeholder - in a real implementation, you would
-    # query basic-memory for the actual note identifiers
+    # Try to get recent notes from basic-memory
+    try:
+        result = run_basic_memory(["tool", "recent-notes", "--format", "json", "--limit", "10"])
+        if result.returncode == 0:
+            import json
+            notes_data = json.loads(result.stdout)
+            identifiers = []
+            for note in notes_data.get("notes", []):
+                # Add both permalink and title as possible identifiers
+                if "permalink" in note:
+                    identifiers.append(note["permalink"])
+                if "title" in note:
+                    identifiers.append(note["title"])
+            # Add special identifiers
+            identifiers.extend(["latest", "recent"])
+            return identifiers
+    except Exception:
+        pass
+    
+    # Fallback to hardcoded list
     return ["latest", "recent", "last-meeting", "project-ideas", "todo"]
 
 @memory_app.command("read")
@@ -309,11 +345,13 @@ def search(
 
 def get_activity_types() -> List[str]:
     """Get a list of activity types for completion."""
-    return ["entity", "observation", "relation", "all"]
+    # These are the standard activity types in basic-memory
+    return ["entity", "observation", "relation", "all", "note", "tag"]
 
 def get_timeframe_options() -> List[str]:
     """Get a list of timeframe options for completion."""
-    return ["1d", "3d", "7d", "14d", "30d", "1w", "2w", "1m", "3m", "6m", "1y"]
+    # Common timeframe options that basic-memory accepts
+    return ["1d", "3d", "7d", "14d", "30d", "1w", "2w", "1m", "3m", "6m", "1y", "today", "yesterday", "this-week", "last-week", "this-month", "last-month"]
 
 @memory_app.command("list")
 @with_explanation("List recent notes and activity in your knowledge base.")
