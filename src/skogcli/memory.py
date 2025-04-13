@@ -280,3 +280,51 @@ def status(
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
+
+@memory_app.command("recent-activity")
+@with_explanation("List recent notes and activity in your knowledge base (alias for list).")
+def recent_activity(
+    type: Optional[str] = typer.Option(None, "--type", help="Activity type (entity, observation, relation)"),
+    depth: int = typer.Option(1, "--depth", help="Depth of related entities"),
+    timeframe: str = typer.Option("7d", "--timeframe", help="Timeframe for recent activity (e.g., '7d', '2w')"),
+    page: int = typer.Option(1, "--page", help="Page number"),
+    page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
+    max_related: int = typer.Option(10, "--max-related", help="Maximum number of related items"),
+    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+):
+    """
+    List recent activity across your knowledge base.
+    
+    This is an alias for the 'list' command.
+    
+    Examples:
+    
+    List recent activity (default 7 days):
+      skogcli memory recent-activity
+      
+    List specific type:
+      skogcli memory recent-activity --type entity
+      
+    Custom timeframe:
+      skogcli memory recent-activity --timeframe 30d
+    """
+    cmd = ["tool", "recent-activity", 
+           "--depth", str(depth),
+           "--timeframe", timeframe,
+           "--page", str(page),
+           "--page-size", str(page_size),
+           "--max-related", str(max_related)]
+    
+    if type:
+        cmd.extend(["--type", type])
+    
+    if project:
+        cmd = ["--project", project] + cmd
+        
+    result = run_basic_memory(cmd)
+    
+    if result.returncode == 0:
+        console.print(result.stdout)
+    else:
+        typer.echo(f"Error: {result.stderr}")
+        raise typer.Exit(code=1)
