@@ -15,7 +15,11 @@ console = Console()
 def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
     """Run basic-memory with the given arguments."""
     cmd = ["uvx", "basic-memory"] + args
-    return subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError:
+        typer.echo("Error: basic-memory not found. Please install it with 'uv add basic-memory'")
+        raise typer.Exit(code=1)
 
 @memory_app.callback()
 def memory_callback():
@@ -137,7 +141,32 @@ def read(
         if raw:
             typer.echo(result.stdout)
         else:
-            console.print(Markdown(result.stdout))
+            try:
+                # Try to parse the JSON output
+                import json
+                data = json.loads(result.stdout)
+                
+                # Extract the content if available
+                if "content" in data:
+                    content = data["content"]
+                    console.print(Markdown(content))
+                    
+                    # Print metadata
+                    console.print("\n[bold cyan]Metadata:[/bold cyan]")
+                    if "title" in data:
+                        console.print(f"[bold]Title:[/bold] {data['title']}")
+                    if "file_path" in data:
+                        console.print(f"[bold]Path:[/bold] {data['file_path']}")
+                    if "created_at" in data:
+                        console.print(f"[bold]Created:[/bold] {data['created_at'].split('.')[0]}")
+                    if "updated_at" in data:
+                        console.print(f"[bold]Updated:[/bold] {data['updated_at'].split('.')[0]}")
+                else:
+                    # If no content field, just render the whole output as markdown
+                    console.print(Markdown(result.stdout))
+            except (json.JSONDecodeError, KeyError):
+                # Fallback to rendering the whole output as markdown
+                console.print(Markdown(result.stdout))
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -184,7 +213,41 @@ def search(
     result = run_basic_memory(cmd)
     
     if result.returncode == 0:
-        console.print(result.stdout)
+        try:
+            # Try to parse the JSON output for better formatting
+            import json
+            data = json.loads(result.stdout)
+            
+            # Create a table for the results
+            from rich.table import Table
+            table = Table(title=f"Recent Activity ({timeframe})")
+            
+            # Add columns
+            table.add_column("Type", style="cyan")
+            table.add_column("Title", style="green")
+            table.add_column("Created At", style="yellow")
+            table.add_column("Path", style="blue")
+            
+            # Add rows
+            for item in data.get("primary_results", []):
+                table.add_row(
+                    item.get("type", ""),
+                    item.get("title", ""),
+                    item.get("created_at", "").split(".")[0],  # Remove microseconds
+                    item.get("file_path", "")
+                )
+            
+            # Print the table
+            console.print(table)
+            
+            # Show metadata
+            metadata = data.get("metadata", {})
+            console.print(f"\nTotal results: {metadata.get('total_results', 0)}")
+            console.print(f"Page {data.get('page', 1)} of {(metadata.get('total_results', 0) + page_size - 1) // page_size}")
+            
+        except (json.JSONDecodeError, KeyError):
+            # Fallback to raw output if JSON parsing fails
+            console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -324,7 +387,41 @@ def recent_activity(
     result = run_basic_memory(cmd)
     
     if result.returncode == 0:
-        console.print(result.stdout)
+        try:
+            # Try to parse the JSON output for better formatting
+            import json
+            data = json.loads(result.stdout)
+            
+            # Create a table for the results
+            from rich.table import Table
+            table = Table(title=f"Recent Activity ({timeframe})")
+            
+            # Add columns
+            table.add_column("Type", style="cyan")
+            table.add_column("Title", style="green")
+            table.add_column("Created At", style="yellow")
+            table.add_column("Path", style="blue")
+            
+            # Add rows
+            for item in data.get("primary_results", []):
+                table.add_row(
+                    item.get("type", ""),
+                    item.get("title", ""),
+                    item.get("created_at", "").split(".")[0],  # Remove microseconds
+                    item.get("file_path", "")
+                )
+            
+            # Print the table
+            console.print(table)
+            
+            # Show metadata
+            metadata = data.get("metadata", {})
+            console.print(f"\nTotal results: {metadata.get('total_results', 0)}")
+            console.print(f"Page {data.get('page', 1)} of {(metadata.get('total_results', 0) + page_size - 1) // page_size}")
+            
+        except (json.JSONDecodeError, KeyError):
+            # Fallback to raw output if JSON parsing fails
+            console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
