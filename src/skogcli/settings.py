@@ -230,10 +230,11 @@ def edit():
     editor = os.environ.get("EDITOR", "nano")
     
     try:
-        result = typer.launch(f"{editor} {config_file}")
-        if result:
-            console.print("[green]Configuration file opened in editor.[/]")
+        # Use os.system to properly invoke the editor with the file path
+        exit_code = os.system(f"{editor} {config_file}")
+        if exit_code == 0:
+            console.print("[green]Configuration file edited successfully.[/]")
         else:
-            console.print("[bold red]Error:[/] Failed to open editor.")
+            console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
