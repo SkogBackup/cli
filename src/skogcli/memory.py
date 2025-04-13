@@ -1,6 +1,6 @@
 import typer
 import subprocess
-from typing import Optional, List
+from typing import Optional, List, Callable
 from rich.console import Console
 from rich.markdown import Markdown
 from .decorators import with_explanation
