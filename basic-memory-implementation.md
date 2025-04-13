@@ -107,6 +107,52 @@ def create(
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
+@memory_app.command("write")
+@with_explanation("Create or update a note in your knowledge base (alias for create).")
+def write(
+    title: str = typer.Argument(..., help="Title of the note"),
+    folder: str = typer.Argument(..., help="Folder to create the note in"),
+    content: Optional[str] = typer.Option(None, "--content", "-c", help="Note content (if not provided, read from stdin)"),
+    tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Tags to apply to the note (comma-separated)"),
+    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+):
+    """
+    Create or update a note in your knowledge base.
+    
+    This is an alias for the 'create' command.
+    
+    Examples:
+    
+    Create from argument:
+      skogcli memory write "My Idea" notes --content "# My Idea\n\nThis is a great idea."
+      
+    Create from stdin:
+      echo "# My Idea\n\nThis is a great idea." | skogcli memory write "My Idea" notes
+      
+    Create with tags:
+      skogcli memory write "Meeting Notes" meetings --tags "work,important,2025"
+    """
+    cmd = ["tool", "write-note", "--title", title, "--folder", folder]
+    if tags:
+        cmd.extend(["--tags", tags])
+    
+    if project:
+        cmd = ["--project", project] + cmd
+        
+    if content:
+        result = run_basic_memory(cmd + ["--content", content])
+    else:
+        # Read from stdin
+        typer.echo("Enter note content (Ctrl+D to finish):")
+        from_stdin = typer.get_text_stream('stdin').read()
+        result = run_basic_memory(cmd + ["--content", from_stdin])
+    
+    if result.returncode == 0:
+        typer.echo(f"✓ Note saved: {title} in {folder}")
+    else:
+        typer.echo(f"Error: {result.stderr}")
+        raise typer.Exit(code=1)
+
 @memory_app.command("read")
 @with_explanation("Read a note from your knowledge base.")
 def read(
