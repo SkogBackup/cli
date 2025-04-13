@@ -55,7 +55,7 @@ console = Console()
 
 def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
     """Run basic-memory with the given arguments."""
-    cmd = ["basic-memory"] + args
+    cmd = ["uvx", "basic-memory"] + args
     return subprocess.run(cmd, capture_output=True, text=True)
 
 @memory_app.callback()
