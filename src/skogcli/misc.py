@@ -15,7 +15,6 @@ from rich.table import Table
 from rich import print as rprint
 from .decorators import with_explanation
 from .settings import get_setting, set_setting
-from .completion import get_script_names, get_script_types, get_script_templates
 
 console = Console()
 
@@ -303,6 +302,19 @@ def list_available_scripts(global_scripts: bool = False) -> List[Path]:
             scripts.extend(list(global_scripts_dir.glob("*.*")))
     
     return scripts
+
+def get_script_names() -> List[str]:
+    """Get a list of all available script names for completion."""
+    scripts = list_available_scripts(global_scripts=True)
+    return [script.stem for script in scripts]
+
+def get_script_templates() -> List[str]:
+    """Get a list of available script templates for completion."""
+    return list(TEMPLATES.keys())
+
+def get_script_types() -> List[str]:
+    """Get a list of available script types for completion."""
+    return ["python", "shell"]
 
 def find_script(name: str, global_scripts: bool = True) -> Optional[Path]:
     """Find a script by name, checking both user and global directories."""

@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich import print as rprint
 from .decorators import with_explanation
-from .completion import get_config_keys
 
 console = Console()
 
@@ -56,6 +55,23 @@ def load_settings() -> Dict[str, Any]:
         console.print("[bold red]Error:[/] Config file is corrupted. Resetting to defaults.")
         save_settings(DEFAULT_CONFIG)
         return DEFAULT_CONFIG.copy()
+
+def get_config_keys() -> List[str]:
+    """Get a list of all configuration keys for completion."""
+    settings = load_settings()
+    
+    def extract_keys(data, prefix=""):
+        keys = []
+        for key, value in data.items():
+            full_key = f"{prefix}{key}" if prefix else key
+            if isinstance(value, dict):
+                keys.append(full_key)
+                keys.extend(extract_keys(value, f"{full_key}."))
+            else:
+                keys.append(full_key)
+        return keys
+    
+    return extract_keys(settings)
 
 def save_settings(settings: Dict[str, Any]) -> None:
     """Save settings to the config file."""

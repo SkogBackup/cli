@@ -9,16 +9,6 @@ from pathlib import Path
 # Create the main Typer app
 app = typer.Typer(no_args_is_help=True)
 
-# Import completion functionality
-from .completion import (
-    get_script_names, 
-    get_script_templates, 
-    get_script_types,
-    get_config_keys,
-    get_memory_folders,
-    get_memory_projects
-)
-
 # Import and add the memory subcommand
 from .memory import memory_app
 app.add_typer(memory_app, name="memory")

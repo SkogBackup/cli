@@ -4,14 +4,28 @@ from typing import Optional, List, Callable, Iterable
 from rich.console import Console
 from rich.markdown import Markdown
 from .decorators import with_explanation
+from .settings import get_setting
 
 memory_app = typer.Typer(
     help="Knowledge management powered by basic-memory",
     no_args_is_help=True
 )
 
-# Import completion functions
-from .completion import get_memory_folders, get_memory_projects
+def get_memory_folders() -> List[str]:
+    """Get a list of memory folders for completion."""
+    # This is a placeholder - in a real implementation, you would
+    # query basic-memory for the actual folders
+    return ["notes", "meetings", "projects", "ideas", "research", "journal"]
+
+def get_memory_projects() -> List[str]:
+    """Get a list of memory projects for completion."""
+    # This is a placeholder - in a real implementation, you would
+    # query basic-memory for the actual projects
+    default_project = get_setting("memory.default_project")
+    projects = ["default"]
+    if default_project and default_project not in projects:
+        projects.append(default_project)
+    return projects
 
 console = Console()
 
