@@ -1,19 +1,10 @@
 {
   "running": true,
-  "start_time": "2025-04-12T13:26:48.078422",
-  "pid": 223337,
+  "start_time": "2025-04-13T03:53:55.370440",
+  "pid": 858532,
   "error_count": 0,
   "last_error": null,
-  "last_scan": "2025-04-12T18:08:39.852778",
-  "synced_files": 2,
-  "recent_events": [
-    {
-      "timestamp": "2025-04-12T18:08:39.846207",
-      "path": "SkogMCP/MCP Development Tools.md",
-      "action": "modified",
-      "status": "success",
-      "checksum": "c09facdf769a8feba8197ef4bf6b4b6207a9c8b735098743683b2ed9af66e050",
-      "error": null
-    }
-  ]
+  "last_scan": null,
+  "synced_files": 0,
+  "recent_events": []
 }
