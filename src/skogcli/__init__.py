@@ -10,6 +10,10 @@ app = typer.Typer(no_args_is_help=True)
 from .memory import memory_app
 app.add_typer(memory_app, name="memory")
 
+# Import and add the config subcommand
+from .settings import config_app
+app.add_typer(config_app, name="config")
+
 @app.command()
 def hello(name: str = "World"):
     """Say hello to someone."""
