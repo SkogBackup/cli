@@ -18,11 +18,8 @@ def with_explanation(explanation: str) -> Callable:
     def decorator(f: Callable) -> Callable:
         @wraps(f)
         def wrapper(*args, **kwargs):
-            # Store the explanation in the current context if available
-            ctx = typer.Context.get_current()
-            if ctx:
-                ctx.obj = ctx.obj or {}
-                ctx.obj["explanation"] = explanation
+            # Simply store the explanation as an attribute
+            # No need to access the context here
             return f(*args, **kwargs)
         
         # Store the explanation directly on the function for access outside of execution
