@@ -14,6 +14,10 @@ app.add_typer(memory_app, name="memory")
 from .settings import config_app
 app.add_typer(config_app, name="config")
 
+# Import and add the misc subcommand
+from .misc import misc_app
+app.add_typer(misc_app, name="misc")
+
 @app.command()
 def hello(name: str = "World"):
     """Say hello to someone."""
