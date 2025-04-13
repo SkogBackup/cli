@@ -6,6 +6,10 @@ from typing import Optional
 # Create the main Typer app
 app = typer.Typer(no_args_is_help=True)
 
+# Import and add the memory subcommand
+from .memory import memory_app
+app.add_typer(memory_app, name="memory")
+
 @app.command()
 def hello(name: str = "World"):
     """Say hello to someone."""
