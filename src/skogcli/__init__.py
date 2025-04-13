@@ -3,11 +3,21 @@
 import os
 import subprocess
 import typer
-from typing import Optional, List
+from typing import Optional, List, Callable, Iterable
 from pathlib import Path
 
 # Create the main Typer app
 app = typer.Typer(no_args_is_help=True)
+
+# Import completion functionality
+from .completion import (
+    get_script_names, 
+    get_script_templates, 
+    get_script_types,
+    get_config_keys,
+    get_memory_folders,
+    get_memory_projects
+)
 
 # Import and add the memory subcommand
 from .memory import memory_app
@@ -60,6 +70,57 @@ def edit(
 def main():
     """Entry point for the CLI application."""
     app()
+
+def get_completion_script():
+    """Generate shell completion script."""
+    import click
+    shell = os.environ.get("SHELL", "").split("/")[-1]
+    if not shell:
+        return "echo 'Shell not detected'"
+    
+    complete_var = f"_{app.info.name.upper()}_COMPLETE"
+    
+    if shell == "bash":
+        return f"{complete_var}=bash_source {app.info.name} > ~/.{app.info.name}-complete.bash"
+    elif shell == "zsh":
+        return f"{complete_var}=zsh_source {app.info.name} > ~/.{app.info.name}-complete.zsh"
+    elif shell == "fish":
+        return f"{complete_var}=fish_source {app.info.name} > ~/.config/fish/completions/{app.info.name}.fish"
+    else:
+        return f"echo 'Shell {shell} not supported for completion'"
+
+@app.command("completion")
+def completion(
+    shell: str = typer.Option(None, help="Shell to generate completion for (bash, zsh, fish)")
+):
+    """Generate shell completion script."""
+    import click
+    
+    if shell is None:
+        # Try to detect the shell
+        detected_shell = os.environ.get("SHELL", "").split("/")[-1]
+        if not detected_shell:
+            typer.echo("Could not detect shell. Please specify with --shell.")
+            raise typer.Exit(1)
+        shell = detected_shell
+    
+    complete_var = f"_{app.info.name.upper()}_COMPLETE"
+    
+    if shell == "bash":
+        script = f"{complete_var}=bash_source {app.info.name}"
+        typer.echo(f"# Add this to ~/.bashrc:")
+        typer.echo(f"eval \"$({script})\"")
+    elif shell == "zsh":
+        script = f"{complete_var}=zsh_source {app.info.name}"
+        typer.echo(f"# Add this to ~/.zshrc:")
+        typer.echo(f"eval \"$({script})\"")
+    elif shell == "fish":
+        script = f"{complete_var}=fish_source {app.info.name}"
+        typer.echo(f"# Add this to ~/.config/fish/config.fish:")
+        typer.echo(f"{script} > ~/.config/fish/completions/{app.info.name}.fish")
+    else:
+        typer.echo(f"Shell {shell} not supported for completion")
+        raise typer.Exit(1)
 
 if __name__ == "__main__":
     main()

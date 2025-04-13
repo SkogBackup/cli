@@ -400,7 +400,11 @@ def list_scripts(
 @misc_app.command("run")
 @with_explanation("Run a custom script.")
 def run_script(
-    name: str = typer.Argument(..., help="Name of the script to run"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script to run",
+        autocompletion=lambda: get_script_names()
+    ),
     args: List[str] = typer.Argument(None, help="Arguments to pass to the script"),
     global_scripts: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
@@ -464,8 +468,18 @@ def run_script(
 @with_explanation("Add a new custom script.")
 def add_script(
     name: str = typer.Argument(..., help="Name for the new script"),
-    type: str = typer.Option("python", "--type", "-t", help="Script type (python or shell)"),
-    template: str = typer.Option("basic", "--template", help="Script template to use"),
+    type: str = typer.Option(
+        "python", 
+        "--type", "-t", 
+        help="Script type (python or shell)",
+        autocompletion=lambda: get_script_types()
+    ),
+    template: str = typer.Option(
+        "basic", 
+        "--template", 
+        help="Script template to use",
+        autocompletion=lambda: get_script_templates()
+    ),
     global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
     description: str = typer.Option("", "--description", "-d", help="Description of the script"),
     edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation")
@@ -540,7 +554,11 @@ def add_script(
 @misc_app.command("edit")
 @with_explanation("Edit an existing custom script.")
 def edit_script(
-    name: str = typer.Argument(..., help="Name of the script to edit"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script to edit",
+        autocompletion=lambda: get_script_names()
+    ),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
     """Edit an existing custom script."""
@@ -573,7 +591,11 @@ def edit_script(
 @misc_app.command("remove")
 @with_explanation("Remove a custom script.")
 def remove_script(
-    name: str = typer.Argument(..., help="Name of the script to remove"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script to remove",
+        autocompletion=lambda: get_script_names()
+    ),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
     force: bool = typer.Option(False, "--force", "-f", help="Force removal without confirmation")
 ):
@@ -616,7 +638,11 @@ def remove_script(
 @misc_app.command("info")
 @with_explanation("Show detailed information about a script.")
 def script_info(
-    name: str = typer.Argument(..., help="Name of the script"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script",
+        autocompletion=lambda: get_script_names()
+    ),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
     """Show detailed information about a script."""
@@ -658,7 +684,11 @@ def script_info(
 @misc_app.command("update-metadata")
 @with_explanation("Update metadata for a script.")
 def update_metadata(
-    name: str = typer.Argument(..., help="Name of the script"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script",
+        autocompletion=lambda: get_script_names()
+    ),
     description: str = typer.Option(None, "--description", "-d", help="Description of the script"),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
@@ -695,7 +725,11 @@ def list_templates():
 @misc_app.command("export")
 @with_explanation("Export a script to share with others.")
 def export_script(
-    name: str = typer.Argument(..., help="Name of the script to export"),
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script to export",
+        autocompletion=lambda: get_script_names()
+    ),
     output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
     include_metadata: bool = typer.Option(True, "--metadata/--no-metadata", help="Include metadata in export"),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
@@ -811,7 +845,11 @@ def import_script(
 @misc_app.command("copy")
 @with_explanation("Copy a script to create a new one.")
 def copy_script(
-    source: str = typer.Argument(..., help="Name of the source script"),
+    source: str = typer.Argument(
+        ..., 
+        help="Name of the source script",
+        autocompletion=lambda: get_script_names()
+    ),
     destination: str = typer.Argument(..., help="Name for the new script"),
     global_source: bool = typer.Option(True, "--global-source/--no-global-source", help="Include global scripts as source"),
     global_dest: bool = typer.Option(False, "--global-dest", "-g", help="Create as a global script"),

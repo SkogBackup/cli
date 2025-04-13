@@ -1,6 +1,6 @@
 import typer
 import subprocess
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Iterable
 from rich.console import Console
 from rich.markdown import Markdown
 from .decorators import with_explanation
@@ -9,6 +9,9 @@ memory_app = typer.Typer(
     help="Knowledge management powered by basic-memory",
     no_args_is_help=True
 )
+
+# Import completion functions
+from .completion import get_memory_folders, get_memory_projects
 
 console = Console()
 
@@ -30,10 +33,19 @@ def memory_callback():
 @with_explanation("Create or update a note in your knowledge base.")
 def create(
     title: str = typer.Argument(..., help="Title of the note"),
-    folder: str = typer.Argument(..., help="Folder to create the note in"),
+    folder: str = typer.Argument(
+        ..., 
+        help="Folder to create the note in",
+        autocompletion=get_memory_folders
+    ),
     content: Optional[str] = typer.Option(None, "--content", "-c", help="Note content (if not provided, read from stdin)"),
     tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Tags to apply to the note (comma-separated)"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     Create or update a note in your knowledge base.
@@ -74,10 +86,19 @@ def create(
 @with_explanation("Create or update a note in your knowledge base (alias for create).")
 def write(
     title: str = typer.Argument(..., help="Title of the note"),
-    folder: str = typer.Argument(..., help="Folder to create the note in"),
+    folder: str = typer.Argument(
+        ..., 
+        help="Folder to create the note in",
+        autocompletion=get_memory_folders
+    ),
     content: Optional[str] = typer.Option(None, "--content", "-c", help="Note content (if not provided, read from stdin)"),
     tags: Optional[str] = typer.Option(None, "--tags", "-t", help="Tags to apply to the note (comma-separated)"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     Create or update a note in your knowledge base.
@@ -116,13 +137,28 @@ def write(
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
+def get_note_identifiers() -> List[str]:
+    """Get a list of note identifiers for completion."""
+    # This is a placeholder - in a real implementation, you would
+    # query basic-memory for the actual note identifiers
+    return ["latest", "recent", "last-meeting", "project-ideas", "todo"]
+
 @memory_app.command("read")
 @with_explanation("Read a note from your knowledge base.")
 def read(
-    identifier: str = typer.Argument(..., help="Note identifier"),
+    identifier: str = typer.Argument(
+        ..., 
+        help="Note identifier",
+        autocompletion=get_note_identifiers
+    ),
     page: int = typer.Option(1, "--page", help="Page number"),
     page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
     raw: bool = typer.Option(False, "--raw", help="Display raw markdown without rendering"),
 ):
     """
@@ -180,7 +216,12 @@ def search(
     after_date: Optional[str] = typer.Option(None, "--after-date", help="Search results after date (e.g. '2d', '1 week')"),
     page: int = typer.Option(1, "--page", help="Page number"),
     page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     Search across your knowledge base for specific content.
@@ -252,16 +293,39 @@ def search(
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
+def get_activity_types() -> List[str]:
+    """Get a list of activity types for completion."""
+    return ["entity", "observation", "relation", "all"]
+
+def get_timeframe_options() -> List[str]:
+    """Get a list of timeframe options for completion."""
+    return ["1d", "3d", "7d", "14d", "30d", "1w", "2w", "1m", "3m", "6m", "1y"]
+
 @memory_app.command("list")
 @with_explanation("List recent notes and activity in your knowledge base.")
 def list_notes(
-    type: Optional[str] = typer.Option(None, "--type", help="Activity type (entity, observation, relation)"),
+    type: Optional[str] = typer.Option(
+        None, 
+        "--type", 
+        help="Activity type (entity, observation, relation)",
+        autocompletion=get_activity_types
+    ),
     depth: int = typer.Option(1, "--depth", help="Depth of related entities"),
-    timeframe: str = typer.Option("7d", "--timeframe", help="Timeframe for recent activity (e.g., '7d', '2w')"),
+    timeframe: str = typer.Option(
+        "7d", 
+        "--timeframe", 
+        help="Timeframe for recent activity (e.g., '7d', '2w')",
+        autocompletion=get_timeframe_options
+    ),
     page: int = typer.Option(1, "--page", help="Page number"),
     page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
     max_related: int = typer.Option(10, "--max-related", help="Maximum number of related items"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     List recent activity across your knowledge base.
@@ -303,7 +367,12 @@ def list_notes(
 @memory_app.command("sync")
 @with_explanation("Synchronize your knowledge files with the database.")
 def sync(
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     Synchronize your knowledge files with the database.
@@ -325,7 +394,12 @@ def sync(
 @memory_app.command("status")
 @with_explanation("Show sync status between files and the database.")
 def status(
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     Show sync status between your knowledge files and the database.
@@ -347,13 +421,28 @@ def status(
 @memory_app.command("recent-activity")
 @with_explanation("List recent notes and activity in your knowledge base (alias for list).")
 def recent_activity(
-    type: Optional[str] = typer.Option(None, "--type", help="Activity type (entity, observation, relation)"),
+    type: Optional[str] = typer.Option(
+        None, 
+        "--type", 
+        help="Activity type (entity, observation, relation)",
+        autocompletion=get_activity_types
+    ),
     depth: int = typer.Option(1, "--depth", help="Depth of related entities"),
-    timeframe: str = typer.Option("7d", "--timeframe", help="Timeframe for recent activity (e.g., '7d', '2w')"),
+    timeframe: str = typer.Option(
+        "7d", 
+        "--timeframe", 
+        help="Timeframe for recent activity (e.g., '7d', '2w')",
+        autocompletion=get_timeframe_options
+    ),
     page: int = typer.Option(1, "--page", help="Page number"),
     page_size: int = typer.Option(10, "--page-size", help="Number of items per page"),
     max_related: int = typer.Option(10, "--max-related", help="Maximum number of related items"),
-    project: Optional[str] = typer.Option(None, "--project", "-p", help="Specific project to use"),
+    project: Optional[str] = typer.Option(
+        None, 
+        "--project", "-p", 
+        help="Specific project to use",
+        autocompletion=get_memory_projects
+    ),
 ):
     """
     List recent activity across your knowledge base.

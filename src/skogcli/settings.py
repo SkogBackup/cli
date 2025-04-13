@@ -141,7 +141,13 @@ def list_keys():
 
 @config_app.command("get")
 @with_explanation("Get the value of a specific configuration key.")
-def get(key: str = typer.Argument(..., help="Configuration key (e.g., 'memory.page_size')")):
+def get(
+    key: str = typer.Argument(
+        ..., 
+        help="Configuration key (e.g., 'memory.page_size')",
+        autocompletion=lambda: get_config_keys()
+    )
+):
     """Get the value of a specific configuration key."""
     value = get_setting(key)
     if value is None:
@@ -158,7 +164,11 @@ def get(key: str = typer.Argument(..., help="Configuration key (e.g., 'memory.pa
 @config_app.command("set")
 @with_explanation("Set the value of a specific configuration key.")
 def set(
-    key: str = typer.Argument(..., help="Configuration key (e.g., 'memory.page_size')"),
+    key: str = typer.Argument(
+        ..., 
+        help="Configuration key (e.g., 'memory.page_size')",
+        autocompletion=lambda: get_config_keys()
+    ),
     value: str = typer.Argument(..., help="Value to set")
 ):
     """Set the value of a specific configuration key."""
