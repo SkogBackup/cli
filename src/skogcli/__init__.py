@@ -68,14 +68,15 @@ def get_completion_script():
     if not shell:
         return "echo 'Shell not detected'"
     
-    complete_var = f"_{app.info.name.upper()}_COMPLETE"
+    app_name = "skogcli"
+    complete_var = f"_{app_name.upper()}_COMPLETE"
     
     if shell == "bash":
-        return f"{complete_var}=bash_source {app.info.name} > ~/.{app.info.name}-complete.bash"
+        return f"{complete_var}=bash_source {app_name} > ~/.{app_name}-complete.bash"
     elif shell == "zsh":
-        return f"{complete_var}=zsh_source {app.info.name} > ~/.{app.info.name}-complete.zsh"
+        return f"{complete_var}=zsh_source {app_name} > ~/.{app_name}-complete.zsh"
     elif shell == "fish":
-        return f"{complete_var}=fish_source {app.info.name} > ~/.config/fish/completions/{app.info.name}.fish"
+        return f"{complete_var}=fish_source {app_name} > ~/.config/fish/completions/{app_name}.fish"
     else:
         return f"echo 'Shell {shell} not supported for completion'"
 
@@ -94,20 +95,21 @@ def completion(
             raise typer.Exit(1)
         shell = detected_shell
     
-    complete_var = f"_{app.info.name.upper()}_COMPLETE"
+    app_name = "skogcli"
+    complete_var = f"_{app_name.upper()}_COMPLETE"
     
     if shell == "bash":
-        script = f"{complete_var}=bash_source {app.info.name}"
+        script = f"{complete_var}=bash_source {app_name}"
         typer.echo(f"# Add this to ~/.bashrc:")
         typer.echo(f"eval \"$({script})\"")
     elif shell == "zsh":
-        script = f"{complete_var}=zsh_source {app.info.name}"
+        script = f"{complete_var}=zsh_source {app_name}"
         typer.echo(f"# Add this to ~/.zshrc:")
         typer.echo(f"eval \"$({script})\"")
     elif shell == "fish":
-        script = f"{complete_var}=fish_source {app.info.name}"
+        script = f"{complete_var}=fish_source {app_name}"
         typer.echo(f"# Add this to ~/.config/fish/config.fish:")
-        typer.echo(f"{script} > ~/.config/fish/completions/{app.info.name}.fish")
+        typer.echo(f"{script} > ~/.config/fish/completions/{app_name}.fish")
     else:
         typer.echo(f"Shell {shell} not supported for completion")
         raise typer.Exit(1)
