@@ -220,7 +220,7 @@ def search(
             
             # Create a table for the results
             from rich.table import Table
-            table = Table(title=f"Recent Activity ({timeframe})")
+            table = Table(title=f"Search Results: '{query}'")
             
             # Add columns
             table.add_column("Type", style="cyan")
