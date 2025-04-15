@@ -1,0 +1,8 @@
+{
+  "name": "hello",
+  "content": "#!/usr/bin/env python3\n\"\"\"\nCustom script for SkogCLI.\n\"\"\"\n\ndef main(args=None):\n    \"\"\"Main entry point for the script.\"\"\"\n    if args is None:\n        args = []\n    \n    print(f\"Hello from {__file__}!\")\n    print(f\"Arguments: {args}\")\n\nif __name__ == \"__main__\":\n    import sys\n    main(sys.argv[1:])\n",
+  "type": "py",
+  "metadata": {},
+  "exported_at": "2025-04-14T00:09:56.925949",
+  "exported_by": "skogix"
+}

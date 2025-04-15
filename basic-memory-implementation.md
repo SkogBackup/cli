@@ -225,7 +225,46 @@ def search(
     result = run_basic_memory(cmd)
     
     if result.returncode == 0:
-        console.print(result.stdout)
+        try:
+            # Try to parse the JSON output for better formatting
+            import json
+            data = json.loads(result.stdout)
+            
+            # Create a table for the results
+            from rich.table import Table
+            table = Table(title=f"Search Results: '{query}'")
+            
+            # Add columns
+            table.add_column("Type", style="cyan")
+            table.add_column("Title", style="green")
+            table.add_column("Path", style="blue")
+            table.add_column("Preview", style="yellow", no_wrap=False)
+            
+            # Add rows
+            for item in data.get("results", []):
+                # Truncate content for preview
+                content = item.get("content", "")
+                preview = content[:100] + "..." if len(content) > 100 else content
+                
+                table.add_row(
+                    item.get("type", ""),
+                    item.get("title", ""),
+                    item.get("file_path", ""),
+                    preview
+                )
+            
+            # Print the table
+            console.print(table)
+            
+            # Show metadata if available
+            if "metadata" in data:
+                metadata = data.get("metadata", {})
+                console.print(f"\nTotal results: {metadata.get('total_results', 0)}")
+                console.print(f"Page {data.get('page', 1)} of {(metadata.get('total_results', 0) + page_size - 1) // page_size}")
+            
+        except (json.JSONDecodeError, KeyError):
+            # Fallback to raw output if JSON parsing fails
+            console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
