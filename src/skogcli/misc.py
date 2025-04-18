@@ -1347,6 +1347,157 @@ def search_scripts(
         if errors and not ignore_errors:
             console.print(f"[yellow]Note: {len(errors)} errors occurred during search. Use --ignore-errors to suppress these messages.[/]")
 
+@misc_app.command("generate")
+@with_explanation("Generate a script from a description using AI.")
+def generate_script(
+    name: str = typer.Argument(..., help="Name for the new script"),
+    description: str = typer.Argument(..., help="Description of what the script should do"),
+    type: str = typer.Option(
+        "python", 
+        "--type", "-t", 
+        help="Script type (python or shell)",
+        autocompletion=lambda: get_script_types()
+    ),
+    global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
+    edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation"),
+    editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"),
+    model: str = typer.Option("gpt-3.5-turbo", "--model", "-m", help="AI model to use for generation"),
+    api_key: Optional[str] = typer.Option(None, "--api-key", "-k", help="API key for the AI service")
+):
+    """Generate a script from a description using AI."""
+    # Check if requests is installed
+    try:
+        import requests
+    except ImportError:
+        console.print("[bold red]Error:[/] The 'requests' package is required for this feature.")
+        console.print("Install it with: pip install requests")
+        return
+    
+    # Determine the scripts directory
+    if global_script:
+        # Check if user has permission to write to global directory
+        global_dir = get_global_scripts_dir()
+        if not os.access(global_dir.parent, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to create global scripts.")
+            console.print("Try running with sudo or use --no-global for a user script.")
+            return
+        scripts_dir = global_dir
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        scripts_dir = get_user_scripts_dir()
+    
+    # Determine file extension based on type
+    ext = ".py" if type.lower() == "python" else ".sh"
+    script_path = scripts_dir / f"{name}{ext}"
+    
+    # Check if script already exists
+    if script_path.exists():
+        overwrite = typer.confirm(f"Script '{name}' already exists. Overwrite?")
+        if not overwrite:
+            return
+    
+    # Get API key from environment if not provided
+    if api_key is None:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if api_key is None:
+            console.print("[bold red]Error:[/] No API key provided.")
+            console.print("Set the OPENAI_API_KEY environment variable or use --api-key.")
+            return
+    
+    # Prepare the prompt
+    language = "Python" if type.lower() == "python" else "Bash"
+    prompt = f"""Create a {language} script that does the following:
+{description}
+
+The script should:
+1. Be well-documented with comments
+2. Include error handling
+3. Have a main function that can be called with arguments
+4. Be executable from the command line
+
+Return ONLY the code with no additional text or explanations.
+"""
+    
+    # Show a spinner while waiting for the API response
+    with console.status(f"[bold green]Generating {language} script using {model}...[/]"):
+        try:
+            # Make the API request
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+            
+            data = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": f"You are an expert {language} programmer."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 2000
+            }
+            
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=data
+            )
+            
+            if response.status_code != 200:
+                console.print(f"[bold red]Error:[/] API request failed with status code {response.status_code}")
+                console.print(response.text)
+                return
+            
+            # Extract the generated code
+            response_data = response.json()
+            generated_code = response_data["choices"][0]["message"]["content"].strip()
+            
+            # Add shebang line if it's not already there
+            if type.lower() == "python" and not generated_code.startswith("#!/"):
+                generated_code = "#!/usr/bin/env python3\n" + generated_code
+            elif type.lower() == "shell" and not generated_code.startswith("#!/"):
+                generated_code = "#!/bin/bash\n" + generated_code
+            
+            # Write the generated code to the file
+            with open(script_path, "w") as f:
+                f.write(generated_code)
+            
+            # Make the script executable
+            script_path.chmod(script_path.stat().st_mode | 0o755)
+            
+            # Save metadata
+            metadata = {
+                "description": description,
+                "type": type.lower(),
+                "created": datetime.now().isoformat(),
+                "generated_by": model,
+                "run_count": 0
+            }
+            update_script_metadata(script_path, metadata)
+            
+            location = "global" if global_script else "user"
+            console.print(f"[green]Generated {location} script:[/] {script_path}")
+            
+            # Open in editor if requested
+            if edit:
+                # Get the editor from the environment or use the provided one
+                editor_cmd = editor or os.environ.get("EDITOR", "nano")
+                try:
+                    exit_code = subprocess.call([editor_cmd, str(script_path)])
+                    if exit_code == 0:
+                        console.print("[green]Script edited successfully.[/]")
+                    else:
+                        console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+                except FileNotFoundError:
+                    console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
+                except Exception as e:
+                    console.print(f"[bold red]Error:[/] {str(e)}")
+        
+        except requests.exceptions.RequestException as e:
+            console.print(f"[bold red]Error:[/] Failed to connect to the API: {str(e)}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] {str(e)}")
+
 @misc_app.command("import")
 @with_explanation("Import a script from an export file.")
 def import_script(

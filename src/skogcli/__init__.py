@@ -26,6 +26,22 @@ def version():
     """Show the current version of SkogCLI."""
     typer.echo("SkogCLI v0.1.0")
 
+# Add a callback to handle explanation display
+def show_explanation_callback(ctx: typer.Context):
+    """Show explanation for commands if available and no args provided."""
+    if ctx.invoked_subcommand is None and hasattr(ctx.command, "callback"):
+        callback = ctx.command.callback
+        if hasattr(callback, "_explanation") and len(ctx.args) == 0 and len(ctx.params) == 1:
+            typer.echo(callback._explanation)
+            typer.echo("\nCommand help:")
+            ctx.invoke(ctx.command.get_help)
+            raise typer.Exit()
+
+@app.callback()
+def app_callback(ctx: typer.Context):
+    """Main app callback to handle explanation display."""
+    show_explanation_callback(ctx)
+
 def main():
     """Entry point for the CLI application."""
     app()
