@@ -1123,6 +1123,96 @@ def transform_script(
     except Exception as e:
         console.print(f"[bold red]Error:[/] Failed to transform script: {str(e)}")
 
+@misc_app.command("search")
+@with_explanation("Search for text in scripts.")
+def search_scripts(
+    pattern: str = typer.Argument(..., help="Text or regular expression to search for"),
+    regex: bool = typer.Option(False, "--regex", "-r", help="Treat pattern as a regular expression"),
+    case_sensitive: bool = typer.Option(False, "--case-sensitive", "-c", help="Make search case-sensitive"),
+    global_scripts: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
+    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Write results to this file")
+):
+    """Search for text in scripts."""
+    import re
+    
+    # Get all scripts
+    scripts = list_available_scripts(global_scripts)
+    
+    if not scripts:
+        console.print("[yellow]No scripts found to search.[/]")
+        return
+    
+    console.print(f"[bold]Searching {len(scripts)} scripts for:[/] {pattern}")
+    
+    # Prepare regex pattern
+    if regex:
+        try:
+            if case_sensitive:
+                pattern_obj = re.compile(pattern)
+            else:
+                pattern_obj = re.compile(pattern, re.IGNORECASE)
+        except re.error as e:
+            console.print(f"[bold red]Error:[/] Invalid regular expression: {str(e)}")
+            return
+    
+    # Store results
+    results = []
+    
+    # Search each script
+    for script_path in scripts:
+        try:
+            with open(script_path, "r") as f:
+                content = f.read()
+                
+            # Search for matches
+            matches = []
+            if regex:
+                for i, line in enumerate(content.splitlines(), 1):
+                    if pattern_obj.search(line):
+                        matches.append((i, line.strip()))
+            else:
+                for i, line in enumerate(content.splitlines(), 1):
+                    if (pattern in line) if case_sensitive else (pattern.lower() in line.lower()):
+                        matches.append((i, line.strip()))
+            
+            if matches:
+                script_name = script_path.stem
+                location = "Global" if str(get_global_scripts_dir()) in str(script_path) else "User"
+                results.append((script_name, script_path, location, matches))
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to search script {script_path}: {str(e)}")
+    
+    # Display results
+    if not results:
+        console.print("[yellow]No matches found.[/]")
+        return
+    
+    # Format results
+    formatted_results = []
+    for script_name, script_path, location, matches in results:
+        formatted_results.append(f"[bold]{script_name}[/] ({location}): {script_path}")
+        for line_num, line in matches:
+            formatted_results.append(f"  Line {line_num}: {line}")
+        formatted_results.append("")
+    
+    # Write to output file if specified
+    if output_file is not None:
+        try:
+            with open(output_file, "w") as f:
+                for line in formatted_results:
+                    # Strip rich formatting for file output
+                    clean_line = line.replace("[bold]", "").replace("[/]", "")
+                    f.write(f"{clean_line}\n")
+            console.print(f"[green]Search results written to:[/] {output_file}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+    else:
+        # Display results in console
+        for line in formatted_results:
+            console.print(line)
+        
+        console.print(f"[green]Found matches in {len(results)} scripts.[/]")
+
 @misc_app.command("import")
 @with_explanation("Import a script from an export file.")
 def import_script(
