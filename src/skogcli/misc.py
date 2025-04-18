@@ -717,6 +717,9 @@ def script_code(
     input_file: Optional[Path] = typer.Option(
         None, "--file", "-f", help="Read new content from this file"
     ),
+    output_file: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Write content to this file instead of updating the script"
+    ),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
     """View or update script code without using an editor."""
@@ -729,12 +732,6 @@ def script_code(
     
     # If content or input file is provided, update the script
     if content is not None or input_file is not None:
-        # Check if user has permission to edit the script
-        if not os.access(script_path, os.W_OK):
-            console.print("[bold red]Error:[/] You don't have permission to edit this script.")
-            console.print("Try running with sudo if it's a global script.")
-            return
-        
         # Get content from file if specified
         if input_file is not None:
             if not input_file.exists():
@@ -747,6 +744,24 @@ def script_code(
             except Exception as e:
                 console.print(f"[bold red]Error:[/] Failed to read input file: {str(e)}")
                 return
+        
+        # If output file is specified, write to that instead of updating the script
+        if output_file is not None:
+            try:
+                with open(output_file, "w") as f:
+                    f.write(content)
+                console.print(f"[green]Content written to:[/] {output_file}")
+                return
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+                return
+        
+        # Otherwise update the script
+        # Check if user has permission to edit the script
+        if not os.access(script_path, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to edit this script.")
+            console.print("Try running with sudo if it's a global script.")
+            return
         
         # Write the new content
         try:
@@ -769,10 +784,152 @@ def script_code(
             with open(script_path, "r") as f:
                 content = f.read()
             
+            # If output file is specified, write to that instead of displaying
+            if output_file is not None:
+                try:
+                    with open(output_file, "w") as f:
+                        f.write(content)
+                    console.print(f"[green]Content written to:[/] {output_file}")
+                    return
+                except Exception as e:
+                    console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+                    return
+            
+            # Otherwise display the content
             console.print(f"[bold]Content of script '{name}':[/]\n")
             console.print(content)
         except Exception as e:
             console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
+
+@misc_app.command("batch")
+@with_explanation("Process multiple scripts with a single command.")
+def batch_process(
+    script_list: Path = typer.Argument(
+        ...,
+        help="Path to a file containing a list of scripts to process, one per line"
+    ),
+    command: str = typer.Option(
+        "code", "--command", "-c", 
+        help="Command to run on each script (code, run, info, etc.)"
+    ),
+    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
+):
+    """Process multiple scripts with a single command."""
+    if not script_list.exists():
+        console.print(f"[bold red]Error:[/] Script list file '{script_list}' not found.")
+        return
+    
+    try:
+        with open(script_list, "r") as f:
+            scripts = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to read script list: {str(e)}")
+        return
+    
+    if not scripts:
+        console.print("[yellow]No scripts found in the list file.[/]")
+        return
+    
+    console.print(f"[bold]Processing {len(scripts)} scripts with command '{command}':[/]")
+    
+    for script_name in scripts:
+        console.print(f"\n[bold]Processing script:[/] {script_name}")
+        
+        # Find the script
+        script_path = find_script(script_name, global_script)
+        
+        if not script_path:
+            console.print(f"[bold red]Error:[/] Script '{script_name}' not found. Skipping.")
+            continue
+        
+        # Execute the requested command
+        if command == "code":
+            # Display the script content
+            try:
+                with open(script_path, "r") as f:
+                    content = f.read()
+                console.print(f"[bold]Content of script '{script_name}':[/]\n")
+                console.print(content)
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
+        
+        elif command == "info":
+            # Show script info
+            script_type = "Unknown"
+            if script_path.suffix == ".py":
+                script_type = "Python"
+            elif script_path.suffix == ".sh":
+                script_type = "Shell"
+            elif is_executable(script_path):
+                script_type = "Executable"
+            
+            location = "Global" if str(get_global_scripts_dir()) in str(script_path) else "User"
+            metadata = get_script_metadata(script_path)
+            
+            console.print(f"[bold]Script:[/] {script_name}")
+            console.print(f"[bold]Path:[/] {script_path}")
+            console.print(f"[bold]Type:[/] {script_type}")
+            console.print(f"[bold]Location:[/] {location}")
+            
+            if metadata:
+                console.print("[bold]Metadata:[/]")
+                for key, value in metadata.items():
+                    console.print(f"  [bold]{key}:[/] {value}")
+        
+        elif command == "run":
+            # Run the script
+            console.print(f"[bold]Running script:[/] {script_name}")
+            
+            # Update metadata to track usage
+            metadata = get_script_metadata(script_path)
+            run_count = metadata.get("run_count", 0) + 1
+            update_script_metadata(script_path, {"run_count": run_count, "last_run": datetime.now().isoformat()})
+            
+            # Run the script based on its type
+            if script_path.suffix == ".py":
+                try:
+                    # Add script directory to path
+                    scripts_dir = script_path.parent
+                    sys.path.insert(0, str(scripts_dir))
+                    
+                    # Load the module
+                    spec = importlib.util.spec_from_file_location(script_name, script_path)
+                    if spec is None or spec.loader is None:
+                        console.print(f"[bold red]Error:[/] Failed to load Python script '{script_name}'.")
+                        continue
+                        
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    
+                    # Check if the module has a main function
+                    if hasattr(module, "main"):
+                        # Call the main function with no arguments
+                        module.main([])
+                    else:
+                        console.print("[yellow]Warning:[/] Python script has no 'main' function.")
+                except Exception as e:
+                    console.print(f"[bold red]Error:[/] {str(e)}")
+            else:
+                # Run shell script or executable
+                try:
+                    # Make sure the script is executable
+                    if not is_executable(script_path):
+                        script_path.chmod(script_path.stat().st_mode | 0o755)
+                    
+                    # Run the script with no arguments
+                    result = subprocess.run([str(script_path)], check=True)
+                    
+                    if result.returncode != 0:
+                        console.print(f"[bold red]Error:[/] Script exited with code {result.returncode}")
+                except subprocess.CalledProcessError as e:
+                    console.print(f"[bold red]Error:[/] {str(e)}")
+                except Exception as e:
+                    console.print(f"[bold red]Error:[/] {str(e)}")
+        
+        else:
+            console.print(f"[bold red]Error:[/] Unknown command '{command}'. Skipping.")
+    
+    console.print("\n[green]Batch processing complete.[/]")
 
 @misc_app.command("update-metadata")
 @with_explanation("Update metadata for a script.")
