@@ -301,6 +301,9 @@ def list_available_scripts(global_scripts: bool = False) -> List[Path]:
         if global_scripts_dir.exists():
             scripts.extend(list(global_scripts_dir.glob("*.*")))
     
+    # Filter out directories that might have been included due to having extensions
+    scripts = [script for script in scripts if not script.is_dir()]
+    
     return scripts
 
 def get_script_names() -> List[str]:
@@ -813,7 +816,10 @@ def batch_process(
         help="Command to run on each script (code, run, info, etc.)"
     ),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
-    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Directory to write output files to")
+    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Directory to write output files to"),
+    continue_on_error: bool = typer.Option(False, "--continue-on-error", help="Continue processing even if errors occur"),
+    pattern: Optional[str] = typer.Option(None, "--pattern", "-p", help="Pattern to search for (when using 'search' command)"),
+    replacement: Optional[str] = typer.Option(None, "--replacement", "-r", help="Replacement string (when using 'transform' command)")
 ):
     """Process multiple scripts with a single command."""
     if not script_list.exists():
@@ -849,7 +855,7 @@ def batch_process(
             try:
                 with open(script_path, "r") as f:
                     content = f.read()
-                
+            
                 # If output directory is specified, write to a file there
                 if output_dir is not None:
                     output_dir.mkdir(parents=True, exist_ok=True)
@@ -859,13 +865,19 @@ def batch_process(
                             f.write(content)
                         console.print(f"[green]Content written to:[/] {output_file}")
                     except Exception as e:
-                        console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+                        error_msg = f"Failed to write to output file: {str(e)}"
+                        console.print(f"[bold red]Error:[/] {error_msg}")
+                        if not continue_on_error:
+                            return
                 else:
                     # Otherwise display the content
                     console.print(f"[bold]Content of script '{script_name}':[/]\n")
                     console.print(content)
             except Exception as e:
-                console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
+                error_msg = f"Failed to read script: {str(e)}"
+                console.print(f"[bold red]Error:[/] {error_msg}")
+                if not continue_on_error:
+                    continue
         
         elif command == "info":
             # Show script info
@@ -940,8 +952,110 @@ def batch_process(
                 except Exception as e:
                     console.print(f"[bold red]Error:[/] {str(e)}")
         
+        elif command == "search" and pattern is not None:
+            # Search for pattern in the script
+            import re
+            try:
+                with open(script_path, "r") as f:
+                    content = f.read()
+            
+                # Search for matches
+                matches = []
+                for i, line in enumerate(content.splitlines(), 1):
+                    if pattern in line:
+                        matches.append((i, line.strip()))
+            
+                if matches:
+                    console.print(f"[bold]Matches in '{script_name}':[/]")
+                    for line_num, line in matches:
+                        console.print(f"  Line {line_num}: {line}")
+                
+                    # If output directory is specified, write matches to a file there
+                    if output_dir is not None:
+                        output_dir.mkdir(parents=True, exist_ok=True)
+                        output_file = output_dir / f"{script_name}_matches.txt"
+                        try:
+                            with open(output_file, "w") as f:
+                                f.write(f"Matches in '{script_name}':\n")
+                                for line_num, line in matches:
+                                    f.write(f"  Line {line_num}: {line}\n")
+                            console.print(f"[green]Matches written to:[/] {output_file}")
+                        except Exception as e:
+                            error_msg = f"Failed to write matches to file: {str(e)}"
+                            console.print(f"[bold red]Error:[/] {error_msg}")
+                            if not continue_on_error:
+                                return
+                else:
+                    console.print(f"[yellow]No matches found in '{script_name}'[/]")
+            except Exception as e:
+                error_msg = f"Failed to search script: {str(e)}"
+                console.print(f"[bold red]Error:[/] {error_msg}")
+                if not continue_on_error:
+                    continue
+    
+        elif command == "transform" and pattern is not None and replacement is not None:
+            # Transform script content using regex
+            import re
+            try:
+                with open(script_path, "r") as f:
+                    content = f.read()
+            
+                # Apply the transformation
+                try:
+                    transformed_content = content.replace(pattern, replacement)
+                
+                    # Check if any changes were made
+                    if transformed_content == content:
+                        console.print(f"[yellow]No changes made to '{script_name}'. Pattern did not match any content.[/]")
+                        continue
+                
+                    # If output directory is specified, write to a file there
+                    if output_dir is not None:
+                        output_dir.mkdir(parents=True, exist_ok=True)
+                        output_file = output_dir / f"{script_name}_transformed{script_path.suffix}"
+                        try:
+                            with open(output_file, "w") as f:
+                                f.write(transformed_content)
+                            console.print(f"[green]Transformed content written to:[/] {output_file}")
+                        except Exception as e:
+                            error_msg = f"Failed to write transformed content to file: {str(e)}"
+                            console.print(f"[bold red]Error:[/] {error_msg}")
+                            if not continue_on_error:
+                                return
+                    else:
+                        # Otherwise update the script
+                        # Check if user has permission to edit the script
+                        if not os.access(script_path, os.W_OK):
+                            console.print(f"[bold red]Error:[/] You don't have permission to edit script '{script_name}'.")
+                            if not continue_on_error:
+                                continue
+                        else:
+                            # Write the transformed content
+                            with open(script_path, "w") as f:
+                                f.write(transformed_content)
+                        
+                            # Make sure the script is executable
+                            script_path.chmod(script_path.stat().st_mode | 0o755)
+                        
+                            # Update metadata
+                            update_script_metadata(script_path, {"last_edited": datetime.now().isoformat()})
+                        
+                            console.print(f"[green]Transformed script:[/] {script_name}")
+                except Exception as e:
+                    error_msg = f"Failed to transform script: {str(e)}"
+                    console.print(f"[bold red]Error:[/] {error_msg}")
+                    if not continue_on_error:
+                        continue
+            except Exception as e:
+                error_msg = f"Failed to read script: {str(e)}"
+                console.print(f"[bold red]Error:[/] {error_msg}")
+                if not continue_on_error:
+                    continue
         else:
-            console.print(f"[bold red]Error:[/] Unknown command '{command}'. Skipping.")
+            if command not in ["code", "info", "run"] and (command == "search" and pattern is None) or (command == "transform" and (pattern is None or replacement is None)):
+                console.print(f"[bold red]Error:[/] Command '{command}' requires additional parameters. Skipping.")
+            else:
+                console.print(f"[bold red]Error:[/] Unknown command '{command}'. Skipping.")
     
     console.print("\n[green]Batch processing complete.[/]")
 
@@ -1130,7 +1244,8 @@ def search_scripts(
     regex: bool = typer.Option(False, "--regex", "-r", help="Treat pattern as a regular expression"),
     case_sensitive: bool = typer.Option(False, "--case-sensitive", "-c", help="Make search case-sensitive"),
     global_scripts: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
-    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Write results to this file")
+    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Write results to this file"),
+    ignore_errors: bool = typer.Option(False, "--ignore-errors", help="Continue searching even if errors occur")
 ):
     """Search for text in scripts."""
     import re
@@ -1157,9 +1272,16 @@ def search_scripts(
     
     # Store results
     results = []
+    errors = []
     
     # Search each script
     for script_path in scripts:
+        # Skip directories
+        if script_path.is_dir():
+            if not ignore_errors:
+                errors.append(f"Skipped directory: {script_path}")
+            continue
+            
         try:
             with open(script_path, "r") as f:
                 content = f.read()
@@ -1180,7 +1302,10 @@ def search_scripts(
                 location = "Global" if str(get_global_scripts_dir()) in str(script_path) else "User"
                 results.append((script_name, script_path, location, matches))
         except Exception as e:
-            console.print(f"[bold red]Error:[/] Failed to search script {script_path}: {str(e)}")
+            error_msg = f"Failed to search script {script_path}: {str(e)}"
+            errors.append(error_msg)
+            if not ignore_errors:
+                console.print(f"[bold red]Error:[/] {error_msg}")
     
     # Display results
     if not results:
@@ -1195,13 +1320,20 @@ def search_scripts(
             formatted_results.append(f"  Line {line_num}: {line}")
         formatted_results.append("")
     
+    # Add error summary at the end if there were errors
+    if errors:
+        formatted_results.append("[bold red]Errors encountered during search:[/]")
+        for error in errors:
+            formatted_results.append(f"  {error}")
+        formatted_results.append("")
+    
     # Write to output file if specified
     if output_file is not None:
         try:
             with open(output_file, "w") as f:
                 for line in formatted_results:
                     # Strip rich formatting for file output
-                    clean_line = line.replace("[bold]", "").replace("[/]", "")
+                    clean_line = line.replace("[bold]", "").replace("[/]", "").replace("[bold red]", "").replace("[yellow]", "")
                     f.write(f"{clean_line}\n")
             console.print(f"[green]Search results written to:[/] {output_file}")
         except Exception as e:
@@ -1212,6 +1344,8 @@ def search_scripts(
             console.print(line)
         
         console.print(f"[green]Found matches in {len(results)} scripts.[/]")
+        if errors and not ignore_errors:
+            console.print(f"[yellow]Note: {len(errors)} errors occurred during search. Use --ignore-errors to suppress these messages.[/]")
 
 @misc_app.command("import")
 @with_explanation("Import a script from an export file.")
