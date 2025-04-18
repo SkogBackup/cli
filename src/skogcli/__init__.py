@@ -22,11 +22,6 @@ from .misc import misc_app
 app.add_typer(misc_app, name="misc")
 
 @app.command()
-def hello(name: str = "World"):
-    """Say hello to someone."""
-    typer.echo(f"Hello {name}!")
-
-@app.command()
 def version():
     """Show the current version of SkogCLI."""
     typer.echo("SkogCLI v0.1.0")

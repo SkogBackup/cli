@@ -149,20 +149,14 @@ def test_with_explanation_decorator():
 
 def test_app_commands_with_explanation():
     """Test that the main app commands with explanations work correctly."""
-    # Test hello command with explanation
+    # Test main app with no args
     result = runner.invoke(app, [])
     assert result.exit_code == 0
     
-    # Test hello command with args (should execute normally)
-    result = runner.invoke(app, ["hello", "Skogix"])
+    # Test version command
+    result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
-    assert "Hello Skogix!" in result.stdout
-    
-    # Test hello command with no args (should show help with explanation)
-    # We need to modify how we test this since the app is configured with no_args_is_help=True
-    result = runner.invoke(app, ["hello", "--help"])
-    assert result.exit_code == 0
-    assert "Say hello to someone or the world." in result.stdout
+    assert "SkogCLI v0.1.0" in result.stdout
     
     # Test examples basic command with help (should show help)
     result = runner.invoke(app, ["examples", "basic", "--help"])
