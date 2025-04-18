@@ -1,10 +1,27 @@
 {
   "running": true,
-  "start_time": "2025-04-15T14:51:29.050545",
-  "pid": 4193,
+  "start_time": "2025-04-17T14:57:32.712353",
+  "pid": 190051,
   "error_count": 0,
   "last_error": null,
-  "last_scan": null,
-  "synced_files": 0,
-  "recent_events": []
+  "last_scan": "2025-04-17T20:24:54.785604",
+  "synced_files": 3,
+  "recent_events": [
+    {
+      "timestamp": "2025-04-17T20:24:54.782102",
+      "path": "src/skogcli/__pycache__/memory.cpython-312.pyc",
+      "action": "modified",
+      "status": "success",
+      "checksum": "a2b9dfac6ec318e17f8c41371bd2b76ba695ad870cec7f491d59f5349c48e24b",
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-17T20:24:48.749493",
+      "path": "src/skogcli/memory.py",
+      "action": "modified",
+      "status": "success",
+      "checksum": "4908ce72cc1877112f4418d3c492be517c109ee2f0fa98e5e05bcbde857394a4",
+      "error": null
+    }
+  ]
 }
