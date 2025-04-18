@@ -703,6 +703,77 @@ def script_info(
     else:
         console.print("\n[yellow]No metadata available for this script.[/]")
 
+@misc_app.command("code")
+@with_explanation("View or update script code without using an editor.")
+def script_code(
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script",
+        autocompletion=lambda: get_script_names()
+    ),
+    content: Optional[str] = typer.Option(
+        None, "--content", "-c", help="New content for the script (if not provided, displays current content)"
+    ),
+    input_file: Optional[Path] = typer.Option(
+        None, "--file", "-f", help="Read new content from this file"
+    ),
+    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
+):
+    """View or update script code without using an editor."""
+    # Find the script
+    script_path = find_script(name, global_script)
+    
+    if not script_path:
+        console.print(f"[bold red]Error:[/] Script '{name}' not found.")
+        return
+    
+    # If content or input file is provided, update the script
+    if content is not None or input_file is not None:
+        # Check if user has permission to edit the script
+        if not os.access(script_path, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to edit this script.")
+            console.print("Try running with sudo if it's a global script.")
+            return
+        
+        # Get content from file if specified
+        if input_file is not None:
+            if not input_file.exists():
+                console.print(f"[bold red]Error:[/] Input file '{input_file}' not found.")
+                return
+            
+            try:
+                with open(input_file, "r") as f:
+                    content = f.read()
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] Failed to read input file: {str(e)}")
+                return
+        
+        # Write the new content
+        try:
+            with open(script_path, "w") as f:
+                f.write(content)
+            
+            # Make sure the script is executable
+            script_path.chmod(script_path.stat().st_mode | 0o755)
+            
+            # Update metadata
+            update_script_metadata(script_path, {"last_edited": datetime.now().isoformat()})
+            
+            console.print(f"[green]Updated script:[/] {name}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to update script: {str(e)}")
+            return
+    else:
+        # Display the current content
+        try:
+            with open(script_path, "r") as f:
+                content = f.read()
+            
+            console.print(f"[bold]Content of script '{name}':[/]\n")
+            console.print(content)
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
+
 @misc_app.command("update-metadata")
 @with_explanation("Update metadata for a script.")
 def update_metadata(
