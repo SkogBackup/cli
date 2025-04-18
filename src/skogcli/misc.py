@@ -51,6 +51,382 @@ echo "Hello from $(basename $0)!"
 echo "Arguments: $@"
 """
     },
+    "line_counter": {
+        "python": """#!/usr/bin/env python3
+\"\"\"
+Line counting script for files and directories.
+\"\"\"
+import os
+import sys
+from pathlib import Path
+from typing import List, Dict, Tuple, Optional
+
+def count_lines_in_file(file_path: Path) -> Tuple[int, int, int]:
+    \"\"\"
+    Count the number of lines, blank lines, and comment lines in a file.
+    
+    Args:
+        file_path: Path to the file
+        
+    Returns:
+        Tuple of (total lines, blank lines, comment lines)
+    \"\"\"
+    if not file_path.exists():
+        print(f"Error: File {file_path} does not exist")
+        return (0, 0, 0)
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+            lines = f.readlines()
+            
+        total_lines = len(lines)
+        blank_lines = sum(1 for line in lines if line.strip() == '')
+        
+        # Count comment lines based on file extension
+        comment_lines = 0
+        ext = file_path.suffix.lower()
+        
+        # Define comment markers for different file types
+        comment_markers = {
+            '.py': '#',
+            '.js': '//',
+            '.java': '//',
+            '.c': '//',
+            '.cpp': '//',
+            '.h': '//',
+            '.sh': '#',
+            '.rb': '#',
+            '.pl': '#',
+            '.php': '//',
+            '.html': '<!--',
+            '.xml': '<!--',
+            '.css': '/*',
+        }
+        
+        if ext in comment_markers:
+            marker = comment_markers[ext]
+            comment_lines = sum(1 for line in lines if line.strip().startswith(marker))
+        
+        return (total_lines, blank_lines, comment_lines)
+    
+    except Exception as e:
+        print(f"Error reading file {file_path}: {str(e)}")
+        return (0, 0, 0)
+
+def count_lines_in_directory(dir_path: Path, extensions: Optional[List[str]] = None) -> Dict[str, Tuple[int, int, int]]:
+    \"\"\"
+    Count lines in all files in a directory (recursively).
+    
+    Args:
+        dir_path: Path to the directory
+        extensions: List of file extensions to include (e.g., ['.py', '.js'])
+                   If None, count all files
+    
+    Returns:
+        Dictionary mapping file paths to line counts
+    \"\"\"
+    if not dir_path.exists() or not dir_path.is_dir():
+        print(f"Error: Directory {dir_path} does not exist or is not a directory")
+        return {}
+    
+    results = {}
+    
+    try:
+        for root, _, files in os.walk(dir_path):
+            for file in files:
+                file_path = Path(root) / file
+                
+                # Skip if we're filtering by extension and this file doesn't match
+                if extensions and not any(file.lower().endswith(ext) for ext in extensions):
+                    continue
+                
+                # Skip binary files and very large files
+                if file_path.stat().st_size > 1024 * 1024:  # Skip files > 1MB
+                    continue
+                
+                try:
+                    # Try to read the first few bytes to check if it's binary
+                    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                        f.read(1024)
+                    
+                    # If we got here, it's probably a text file
+                    line_counts = count_lines_in_file(file_path)
+                    if line_counts[0] > 0:  # Only include files with lines
+                        results[str(file_path)] = line_counts
+                
+                except UnicodeDecodeError:
+                    # Probably a binary file
+                    continue
+                except Exception as e:
+                    print(f"Error processing {file_path}: {str(e)}")
+    
+    except Exception as e:
+        print(f"Error scanning directory {dir_path}: {str(e)}")
+    
+    return results
+
+def print_summary(results: Dict[str, Tuple[int, int, int]]) -> None:
+    \"\"\"Print a summary of the line counting results.\"\"\"
+    if not results:
+        print("No files found or processed.")
+        return
+    
+    # Calculate totals
+    total_files = len(results)
+    total_lines = sum(counts[0] for counts in results.values())
+    total_blank = sum(counts[1] for counts in results.values())
+    total_comments = sum(counts[2] for counts in results.values())
+    total_code = total_lines - total_blank - total_comments
+    
+    # Print summary
+    print(f"\\nSummary:")
+    print(f"  Total files: {total_files}")
+    print(f"  Total lines: {total_lines}")
+    print(f"  Code lines: {total_code}")
+    print(f"  Blank lines: {total_blank}")
+    print(f"  Comment lines: {total_comments}")
+    
+    if total_lines > 0:
+        print(f"\\nPercentages:")
+        print(f"  Code: {total_code / total_lines * 100:.1f}%")
+        print(f"  Comments: {total_comments / total_lines * 100:.1f}%")
+        print(f"  Blank: {total_blank / total_lines * 100:.1f}%")
+
+def main(args=None):
+    \"\"\"Main entry point for the script.\"\"\"
+    if args is None or len(args) == 0:
+        print("Usage: count_lines [file_or_directory] [extension1,extension2,...]")
+        print("Examples:")
+        print("  count_lines myfile.py")
+        print("  count_lines src/")
+        print("  count_lines src/ .py,.js,.html")
+        return
+    
+    path = Path(args[0])
+    
+    # Parse extensions if provided
+    extensions = None
+    if len(args) > 1 and args[1]:
+        extensions = [ext if ext.startswith('.') else f'.{ext}' for ext in args[1].split(',')]
+        print(f"Filtering by extensions: {', '.join(extensions)}")
+    
+    if path.is_file():
+        # Count lines in a single file
+        total, blank, comments = count_lines_in_file(path)
+        code = total - blank - comments
+        
+        print(f"File: {path}")
+        print(f"  Total lines: {total}")
+        print(f"  Code lines: {code}")
+        print(f"  Blank lines: {blank}")
+        print(f"  Comment lines: {comments}")
+    
+    elif path.is_dir():
+        # Count lines in a directory
+        print(f"Scanning directory: {path}")
+        results = count_lines_in_directory(path, extensions)
+        
+        # Print detailed results for each file
+        for file_path, (total, blank, comments) in sorted(results.items()):
+            code = total - blank - comments
+            rel_path = Path(file_path).relative_to(path)
+            print(f"{rel_path}: {total} lines ({code} code, {blank} blank, {comments} comments)")
+        
+        # Print summary
+        print_summary(results)
+    
+    else:
+        print(f"Error: {path} does not exist")
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv[1:])
+""",
+        "shell": """#!/bin/bash
+# Line counting script for files and directories
+
+# Function to count lines in a file
+count_lines_in_file() {
+    local file="$1"
+    
+    if [ ! -f "$file" ]; then
+        echo "Error: File $file does not exist"
+        return 1
+    fi
+    
+    # Count total lines
+    local total_lines=$(wc -l < "$file")
+    
+    # Count blank lines
+    local blank_lines=$(grep -c "^[[:space:]]*$" "$file")
+    
+    # Count comment lines (basic detection)
+    local comment_lines=0
+    local ext="${file##*.}"
+    
+    case "$ext" in
+        py|sh|bash|rb)
+            comment_lines=$(grep -c "^[[:space:]]*#" "$file")
+            ;;
+        js|java|c|cpp|h|php)
+            comment_lines=$(grep -c "^[[:space:]]*//" "$file")
+            comment_lines=$((comment_lines + $(grep -c "^[[:space:]]*/\\*" "$file")))
+            ;;
+        html|xml)
+            comment_lines=$(grep -c "^[[:space:]]*<!--" "$file")
+            ;;
+    esac
+    
+    # Calculate code lines
+    local code_lines=$((total_lines - blank_lines - comment_lines))
+    
+    echo "File: $file"
+    echo "  Total lines: $total_lines"
+    echo "  Code lines: $code_lines"
+    echo "  Blank lines: $blank_lines"
+    echo "  Comment lines: $comment_lines"
+}
+
+# Function to count lines in all files in a directory
+count_lines_in_directory() {
+    local dir="$1"
+    local extensions="$2"
+    
+    if [ ! -d "$dir" ]; then
+        echo "Error: Directory $dir does not exist"
+        return 1
+    fi
+    
+    echo "Scanning directory: $dir"
+    
+    local total_files=0
+    local total_lines=0
+    local total_blank=0
+    local total_comments=0
+    local total_code=0
+    
+    # Create a temporary file to store results
+    local temp_file=$(mktemp)
+    
+    # Find files and process them
+    if [ -z "$extensions" ]; then
+        # Process all text files
+        find "$dir" -type f -size -1M | while read -r file; do
+            # Skip binary files (simple check)
+            if file "$file" | grep -q "text"; then
+                process_file "$file" >> "$temp_file"
+            fi
+        done
+    else
+        # Process only files with specified extensions
+        local ext_pattern=$(echo "$extensions" | sed 's/,/\\|/g')
+        find "$dir" -type f -size -1M -name "*.$ext_pattern" | while read -r file; do
+            process_file "$file" >> "$temp_file"
+        done
+    fi
+    
+    # Display results
+    if [ -s "$temp_file" ]; then
+        cat "$temp_file"
+        
+        # Calculate totals
+        total_files=$(grep -c "^File:" "$temp_file")
+        total_lines=$(grep "Total lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
+        total_blank=$(grep "Blank lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
+        total_comments=$(grep "Comment lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
+        total_code=$(grep "Code lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
+        
+        # Print summary
+        echo -e "\\nSummary:"
+        echo "  Total files: $total_files"
+        echo "  Total lines: $total_lines"
+        echo "  Code lines: $total_code"
+        echo "  Blank lines: $total_blank"
+        echo "  Comment lines: $total_comments"
+        
+        if [ "$total_lines" -gt 0 ]; then
+            echo -e "\\nPercentages:"
+            echo "  Code: $(awk -v code=$total_code -v total=$total_lines 'BEGIN {printf "%.1f", (code/total*100)}')%"
+            echo "  Comments: $(awk -v comments=$total_comments -v total=$total_lines 'BEGIN {printf "%.1f", (comments/total*100)}')%"
+            echo "  Blank: $(awk -v blank=$total_blank -v total=$total_lines 'BEGIN {printf "%.1f", (blank/total*100)}')%"
+        fi
+    else
+        echo "No files found or processed."
+    fi
+    
+    # Clean up
+    rm -f "$temp_file"
+}
+
+# Function to process a single file
+process_file() {
+    local file="$1"
+    
+    # Count total lines
+    local total_lines=$(wc -l < "$file" 2>/dev/null || echo 0)
+    
+    # Count blank lines
+    local blank_lines=$(grep -c "^[[:space:]]*$" "$file" 2>/dev/null || echo 0)
+    
+    # Count comment lines (basic detection)
+    local comment_lines=0
+    local ext="${file##*.}"
+    
+    case "$ext" in
+        py|sh|bash|rb)
+            comment_lines=$(grep -c "^[[:space:]]*#" "$file" 2>/dev/null || echo 0)
+            ;;
+        js|java|c|cpp|h|php)
+            comment_lines=$(grep -c "^[[:space:]]*//" "$file" 2>/dev/null || echo 0)
+            comment_lines=$((comment_lines + $(grep -c "^[[:space:]]*/\\*" "$file" 2>/dev/null || echo 0)))
+            ;;
+        html|xml)
+            comment_lines=$(grep -c "^[[:space:]]*<!--" "$file" 2>/dev/null || echo 0)
+            ;;
+    esac
+    
+    # Calculate code lines
+    local code_lines=$((total_lines - blank_lines - comment_lines))
+    
+    # Print results for this file
+    echo "File: $file"
+    echo "  Total lines: $total_lines"
+    echo "  Code lines: $code_lines"
+    echo "  Blank lines: $blank_lines"
+    echo "  Comment lines: $comment_lines"
+    echo ""
+}
+
+# Main function
+main() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: count_lines [file_or_directory] [extensions]"
+        echo "Examples:"
+        echo "  count_lines myfile.py"
+        echo "  count_lines src/"
+        echo "  count_lines src/ py,js,html"
+        return 1
+    fi
+    
+    local path="$1"
+    local extensions="$2"
+    
+    if [ -f "$path" ]; then
+        # Count lines in a single file
+        count_lines_in_file "$path"
+    elif [ -d "$path" ]; then
+        # Count lines in a directory
+        count_lines_in_directory "$path" "$extensions"
+    else
+        echo "Error: $path does not exist"
+        return 1
+    fi
+}
+
+# Run the script
+main "$@"
+"""
+    },
     "data_processing": {
         "python": """#!/usr/bin/env python3
 \"\"\"
@@ -1348,7 +1724,7 @@ def search_scripts(
             console.print(f"[yellow]Note: {len(errors)} errors occurred during search. Use --ignore-errors to suppress these messages.[/]")
 
 @misc_app.command("generate")
-@with_explanation("Generate a script from a description using AI.")
+@with_explanation("Generate a script from a description using AI or templates.")
 def generate_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     description: str = typer.Argument(..., help="Description of what the script should do"),
@@ -1362,17 +1738,10 @@ def generate_script(
     edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation"),
     editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"),
     model: str = typer.Option("gpt-3.5-turbo", "--model", "-m", help="AI model to use for generation"),
-    api_key: Optional[str] = typer.Option(None, "--api-key", "-k", help="API key for the AI service")
+    api_key: Optional[str] = typer.Option(None, "--api-key", "-k", help="API key for the AI service"),
+    local: bool = typer.Option(False, "--local", "-l", help="Use local templates instead of AI")
 ):
-    """Generate a script from a description using AI."""
-    # Check if requests is installed
-    try:
-        import requests
-    except ImportError:
-        console.print("[bold red]Error:[/] The 'requests' package is required for this feature.")
-        console.print("Install it with: pip install requests")
-        return
-    
+    """Generate a script from a description using AI or templates."""
     # Determine the scripts directory
     if global_script:
         # Check if user has permission to write to global directory
@@ -1396,17 +1765,33 @@ def generate_script(
         if not overwrite:
             return
     
-    # Get API key from environment if not provided
-    if api_key is None:
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if api_key is None:
-            console.print("[bold red]Error:[/] No API key provided.")
-            console.print("Set the OPENAI_API_KEY environment variable or use --api-key.")
-            return
+    # Use local template if requested or if API generation fails
+    use_local_template = local
+    generated_code = None
+    generation_method = "template"
     
-    # Prepare the prompt
-    language = "Python" if type.lower() == "python" else "Bash"
-    prompt = f"""Create a {language} script that does the following:
+    if not use_local_template:
+        # Try to use AI generation
+        try:
+            import requests
+        except ImportError:
+            console.print("[yellow]Warning:[/] The 'requests' package is required for AI generation.")
+            console.print("Falling back to local template. Install requests with: pip install requests")
+            use_local_template = True
+        
+        if not use_local_template:
+            # Get API key from environment if not provided
+            if api_key is None:
+                api_key = os.environ.get("OPENAI_API_KEY")
+                if api_key is None:
+                    console.print("[yellow]Warning:[/] No API key provided.")
+                    console.print("Falling back to local template. Set the OPENAI_API_KEY environment variable or use --api-key.")
+                    use_local_template = True
+    
+    if not use_local_template:
+        # Prepare the prompt
+        language = "Python" if type.lower() == "python" else "Bash"
+        prompt = f"""Create a {language} script that does the following:
 {description}
 
 The script should:
@@ -1417,84 +1802,134 @@ The script should:
 
 Return ONLY the code with no additional text or explanations.
 """
-    
-    # Show a spinner while waiting for the API response
-    with console.status(f"[bold green]Generating {language} script using {model}...[/]"):
-        try:
-            # Make the API request
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            }
-            
-            data = {
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": f"You are an expert {language} programmer."},
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.7,
-                "max_tokens": 2000
-            }
-            
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=data
-            )
-            
-            if response.status_code != 200:
-                console.print(f"[bold red]Error:[/] API request failed with status code {response.status_code}")
-                console.print(response.text)
-                return
-            
-            # Extract the generated code
-            response_data = response.json()
-            generated_code = response_data["choices"][0]["message"]["content"].strip()
-            
-            # Add shebang line if it's not already there
-            if type.lower() == "python" and not generated_code.startswith("#!/"):
-                generated_code = "#!/usr/bin/env python3\n" + generated_code
-            elif type.lower() == "shell" and not generated_code.startswith("#!/"):
-                generated_code = "#!/bin/bash\n" + generated_code
-            
-            # Write the generated code to the file
-            with open(script_path, "w") as f:
-                f.write(generated_code)
-            
-            # Make the script executable
-            script_path.chmod(script_path.stat().st_mode | 0o755)
-            
-            # Save metadata
-            metadata = {
-                "description": description,
-                "type": type.lower(),
-                "created": datetime.now().isoformat(),
-                "generated_by": model,
-                "run_count": 0
-            }
-            update_script_metadata(script_path, metadata)
-            
-            location = "global" if global_script else "user"
-            console.print(f"[green]Generated {location} script:[/] {script_path}")
-            
-            # Open in editor if requested
-            if edit:
-                # Get the editor from the environment or use the provided one
-                editor_cmd = editor or os.environ.get("EDITOR", "nano")
-                try:
-                    exit_code = subprocess.call([editor_cmd, str(script_path)])
-                    if exit_code == 0:
-                        console.print("[green]Script edited successfully.[/]")
-                    else:
-                        console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
-                except FileNotFoundError:
-                    console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
-                except Exception as e:
-                    console.print(f"[bold red]Error:[/] {str(e)}")
         
-        except requests.exceptions.RequestException as e:
-            console.print(f"[bold red]Error:[/] Failed to connect to the API: {str(e)}")
+        # Show a spinner while waiting for the API response
+        with console.status(f"[bold green]Generating {language} script using {model}...[/]"):
+            try:
+                # Make the API request
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}"
+                }
+                
+                data = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": f"You are an expert {language} programmer."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 2000
+                }
+                
+                response = requests.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers=headers,
+                    json=data
+                )
+                
+                if response.status_code != 200:
+                    console.print(f"[yellow]Warning:[/] API request failed with status code {response.status_code}")
+                    console.print(response.text)
+                    console.print("Falling back to local template.")
+                    use_local_template = True
+                else:
+                    # Extract the generated code
+                    response_data = response.json()
+                    generated_code = response_data["choices"][0]["message"]["content"].strip()
+                    generation_method = model
+            
+            except requests.exceptions.RequestException as e:
+                console.print(f"[yellow]Warning:[/] Failed to connect to the API: {str(e)}")
+                console.print("Falling back to local template.")
+                use_local_template = True
+            except Exception as e:
+                console.print(f"[yellow]Warning:[/] {str(e)}")
+                console.print("Falling back to local template.")
+                use_local_template = True
+    
+    # Use local template if AI generation failed or was not requested
+    if use_local_template:
+        # Choose the most appropriate template based on the description
+        template_name = "basic"
+        
+        # Simple keyword matching to find the best template
+        keywords = {
+            "data": ["data", "csv", "json", "process", "file", "read", "write", "parse"],
+            "api": ["api", "http", "request", "rest", "endpoint", "server", "client"],
+            "system_info": ["system", "info", "hardware", "cpu", "memory", "disk", "network"]
+        }
+        
+        # Count keyword matches for each template
+        matches = {template: 0 for template in keywords}
+        for template, words in keywords.items():
+            for word in words:
+                if word.lower() in description.lower():
+                    matches[template] += 1
+        
+        # Find the template with the most matches
+        best_match = max(matches.items(), key=lambda x: x[1])
+        if best_match[1] > 0:
+            if best_match[0] == "data" and "data_processing" in TEMPLATES and type.lower() in TEMPLATES["data_processing"]:
+                template_name = "data_processing"
+            elif best_match[0] == "api" and "api_client" in TEMPLATES and type.lower() in TEMPLATES["api_client"]:
+                template_name = "api_client"
+            elif best_match[0] == "system_info" and "system_info" in TEMPLATES and type.lower() in TEMPLATES["system_info"]:
+                template_name = "system_info"
+        
+        # Get template content
+        if template_name in TEMPLATES and type.lower() in TEMPLATES[template_name]:
+            generated_code = TEMPLATES[template_name][type.lower()]
+        else:
+            # Fall back to basic template
+            generated_code = TEMPLATES["basic"][type.lower()]
+        
+        # Customize the template with the description
+        if type.lower() == "python":
+            generated_code = generated_code.replace("Custom script for SkogCLI.", f"Script to {description}")
+        elif type.lower() == "shell":
+            generated_code = generated_code.replace("# Custom script for SkogCLI", f"# Script to {description}")
+        
+        console.print(f"[green]Using '{template_name}' template for script generation.[/]")
+    
+    # Add shebang line if it's not already there
+    if type.lower() == "python" and not generated_code.startswith("#!/"):
+        generated_code = "#!/usr/bin/env python3\n" + generated_code
+    elif type.lower() == "shell" and not generated_code.startswith("#!/"):
+        generated_code = "#!/bin/bash\n" + generated_code
+    
+    # Write the generated code to the file
+    with open(script_path, "w") as f:
+        f.write(generated_code)
+    
+    # Make the script executable
+    script_path.chmod(script_path.stat().st_mode | 0o755)
+    
+    # Save metadata
+    metadata = {
+        "description": description,
+        "type": type.lower(),
+        "created": datetime.now().isoformat(),
+        "generated_by": generation_method,
+        "run_count": 0
+    }
+    update_script_metadata(script_path, metadata)
+    
+    location = "global" if global_script else "user"
+    console.print(f"[green]Generated {location} script:[/] {script_path}")
+    
+    # Open in editor if requested
+    if edit:
+        # Get the editor from the environment or use the provided one
+        editor_cmd = editor or os.environ.get("EDITOR", "nano")
+        try:
+            exit_code = subprocess.call([editor_cmd, str(script_path)])
+            if exit_code == 0:
+                console.print("[green]Script edited successfully.[/]")
+            else:
+                console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+        except FileNotFoundError:
+            console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
