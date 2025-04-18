@@ -812,7 +812,8 @@ def batch_process(
         "code", "--command", "-c", 
         help="Command to run on each script (code, run, info, etc.)"
     ),
-    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
+    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
+    output_dir: Optional[Path] = typer.Option(None, "--output-dir", "-o", help="Directory to write output files to")
 ):
     """Process multiple scripts with a single command."""
     if not script_list.exists():
@@ -848,8 +849,21 @@ def batch_process(
             try:
                 with open(script_path, "r") as f:
                     content = f.read()
-                console.print(f"[bold]Content of script '{script_name}':[/]\n")
-                console.print(content)
+                
+                # If output directory is specified, write to a file there
+                if output_dir is not None:
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    output_file = output_dir / f"{script_name}{script_path.suffix}"
+                    try:
+                        with open(output_file, "w") as f:
+                            f.write(content)
+                        console.print(f"[green]Content written to:[/] {output_file}")
+                    except Exception as e:
+                        console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+                else:
+                    # Otherwise display the content
+                    console.print(f"[bold]Content of script '{script_name}':[/]\n")
+                    console.print(content)
             except Exception as e:
                 console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
         
@@ -1020,6 +1034,94 @@ def export_script(
         json.dump(export_data, f, indent=2)
     
     console.print(f"[green]Exported script to:[/] {output_file}")
+
+@misc_app.command("transform")
+@with_explanation("Transform script content using regular expressions.")
+def transform_script(
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the script to transform",
+        autocompletion=lambda: get_script_names()
+    ),
+    pattern: str = typer.Option(..., "--pattern", "-p", help="Regular expression pattern to search for"),
+    replacement: str = typer.Option(..., "--replacement", "-r", help="Replacement string"),
+    output_file: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Write transformed content to this file instead of updating the script"
+    ),
+    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
+    backup: bool = typer.Option(True, "--backup/--no-backup", help="Create a backup before transforming")
+):
+    """Transform script content using regular expressions."""
+    import re
+    
+    # Find the script
+    script_path = find_script(name, global_script)
+    
+    if not script_path:
+        console.print(f"[bold red]Error:[/] Script '{name}' not found.")
+        return
+    
+    # Read the script content
+    try:
+        with open(script_path, "r") as f:
+            content = f.read()
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
+        return
+    
+    # Create a backup if requested
+    if backup and output_file is None:
+        backup_path = script_path.with_suffix(f"{script_path.suffix}.bak")
+        try:
+            shutil.copy2(script_path, backup_path)
+            console.print(f"[green]Created backup:[/] {backup_path}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to create backup: {str(e)}")
+            if not typer.confirm("Continue without backup?"):
+                return
+    
+    # Apply the transformation
+    try:
+        transformed_content = re.sub(pattern, replacement, content)
+        
+        # Check if any changes were made
+        if transformed_content == content:
+            console.print("[yellow]Warning:[/] No changes made. Pattern did not match any content.")
+            return
+        
+        # If output file is specified, write to that instead of updating the script
+        if output_file is not None:
+            try:
+                with open(output_file, "w") as f:
+                    f.write(transformed_content)
+                console.print(f"[green]Transformed content written to:[/] {output_file}")
+                return
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] Failed to write to output file: {str(e)}")
+                return
+        
+        # Otherwise update the script
+        # Check if user has permission to edit the script
+        if not os.access(script_path, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to edit this script.")
+            console.print("Try running with sudo if it's a global script.")
+            return
+        
+        # Write the transformed content
+        with open(script_path, "w") as f:
+            f.write(transformed_content)
+        
+        # Make sure the script is executable
+        script_path.chmod(script_path.stat().st_mode | 0o755)
+        
+        # Update metadata
+        update_script_metadata(script_path, {"last_edited": datetime.now().isoformat()})
+        
+        console.print(f"[green]Transformed script:[/] {name}")
+    except re.error as e:
+        console.print(f"[bold red]Error:[/] Invalid regular expression: {str(e)}")
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to transform script: {str(e)}")
 
 @misc_app.command("import")
 @with_explanation("Import a script from an export file.")
