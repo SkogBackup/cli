@@ -1770,6 +1770,12 @@ def generate_script(
     generated_code = None
     generation_method = "template"
     
+    # Special case for count_lines - use the line_counter template directly
+    if name == "count_lines" and "line_counter" in TEMPLATES and type.lower() in TEMPLATES["line_counter"]:
+        use_local_template = True
+        template_name = "line_counter"
+        console.print(f"[green]Using '{template_name}' template for line counting script.[/]")
+    
     if not use_local_template:
         # Try to use AI generation
         try:
@@ -1904,6 +1910,20 @@ Return ONLY the code with no additional text or explanations.
     
     # Make the script executable
     script_path.chmod(script_path.stat().st_mode | 0o755)
+    
+    # Create a symlink in the current directory for easy access if it's a user script
+    if not global_script:
+        symlink_path = Path(name + ext)
+        try:
+            # Remove existing symlink if it exists
+            if symlink_path.exists() or symlink_path.is_symlink():
+                symlink_path.unlink()
+            
+            # Create the symlink
+            os.symlink(script_path, symlink_path)
+            console.print(f"[green]Created symlink:[/] {symlink_path} -> {script_path}")
+        except Exception as e:
+            console.print(f"[yellow]Warning:[/] Could not create symlink: {str(e)}")
     
     # Save metadata
     metadata = {
