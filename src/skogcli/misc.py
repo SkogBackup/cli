@@ -495,7 +495,8 @@ def add_script(
     ),
     global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
     description: str = typer.Option("", "--description", "-d", help="Description of the script"),
-    edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation")
+    edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation"),
+    editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)")
 ):
     """Add a new custom script."""
     # Determine the scripts directory
@@ -554,13 +555,16 @@ def add_script(
     
     # Open in editor if requested
     if edit:
-        editor = os.environ.get("EDITOR", "nano")
+        # Get the editor from the environment or use the provided one
+        editor_cmd = editor or os.environ.get("EDITOR", "nano")
         try:
-            exit_code = os.system(f"{editor} {script_path}")
+            exit_code = subprocess.call([editor_cmd, str(script_path)])
             if exit_code == 0:
                 console.print("[green]Script edited successfully.[/]")
             else:
                 console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+        except FileNotFoundError:
+            console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
@@ -572,7 +576,8 @@ def edit_script(
         help="Name of the script to edit",
         autocompletion=lambda: get_script_names()
     ),
-    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
+    global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
+    editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)")
 ):
     """Edit an existing custom script."""
     # Find the script
@@ -588,16 +593,20 @@ def edit_script(
         console.print("Try running with sudo if it's a global script.")
         return
     
+    # Get the editor from the environment or use the provided one
+    editor_cmd = editor or os.environ.get("EDITOR", "nano")
+    
     # Open in editor
-    editor = os.environ.get("EDITOR", "nano")
     try:
-        exit_code = os.system(f"{editor} {script_path}")
+        exit_code = subprocess.call([editor_cmd, str(script_path)])
         if exit_code == 0:
             # Update metadata
             update_script_metadata(script_path, {"last_edited": datetime.now().isoformat()})
             console.print("[green]Script edited successfully.[/]")
         else:
             console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+    except FileNotFoundError:
+        console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
 
@@ -866,7 +875,8 @@ def copy_script(
     destination: str = typer.Argument(..., help="Name for the new script"),
     global_source: bool = typer.Option(True, "--global-source/--no-global-source", help="Include global scripts as source"),
     global_dest: bool = typer.Option(False, "--global-dest", "-g", help="Create as a global script"),
-    edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the new script in an editor")
+    edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the new script in an editor"),
+    editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)")
 ):
     """Copy a script to create a new one."""
     # Find the source script
@@ -925,13 +935,16 @@ def copy_script(
         
         # Open in editor if requested
         if edit:
-            editor = os.environ.get("EDITOR", "nano")
+            # Get the editor from the environment or use the provided one
+            editor_cmd = editor or os.environ.get("EDITOR", "nano")
             try:
-                exit_code = os.system(f"{editor} {dest_path}")
+                exit_code = subprocess.call([editor_cmd, str(dest_path)])
                 if exit_code == 0:
                     console.print("[green]Script edited successfully.[/]")
                 else:
                     console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+            except FileNotFoundError:
+                console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
             except Exception as e:
                 console.print(f"[bold red]Error:[/] {str(e)}")
     except Exception as e:
