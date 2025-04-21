@@ -1,10 +1,619 @@
 {
   "running": true,
-  "start_time": "2025-04-20T08:19:55.917608",
-  "pid": 305042,
+  "start_time": "2025-04-21T18:18:38.914748",
+  "pid": 623374,
   "error_count": 0,
   "last_error": null,
-  "last_scan": null,
-  "synced_files": 0,
-  "recent_events": []
+  "last_scan": "2025-04-21T20:56:51.405851",
+  "synced_files": 76,
+  "recent_events": [
+    {
+      "timestamp": "2025-04-21T20:56:51.404871",
+      "path": "script_list.txt",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:42.822484",
+      "path": "claude/last-summary-1.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:42.815053",
+      "path": "claude",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:38.545496",
+      "path": "output_scripts",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:38.538270",
+      "path": "output_scripts/test_script_copy.py",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:33.060472",
+      "path": "transformed_scripts",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:26.383264",
+      "path": "system-knowledge",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:23.863617",
+      "path": "system-knowledge/SkogCLI and System Integration Lessons.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:11.923382",
+      "path": "SkogMCP",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.399124",
+      "path": "skogcli/Optimized Skogai-Memory Implementation Guide.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.396539",
+      "path": "skogcli/Skogai-Memory Extension Guide.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.393667",
+      "path": "skogcli/Understanding URIs in Skogai Memory - A Practical Guide.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.389560",
+      "path": "skogcli/SkogCLI Memory Module Implementation.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.385421",
+      "path": "skogcli/features",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.381204",
+      "path": "skogcli/features/SkogCLI Preset States: Comprehensive Implementation Guide.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.376567",
+      "path": "skogcli/SkogCLI Project Testing Notes.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.372711",
+      "path": "skogcli/SkogCLI Development Guidelines.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.368210",
+      "path": "skogcli/Basic Memory Project Management.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.363646",
+      "path": "skogcli/skogcli Memory Module Implementation Plan.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.359279",
+      "path": "skogcli/all_md_content.txt",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.354710",
+      "path": "skogcli/features/Preset States Feature.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.350082",
+      "path": "skogcli/SkogCLI Memory Module Development Workflow.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.345418",
+      "path": "skogcli",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.321764",
+      "path": "skogcli/recipes/Preset States Recipe.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.316297",
+      "path": "skogcli/SkogCLI Memory Module Test Strategy.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:05.310936",
+      "path": "skogcli/SkogCLI Test Fixes Summary.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:56:04.428612",
+      "path": "skogcli/recipes",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.403480",
+      "path": "projects/tasks/Quantum-Goose Task: Knowledge Graph Visualization.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.398035",
+      "path": "projects/skogmcp/last-summary-claude-3.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.393410",
+      "path": "projects/skogcli",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.388516",
+      "path": "projects/agents",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.381837",
+      "path": "projects",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.375195",
+      "path": "projects/agents/Reply to Goose's Letter.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.368677",
+      "path": "projects/tasks/Quantum Counterpart Assignment Summary.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.361206",
+      "path": "projects/tasks",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.355460",
+      "path": "projects/agents/Letter to Claude.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.349218",
+      "path": "projects/tasks/SkogAI Knowledge Graph Visualization Concept.canvas",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.343728",
+      "path": "projects/skogmcp",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.337429",
+      "path": "projects/tasks/Implementation Plan: Knowledge Graph Visualization.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:55:25.327620",
+      "path": "projects/skogcli/SkogCLI Config Module Implementation.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.965903",
+      "path": "docs",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.960899",
+      "path": "docs/SkogCLI Standards and Conventions.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.956114",
+      "path": "docs/code",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.951062",
+      "path": "docs/implementation/SkogCLI Standards MCP Implementation - POC.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.946167",
+      "path": "docs/tools/SkogCLI Standards Checker Tool.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.941068",
+      "path": "docs/code/SkogCLI Config Path Normalizer Implementation Code.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.935165",
+      "path": "docs/implementation",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.927292",
+      "path": "docs/implementations",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.922264",
+      "path": "docs/implementations/SkogCLI Config Path Normalizer Implementation.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:51.779922",
+      "path": "docs/tools",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:54:11.852232",
+      "path": "SkogMCP/MCP Development Tools.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.555651",
+      "path": "SkogAI/Implementation",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.550661",
+      "path": "SkogAI/Implementation/Change-002-CLI Implementation.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.545166",
+      "path": "SkogAI/Architecture",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.539246",
+      "path": "SkogAI/Features/AI Tag System for File-Based AI Interactions.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.532325",
+      "path": "SkogAI/Tools/Using skogai-coder with OpenRouter models.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.526122",
+      "path": "SkogAI",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.519193",
+      "path": "SkogAI/Implementation/Change-001-MCPRouter Implementation.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.512912",
+      "path": "SkogAI/Architecture/SkogCLI Standards MCP Design.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.506300",
+      "path": "SkogAI/Tools",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:58.500322",
+      "path": "SkogAI/Architecture/SkogMCP Multi-Agent Architecture Overview.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:57.939641",
+      "path": "SkogAI/Implementation/SkogCLI Standards MCP Implementation Plan.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:57.873523",
+      "path": "SkogAI/Features",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:53:14.506564",
+      "path": "approaches",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:52:50.433849",
+      "path": "Architecture/System Architecture.canvas",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:52:50.377964",
+      "path": "Architecture",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:52:36.026606",
+      "path": "documentation",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:52:28.193230",
+      "path": "documentation/SkogPrompt Tools Guide.md",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.416881",
+      "path": "design",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.411703",
+      "path": "proposals",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.405217",
+      "path": "configuration",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.399603",
+      "path": "SkogPrompt",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.393885",
+      "path": "planning",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.389139",
+      "path": "architecture",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.383897",
+      "path": "SkogAI Lessons",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-04-21T20:51:51.375544",
+      "path": "agents",
+      "action": "deleted",
+      "status": "success",
+      "checksum": null,
+      "error": null
+    }
+  ]
 }
