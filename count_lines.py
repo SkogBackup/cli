@@ -1,1 +1,0 @@
-/home/skogix/.config/skogcli/scripts/count_lines.py
