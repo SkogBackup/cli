@@ -45,16 +45,16 @@ def load_settings() -> Dict[str, Any]:
     
     if not config_file.exists():
         # Create default config
-        save_settings(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG.copy()
+        save_settings(DEFAULT_SETTINGS)
+        return DEFAULT_SETTINGS.copy()
     
     try:
         with open(config_file, "r") as f:
             return json.load(f)
     except json.JSONDecodeError:
         console.print("[bold red]Error:[/] Config file is corrupted. Resetting to defaults.")
-        save_settings(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG.copy()
+        save_settings(DEFAULT_SETTINGS)
+        return DEFAULT_SETTINGS.copy()
 
 def get_config_keys() -> List[str]:
     """Get a list of all configuration keys for completion."""
@@ -118,7 +118,7 @@ def set_setting(key: str, value: Any) -> None:
 
 def reset_settings() -> None:
     """Reset settings to default values."""
-    save_settings(DEFAULT_CONFIG)
+    save_settings(DEFAULT_SETTINGS)
 
 @config_app.callback()
 def config_callback():
@@ -251,7 +251,7 @@ def edit():
     
     if not config_file.exists():
         # Create default config if it doesn't exist
-        save_settings(DEFAULT_CONFIG)
+        save_settings(DEFAULT_SETTINGS)
     
     # Use the EDITOR environment variable, or fall back to common editors
     editor = os.environ.get("EDITOR", "nano")
