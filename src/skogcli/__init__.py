@@ -25,6 +25,7 @@ app.add_typer(misc_app, name="misc")
 def version():
     """Show the current version of SkogCLI."""
     typer.echo("SkogCLI v0.1.0")
+    return 0  # Ensure the command returns 0
 
 # Add a callback to handle explanation display
 def show_explanation_callback(ctx: typer.Context):

@@ -68,7 +68,8 @@ def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
 @memory_app.callback()
 def memory_callback():
     """Knowledge management powered by basic-memory."""
-    pass
+    typer.echo("Local-first personal knowledge management")
+    return 0  # Ensure the command returns 0
 
 
 @memory_app.command("create")
@@ -123,6 +124,7 @@ def create(
 
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -289,6 +291,7 @@ def read(
             except (json.JSONDecodeError, KeyError):
                 # Fallback to rendering the whole output as markdown
                 console.print(Markdown(result.stdout))
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -393,6 +396,7 @@ def search(
         except (json.JSONDecodeError, KeyError):
             # Fallback to raw output if JSON parsing fails
             console.print(result.stdout)
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -498,6 +502,7 @@ def list_notes(
 
     if result.returncode == 0:
         console.print(result.stdout)
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -527,6 +532,7 @@ def sync(
 
     if result.returncode == 0:
         typer.echo("Synchronization completed successfully.")
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -556,6 +562,7 @@ def status(
 
     if result.returncode == 0:
         console.print(result.stdout)
+        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)

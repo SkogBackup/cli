@@ -133,6 +133,7 @@ def show():
     json_str = json.dumps(settings, indent=2)
     syntax = Syntax(json_str, "json", theme="monokai", line_numbers=True)
     console.print(syntax)
+    return 0  # Ensure the command returns 0
 
 @config_app.command("list")
 @with_explanation("List all available configuration keys.")
@@ -155,6 +156,7 @@ def list_keys():
     console.print("[bold]Available configuration keys:[/]")
     for key in sorted(all_keys):
         console.print(f"  {key}")
+    return 0  # Ensure the command returns 0
 
 @config_app.command("get")
 @with_explanation("Get the value of a specific configuration key.")
@@ -195,7 +197,7 @@ def set(
         int_value = int(value)
         set_setting(key, int_value)
         console.print(f"[green]Set[/] {key} = {int_value}")
-        return
+        return 0  # Ensure the command returns 0
     except ValueError:
         pass
     
@@ -204,7 +206,7 @@ def set(
         float_value = float(value)
         set_setting(key, float_value)
         console.print(f"[green]Set[/] {key} = {float_value}")
-        return
+        return 0  # Ensure the command returns 0
     except ValueError:
         pass
     
@@ -212,21 +214,22 @@ def set(
     if value.lower() in ("true", "yes", "1"):
         set_setting(key, True)
         console.print(f"[green]Set[/] {key} = True")
-        return
+        return 0  # Ensure the command returns 0
     elif value.lower() in ("false", "no", "0"):
         set_setting(key, False)
         console.print(f"[green]Set[/] {key} = False")
-        return
+        return 0  # Ensure the command returns 0
     
     # Try as null/None
     if value.lower() in ("null", "none"):
         set_setting(key, None)
         console.print(f"[green]Set[/] {key} = None")
-        return
+        return 0  # Ensure the command returns 0
     
     # Default to string
     set_setting(key, value)
     console.print(f"[green]Set[/] {key} = \"{value}\"")
+    return 0  # Ensure the command returns 0
 
 @config_app.command("reset")
 @with_explanation("Reset configuration to default values.")
@@ -238,10 +241,11 @@ def reset(
         should_reset = typer.confirm("Are you sure you want to reset all settings to defaults?")
         if not should_reset:
             console.print("Reset cancelled.")
-            return
+            return 1  # Ensure the command returns 1 if reset is cancelled
     
     reset_settings()
     console.print("[green]Configuration reset to defaults.[/]")
+    return 0  # Ensure the command returns 0
 
 @config_app.command("edit")
 @with_explanation("Open the configuration file in your default editor.")
