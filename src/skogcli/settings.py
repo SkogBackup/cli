@@ -18,7 +18,7 @@ config_app = typer.Typer(
     no_args_is_help=True
 )
 
-DEFAULT_CONFIG = {
+DEFAULT_SETTINGS = {
     "memory": {
         "default_project": None,
         "page_size": 10,
