@@ -523,8 +523,9 @@ def list_notes(
                 table.add_column("Created At", style="yellow")
                 table.add_column("Path", style="blue")
 
-                # Add rows
-                for item in data.get("results", []):
+                # Add rows - handle both "results" (from search) and "primary_results" (from list/recent-activity)
+                results = data.get("results", data.get("primary_results", []))
+                for item in results:
                     table.add_row(
                         item.get("type", ""),
                         item.get("title", ""),
@@ -535,10 +536,18 @@ def list_notes(
                 # Print the table
                 console.print(table)
 
-                # Show metadata
-                total_results = len(data.get("results", []))
-                current_page = data.get("current_page", 1)
+                # Show metadata - handle both formats
+                results = data.get("results", data.get("primary_results", []))
+                metadata = data.get("metadata", {})
+                
+                # Get total results either from metadata or by counting
+                total_results = metadata.get("total_results", len(results))
+                
+                # Get current page and page size
+                current_page = data.get("current_page", data.get("page", 1))
                 page_size = data.get("page_size", 10)
+                
+                # Calculate total pages
                 total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
                 
                 console.print(f"\nTotal results: {total_results}")
@@ -705,8 +714,9 @@ def recent_activity(
                 table.add_column("Created At", style="yellow")
                 table.add_column("Path", style="blue")
 
-                # Add rows
-                for item in data.get("results", []):
+                # Add rows - handle both "results" (from search) and "primary_results" (from list/recent-activity)
+                results = data.get("results", data.get("primary_results", []))
+                for item in results:
                     table.add_row(
                         item.get("type", ""),
                         item.get("title", ""),
@@ -717,10 +727,18 @@ def recent_activity(
                 # Print the table
                 console.print(table)
 
-                # Show metadata
-                total_results = len(data.get("results", []))
-                current_page = data.get("current_page", 1)
+                # Show metadata - handle both formats
+                results = data.get("results", data.get("primary_results", []))
+                metadata = data.get("metadata", {})
+                
+                # Get total results either from metadata or by counting
+                total_results = metadata.get("total_results", len(results))
+                
+                # Get current page and page size
+                current_page = data.get("current_page", data.get("page", 1))
                 page_size = data.get("page_size", 10)
+                
+                # Calculate total pages
                 total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
                 
                 console.print(f"\nTotal results: {total_results}")
