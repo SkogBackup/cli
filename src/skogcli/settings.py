@@ -164,7 +164,8 @@ def get(
         help="Configuration key (e.g., 'memory.page_size')",
         autocompletion=lambda: get_config_keys()
     ),
-    raw: bool = typer.Option(False, "--raw", "-r", help="Output raw value without formatting")
+    raw: bool = typer.Option(False, "--raw", "-r", help="Output raw value without formatting"),
+    json_format: bool = typer.Option(False, "--json", "-j", help="Output as formatted JSON")
 ):
     """Get the value of a specific configuration key."""
     value = get_setting(key)
@@ -175,10 +176,15 @@ def get(
     # Check if this is a leaf node in a nested structure
     is_leaf_node = "." in key and not isinstance(value, dict)
     
+    # Output as JSON when --json flag is used
+    if json_format:
+        print(json.dumps(value, indent=2))
+        return
+    
     # Output raw value for leaf nodes or when --raw flag is used
     if raw or is_leaf_node:
         print(value)
-    elif isinstance(value, dict):
+    elif isinstance(value, dict) or isinstance(value, list):
         json_str = json.dumps(value, indent=2)
         syntax = Syntax(json_str, "json", theme="monokai")
         console.print(syntax)
@@ -196,9 +202,24 @@ def set(
     value: str = typer.Argument(..., help="Value to set")
 ):
     """Set the value of a specific configuration key."""
-    # Try to convert the value to the appropriate type
+    # Try to parse as JSON first (for objects, arrays, etc.)
     try:
-        # Try as int
+        json_value = json.loads(value)
+        set_setting(key, json_value)
+        if isinstance(json_value, dict) or isinstance(json_value, list):
+            json_str = json.dumps(json_value, indent=2)
+            console.print(f"[green]Set[/] {key} = ")
+            syntax = Syntax(json_str, "json", theme="monokai")
+            console.print(syntax)
+        else:
+            console.print(f"[green]Set[/] {key} = {json_value}")
+        return
+    except json.JSONDecodeError:
+        # Not valid JSON, continue with other type conversions
+        pass
+    
+    # Try as int
+    try:
         int_value = int(value)
         set_setting(key, int_value)
         console.print(f"[green]Set[/] {key} = {int_value}")
@@ -206,8 +227,8 @@ def set(
     except ValueError:
         pass
     
+    # Try as float
     try:
-        # Try as float
         float_value = float(value)
         set_setting(key, float_value)
         console.print(f"[green]Set[/] {key} = {float_value}")
