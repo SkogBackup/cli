@@ -591,7 +591,7 @@ def sync(
 
 
 @memory_app.command("status")
-@with_explanation("Show sync status between files and the database.")
+@with_explanation("Show project information and sync status.")
 def status(
     project: Optional[str] = typer.Option(
         None,
@@ -600,20 +600,76 @@ def status(
         help="Specific project to use",
         autocompletion=get_memory_projects,
     ),
+    json_output: bool = typer.Option(
+        False, "--json", "-j", help="Output in JSON format"
+    ),
 ):
     """
-    Show sync status between your knowledge files and the database.
+    Show project information and sync status.
 
-    Displays which files need to be synchronized.
+    Displays information about the current project, including:
+    - Project name and location
+    - Number of notes and entities
+    - Last sync time
+    - Files that need to be synchronized
     """
-    cmd = ["status"]
+    cmd = ["project", "info"]
+    
+    if json_output:
+        cmd.append("--json")
+        
     if project:
         cmd = ["--project", project] + cmd
 
     result = run_basic_memory(cmd)
 
     if result.returncode == 0:
-        console.print(result.stdout)
+        if json_output:
+            # Just print the raw JSON
+            typer.echo(result.stdout)
+        else:
+            try:
+                # Try to parse the JSON output for better formatting
+                import json
+                data = json.loads(result.stdout)
+                
+                # Create a rich display
+                from rich.panel import Panel
+                
+                # Project info section
+                project_name = data.get("project_name", "default")
+                project_path = data.get("project_path", "")
+                
+                console.print(Panel(f"[bold cyan]Project:[/bold cyan] {project_name}\n"
+                                   f"[bold cyan]Path:[/bold cyan] {project_path}",
+                                   title="Project Information"))
+                
+                # Stats section
+                stats = data.get("stats", {})
+                entities = stats.get("entities", 0)
+                notes = stats.get("notes", 0)
+                last_sync = stats.get("last_sync", "Never")
+                
+                console.print(Panel(f"[bold cyan]Entities:[/bold cyan] {entities}\n"
+                                   f"[bold cyan]Notes:[/bold cyan] {notes}\n"
+                                   f"[bold cyan]Last Sync:[/bold cyan] {last_sync}",
+                                   title="Statistics"))
+                
+                # Sync status
+                sync_status = data.get("sync_status", {})
+                needs_sync = sync_status.get("needs_sync", False)
+                files_to_sync = sync_status.get("files_to_sync", [])
+                
+                if needs_sync:
+                    console.print("[bold yellow]Files needing synchronization:[/bold yellow]")
+                    for file in files_to_sync:
+                        console.print(f"  • {file}")
+                else:
+                    console.print("[bold green]All files are synchronized.[/bold green]")
+                
+            except (json.JSONDecodeError, KeyError):
+                # Fallback to raw output if JSON parsing fails
+                console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
