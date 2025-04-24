@@ -163,7 +163,8 @@ def get(
         ..., 
         help="Configuration key (e.g., 'memory.page_size')",
         autocompletion=lambda: get_config_keys()
-    )
+    ),
+    raw: bool = typer.Option(False, "--raw", "-r", help="Output raw value without formatting")
 ):
     """Get the value of a specific configuration key."""
     value = get_setting(key)
@@ -171,7 +172,13 @@ def get(
         console.print(f"[bold red]Error:[/] Key '{key}' not found in configuration.")
         return
     
-    if isinstance(value, dict):
+    # Check if this is a leaf node in a nested structure
+    is_leaf_node = "." in key and not isinstance(value, dict)
+    
+    # Output raw value for leaf nodes or when --raw flag is used
+    if raw or is_leaf_node:
+        print(value)
+    elif isinstance(value, dict):
         json_str = json.dumps(value, indent=2)
         syntax = Syntax(json_str, "json", theme="monokai")
         console.print(syntax)
