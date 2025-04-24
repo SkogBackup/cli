@@ -372,11 +372,11 @@ def search(
             table.add_column("Path", style="blue")
 
             # Add rows
-            for item in data.get("primary_results", []):
+            for item in data.get("results", []):
                 table.add_row(
                     item.get("type", ""),
                     item.get("title", ""),
-                    item.get("created_at", "").split(".")[0],  # Remove microseconds
+                    item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
                     item.get("file_path", ""),
                 )
 
@@ -384,11 +384,13 @@ def search(
             console.print(table)
 
             # Show metadata
-            metadata = data.get("metadata", {})
-            console.print(f"\nTotal results: {metadata.get('total_results', 0)}")
-            console.print(
-                f"Page {data.get('page', 1)} of {(metadata.get('total_results', 0) + page_size - 1) // page_size}"
-            )
+            total_results = len(data.get("results", []))
+            current_page = data.get("current_page", 1)
+            page_size = data.get("page_size", 10)
+            total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
+            
+            console.print(f"\nTotal results: {total_results}")
+            console.print(f"Page {current_page} of {total_pages}")
 
         except (json.JSONDecodeError, KeyError):
             # Fallback to raw output if JSON parsing fails
@@ -650,11 +652,11 @@ def recent_activity(
             table.add_column("Path", style="blue")
 
             # Add rows
-            for item in data.get("primary_results", []):
+            for item in data.get("results", []):
                 table.add_row(
                     item.get("type", ""),
                     item.get("title", ""),
-                    item.get("created_at", "").split(".")[0],  # Remove microseconds
+                    item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
                     item.get("file_path", ""),
                 )
 
@@ -662,11 +664,13 @@ def recent_activity(
             console.print(table)
 
             # Show metadata
-            metadata = data.get("metadata", {})
-            console.print(f"\nTotal results: {metadata.get('total_results', 0)}")
-            console.print(
-                f"Page {data.get('page', 1)} of {(metadata.get('total_results', 0) + page_size - 1) // page_size}"
-            )
+            total_results = len(data.get("results", []))
+            current_page = data.get("current_page", 1)
+            page_size = data.get("page_size", 10)
+            total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
+            
+            console.print(f"\nTotal results: {total_results}")
+            console.print(f"Page {current_page} of {total_pages}")
 
         except (json.JSONDecodeError, KeyError):
             # Fallback to raw output if JSON parsing fails
