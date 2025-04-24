@@ -458,6 +458,9 @@ def list_notes(
         help="Specific project to use",
         autocompletion=get_memory_projects,
     ),
+    raw: bool = typer.Option(
+        False, "--raw", help="Display raw JSON output without formatting"
+    ),
 ):
     """
     List recent activity across your knowledge base.
@@ -499,7 +502,51 @@ def list_notes(
     result = run_basic_memory(cmd)
 
     if result.returncode == 0:
-        console.print(result.stdout)
+        if raw:
+            # Display raw JSON output
+            typer.echo(result.stdout)
+        else:
+            try:
+                # Try to parse the JSON output for better formatting
+                import json
+
+                data = json.loads(result.stdout)
+
+                # Create a table for the results
+                from rich.table import Table
+
+                table = Table(title=f"Recent Activity ({timeframe})")
+
+                # Add columns
+                table.add_column("Type", style="cyan")
+                table.add_column("Title", style="green")
+                table.add_column("Created At", style="yellow")
+                table.add_column("Path", style="blue")
+
+                # Add rows
+                for item in data.get("results", []):
+                    table.add_row(
+                        item.get("type", ""),
+                        item.get("title", ""),
+                        item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
+                        item.get("file_path", ""),
+                    )
+
+                # Print the table
+                console.print(table)
+
+                # Show metadata
+                total_results = len(data.get("results", []))
+                current_page = data.get("current_page", 1)
+                page_size = data.get("page_size", 10)
+                total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
+                
+                console.print(f"\nTotal results: {total_results}")
+                console.print(f"Page {current_page} of {total_pages}")
+
+            except (json.JSONDecodeError, KeyError):
+                # Fallback to raw output if JSON parsing fails
+                console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
@@ -593,6 +640,9 @@ def recent_activity(
         help="Specific project to use",
         autocompletion=get_memory_projects,
     ),
+    raw: bool = typer.Option(
+        False, "--raw", help="Display raw JSON output without formatting"
+    ),
 ):
     """
     List recent activity across your knowledge base.
@@ -634,47 +684,51 @@ def recent_activity(
     result = run_basic_memory(cmd)
 
     if result.returncode == 0:
-        try:
-            # Try to parse the JSON output for better formatting
-            import json
+        if raw:
+            # Display raw JSON output
+            typer.echo(result.stdout)
+        else:
+            try:
+                # Try to parse the JSON output for better formatting
+                import json
 
-            data = json.loads(result.stdout)
+                data = json.loads(result.stdout)
 
-            # Create a table for the results
-            from rich.table import Table
+                # Create a table for the results
+                from rich.table import Table
 
-            table = Table(title=f"Recent Activity ({timeframe})")
+                table = Table(title=f"Recent Activity ({timeframe})")
 
-            # Add columns
-            table.add_column("Type", style="cyan")
-            table.add_column("Title", style="green")
-            table.add_column("Created At", style="yellow")
-            table.add_column("Path", style="blue")
+                # Add columns
+                table.add_column("Type", style="cyan")
+                table.add_column("Title", style="green")
+                table.add_column("Created At", style="yellow")
+                table.add_column("Path", style="blue")
 
-            # Add rows
-            for item in data.get("results", []):
-                table.add_row(
-                    item.get("type", ""),
-                    item.get("title", ""),
-                    item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
-                    item.get("file_path", ""),
-                )
+                # Add rows
+                for item in data.get("results", []):
+                    table.add_row(
+                        item.get("type", ""),
+                        item.get("title", ""),
+                        item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
+                        item.get("file_path", ""),
+                    )
 
-            # Print the table
-            console.print(table)
+                # Print the table
+                console.print(table)
 
-            # Show metadata
-            total_results = len(data.get("results", []))
-            current_page = data.get("current_page", 1)
-            page_size = data.get("page_size", 10)
-            total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
-            
-            console.print(f"\nTotal results: {total_results}")
-            console.print(f"Page {current_page} of {total_pages}")
+                # Show metadata
+                total_results = len(data.get("results", []))
+                current_page = data.get("current_page", 1)
+                page_size = data.get("page_size", 10)
+                total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
+                
+                console.print(f"\nTotal results: {total_results}")
+                console.print(f"Page {current_page} of {total_pages}")
 
-        except (json.JSONDecodeError, KeyError):
-            # Fallback to raw output if JSON parsing fails
-            console.print(result.stdout)
+            except (json.JSONDecodeError, KeyError):
+                # Fallback to raw output if JSON parsing fails
+                console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
