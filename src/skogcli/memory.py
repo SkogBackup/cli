@@ -14,9 +14,9 @@ memory_app = typer.Typer(
 
 def get_memory_folders() -> List[str]:
     """Get a list of memory folders for completion."""
-    # Try to get folders from basic-memory
+    # Try to get folders from skogai-memory
     try:
-        result = run_basic_memory(["tool", "list-folders", "--format", "json"])
+        result = run_skogai_memory(["tool", "list-folders", "--format", "json"])
         if result.returncode == 0:
             import json
 
@@ -31,9 +31,9 @@ def get_memory_folders() -> List[str]:
 
 def get_memory_projects() -> List[str]:
     """Get a list of memory projects for completion."""
-    # Try to get projects from basic-memory
+    # Try to get projects from skogai-memory
     try:
-        result = run_basic_memory(["tool", "list-projects", "--format", "json"])
+        result = run_skogai_memory(["tool", "list-projects", "--format", "json"])
         if result.returncode == 0:
             import json
 
@@ -53,21 +53,21 @@ def get_memory_projects() -> List[str]:
 console = Console()
 
 
-def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
-    """Run basic-memory with the given arguments."""
-    cmd = ["uvx", "basic-memory"] + args
+def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
+    """Run skogai-memory with the given arguments."""
+    cmd = ["uvx", "skogai-memory"] + args
     try:
         return subprocess.run(cmd, capture_output=True, text=True)
     except FileNotFoundError:
         typer.echo(
-            "Error: basic-memory not found. Please install it with 'uv add basic-memory'"
+            "Error: skogai-memory not found. Please install it with 'uv add skogai-memory'"
         )
         raise typer.Exit(code=1)
 
 
 @memory_app.callback()
 def memory_callback():
-    """Knowledge management powered by basic-memory."""
+    """Knowledge management powered by skogai-memory."""
     pass
 
 
@@ -114,12 +114,12 @@ def create(
         cmd = ["--project", project] + cmd
 
     if content:
-        result = run_basic_memory(cmd + ["--content", content])
+        result = run_skogai_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream("stdin").read()
-        result = run_basic_memory(cmd + ["--content", from_stdin])
+        result = run_skogai_memory(cmd + ["--content", from_stdin])
 
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -173,12 +173,12 @@ def write(
         cmd = ["--project", project] + cmd
 
     if content:
-        result = run_basic_memory(cmd + ["--content", content])
+        result = run_skogai_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream("stdin").read()
-        result = run_basic_memory(cmd + ["--content", from_stdin])
+        result = run_skogai_memory(cmd + ["--content", from_stdin])
 
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -189,9 +189,9 @@ def write(
 
 def get_note_identifiers() -> List[str]:
     """Get a list of note identifiers for completion."""
-    # Try to get recent notes from basic-memory
+    # Try to get recent notes from skogai-memory
     try:
-        result = run_basic_memory(
+        result = run_skogai_memory(
             ["tool", "recent-notes", "--format", "json", "--limit", "10"]
         )
         if result.returncode == 0:
@@ -252,7 +252,7 @@ def read(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         if raw:
@@ -351,7 +351,7 @@ def search(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         try:
@@ -402,13 +402,13 @@ def search(
 
 def get_activity_types() -> List[str]:
     """Get a list of activity types for completion."""
-    # These are the standard activity types in basic-memory
+    # These are the standard activity types in skogai-memory
     return ["entity", "observation", "relation", "all", "note", "tag"]
 
 
 def get_timeframe_options() -> List[str]:
     """Get a list of timeframe options for completion."""
-    # Common timeframe options that basic-memory accepts
+    # Common timeframe options that skogai-memory accepts
     return [
         "1d",
         "3d",
@@ -499,7 +499,7 @@ def list_notes(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         if raw:
@@ -581,7 +581,7 @@ def sync(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         typer.echo("Synchronization completed successfully.")
@@ -621,7 +621,7 @@ def status(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         if json_output:
@@ -746,7 +746,7 @@ def recent_activity(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
         if raw:

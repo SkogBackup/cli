@@ -53,7 +53,7 @@ memory_app = typer.Typer(
 
 console = Console()
 
-def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
+def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
     """Run basic-memory with the given arguments."""
     cmd = ["uvx", "basic-memory"] + args
     return subprocess.run(cmd, capture_output=True, text=True)
@@ -94,12 +94,12 @@ def create(
         cmd = ["--project", project] + cmd
         
     if content:
-        result = run_basic_memory(cmd + ["--content", content])
+        result = run_skogai_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream('stdin').read()
-        result = run_basic_memory(cmd + ["--content", from_stdin])
+        result = run_skogai_memory(cmd + ["--content", from_stdin])
     
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -140,12 +140,12 @@ def write(
         cmd = ["--project", project] + cmd
         
     if content:
-        result = run_basic_memory(cmd + ["--content", content])
+        result = run_skogai_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream('stdin').read()
-        result = run_basic_memory(cmd + ["--content", from_stdin])
+        result = run_skogai_memory(cmd + ["--content", from_stdin])
     
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -172,7 +172,7 @@ def read(
     if project:
         cmd = ["--project", project] + cmd
         
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
     
     if result.returncode == 0:
         if raw:
@@ -222,7 +222,7 @@ def search(
     if project:
         cmd = ["--project", project] + cmd
         
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
     
     if result.returncode == 0:
         try:
@@ -309,7 +309,7 @@ def list_notes(
     if project:
         cmd = ["--project", project] + cmd
         
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
     
     if result.returncode == 0:
         console.print(result.stdout)
@@ -331,7 +331,7 @@ def sync(
     if project:
         cmd = ["--project", project] + cmd
         
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
     
     if result.returncode == 0:
         typer.echo("Synchronization completed successfully.")
@@ -353,7 +353,7 @@ def status(
     if project:
         cmd = ["--project", project] + cmd
         
-    result = run_basic_memory(cmd)
+    result = run_skogai_memory(cmd)
     
     if result.returncode == 0:
         console.print(result.stdout)
