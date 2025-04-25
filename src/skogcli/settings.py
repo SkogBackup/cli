@@ -2,9 +2,11 @@
 
 import json
 import os
+import shutil
+import time
 import typer
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 from rich.console import Console
 from rich.syntax import Syntax
 from rich import print as rprint
@@ -18,7 +20,14 @@ config_app = typer.Typer(
     no_args_is_help=True
 )
 
+# Configuration version - increment when making breaking changes
+CONFIG_VERSION = 1
+
 DEFAULT_SETTINGS = {
+    "_meta": {
+        "version": CONFIG_VERSION,
+        "last_updated": None,  # Will be set when saving
+    },
     "memory": {
         "default_project": None,
         "page_size": 10,
@@ -26,6 +35,14 @@ DEFAULT_SETTINGS = {
     "ui": {
         "theme": "default",
         "verbose": False,
+    },
+    "chat": {
+        "history_enabled": True,
+        "max_history_items": 100,
+        "history": [],
+    },
+    "credentials": {
+        # This section will store API keys and other sensitive data
     }
 }
 
@@ -35,9 +52,64 @@ def get_config_dir() -> Path:
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir
 
+def get_backup_dir() -> Path:
+    """Get the backup directory for configuration files."""
+    backup_dir = get_config_dir() / "backups"
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    return backup_dir
+
 def get_config_file() -> Path:
     """Get the path to the configuration file."""
     return get_config_dir() / "config.json"
+
+def get_sensitive_config_file() -> Path:
+    """Get the path to the sensitive configuration file."""
+    return get_config_dir() / "credentials.json"
+
+def create_backup(config_file: Path) -> Path:
+    """Create a backup of the configuration file."""
+    if not config_file.exists():
+        return None
+        
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    backup_path = get_backup_dir() / f"{config_file.name}.{timestamp}.bak"
+    
+    try:
+        shutil.copy2(config_file, backup_path)
+        return backup_path
+    except Exception as e:
+        console.print(f"[bold yellow]Warning:[/] Failed to create backup: {str(e)}")
+        return None
+
+def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
+    """Migrate configuration from older versions to the current version."""
+    if "_meta" not in settings or "version" not in settings["_meta"]:
+        # This is an old config without versioning
+        console.print("[yellow]Migrating configuration to the latest version...[/]")
+        
+        # Add metadata section with current version
+        settings["_meta"] = {
+            "version": CONFIG_VERSION,
+            "last_updated": time.time(),
+        }
+        
+        # Add new sections that didn't exist in older versions
+        if "chat" not in settings:
+            settings["chat"] = DEFAULT_SETTINGS["chat"].copy()
+            
+        if "credentials" not in settings:
+            settings["credentials"] = {}
+    
+    # Handle future migrations based on version numbers
+    version = settings["_meta"]["version"]
+    
+    # Example of future migration:
+    # if version < 2:
+    #     # Migrate from version 1 to 2
+    #     settings["new_section"] = {"new_key": "new_value"}
+    #     settings["_meta"]["version"] = 2
+    
+    return settings
 
 def load_settings() -> Dict[str, Any]:
     """Load settings from the config file, or create default settings if the file doesn't exist."""
@@ -45,16 +117,77 @@ def load_settings() -> Dict[str, Any]:
     
     if not config_file.exists():
         # Create default config
-        save_settings(DEFAULT_SETTINGS)
-        return DEFAULT_SETTINGS.copy()
+        settings = DEFAULT_SETTINGS.copy()
+        settings["_meta"]["last_updated"] = time.time()
+        save_settings(settings)
+        return settings
     
     try:
         with open(config_file, "r") as f:
-            return json.load(f)
+            settings = json.load(f)
+            
+        # Migrate configuration if needed
+        settings = migrate_config(settings)
+        
+        # Ensure all required sections exist
+        for section, defaults in DEFAULT_SETTINGS.items():
+            if section not in settings:
+                settings[section] = defaults
+                
+        return settings
     except json.JSONDecodeError:
-        console.print("[bold red]Error:[/] Config file is corrupted. Resetting to defaults.")
-        save_settings(DEFAULT_SETTINGS)
+        console.print("[bold red]Error:[/] Config file is corrupted.")
+        
+        # Try to restore from backup
+        backup = restore_from_latest_backup()
+        if backup:
+            console.print(f"[green]Restored configuration from backup.[/]")
+            return backup
+            
+        # If no backup, reset to defaults
+        console.print("[yellow]Resetting to default configuration.[/]")
+        settings = DEFAULT_SETTINGS.copy()
+        settings["_meta"]["last_updated"] = time.time()
+        save_settings(settings)
+        return settings
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to load configuration: {str(e)}")
         return DEFAULT_SETTINGS.copy()
+
+def load_sensitive_settings() -> Dict[str, Any]:
+    """Load sensitive settings like API keys from a separate file."""
+    sensitive_file = get_sensitive_config_file()
+    
+    if not sensitive_file.exists():
+        return {}
+    
+    try:
+        with open(sensitive_file, "r") as f:
+            return json.load(f)
+    except Exception:
+        console.print("[bold yellow]Warning:[/] Could not load sensitive configuration.")
+        return {}
+
+def restore_from_latest_backup() -> Optional[Dict[str, Any]]:
+    """Attempt to restore configuration from the most recent backup."""
+    backup_dir = get_backup_dir()
+    if not backup_dir.exists():
+        return None
+        
+    # Find the most recent backup file
+    backup_files = list(backup_dir.glob("config.json.*.bak"))
+    if not backup_files:
+        return None
+        
+    # Sort by modification time (newest first)
+    backup_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    
+    # Try to load from the most recent backup
+    try:
+        with open(backup_files[0], "r") as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 def get_config_keys() -> List[str]:
     """Get a list of all configuration keys for completion."""
@@ -73,16 +206,54 @@ def get_config_keys() -> List[str]:
     
     return extract_keys(settings)
 
-def save_settings(settings: Dict[str, Any]) -> None:
-    """Save settings to the config file."""
+def save_settings(settings: Dict[str, Any]) -> bool:
+    """Save settings to the config file.
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
     config_file = get_config_file()
     
-    with open(config_file, "w") as f:
-        json.dump(settings, f, indent=2)
+    # Update metadata
+    if "_meta" not in settings:
+        settings["_meta"] = {"version": CONFIG_VERSION}
+    
+    settings["_meta"]["last_updated"] = time.time()
+    
+    # Create a backup before saving
+    create_backup(config_file)
+    
+    # Extract sensitive data to save separately
+    sensitive_data = settings.get("credentials", {})
+    
+    try:
+        # Save main configuration
+        with open(config_file, "w") as f:
+            # Create a copy without sensitive data for the main config file
+            main_settings = settings.copy()
+            main_settings["credentials"] = {}  # Empty the credentials section
+            json.dump(main_settings, f, indent=2)
+        
+        # Save sensitive data if there is any
+        if sensitive_data:
+            sensitive_file = get_sensitive_config_file()
+            with open(sensitive_file, "w") as f:
+                json.dump(sensitive_data, f, indent=2)
+                
+        return True
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to save configuration: {str(e)}")
+        return False
 
 def get_setting(key: str) -> Any:
     """Get a setting value by its key (supports dot notation for nested settings)."""
     settings = load_settings()
+    
+    # Handle credentials separately
+    if key.startswith("credentials."):
+        sensitive_settings = load_sensitive_settings()
+        credential_key = key.split(".", 1)[1]
+        return sensitive_settings.get(credential_key)
     
     if "." in key:
         # Handle nested keys
@@ -96,11 +267,37 @@ def get_setting(key: str) -> Any:
     
     return settings.get(key)
 
-def set_setting(key: str, value: Any) -> None:
-    """Set a setting value by its key (supports dot notation for nested settings)."""
+def set_setting(key: str, value: Any) -> bool:
+    """Set a setting value by its key (supports dot notation for nested settings).
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
     settings = load_settings()
     
-    if "." in key:
+    # Special handling for credentials
+    is_credential = key.startswith("credentials.")
+    
+    if is_credential:
+        # Load sensitive settings separately
+        sensitive_settings = load_sensitive_settings()
+        credential_key = key.split(".", 1)[1]
+        sensitive_settings[credential_key] = value
+        
+        # Save to the sensitive file
+        try:
+            sensitive_file = get_sensitive_config_file()
+            with open(sensitive_file, "w") as f:
+                json.dump(sensitive_settings, f, indent=2)
+            
+            # Also update the main settings object for consistency
+            if "credentials" not in settings:
+                settings["credentials"] = {}
+            settings["credentials"][credential_key] = value
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
+            return False
+    elif "." in key:
         # Handle nested keys
         parts = key.split(".")
         current = settings
@@ -114,11 +311,93 @@ def set_setting(key: str, value: Any) -> None:
     else:
         settings[key] = value
     
-    save_settings(settings)
+    return save_settings(settings)
 
-def reset_settings() -> None:
-    """Reset settings to default values."""
-    save_settings(DEFAULT_SETTINGS)
+def reset_settings() -> bool:
+    """Reset settings to default values.
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    # Create a backup before resetting
+    create_backup(get_config_file())
+    create_backup(get_sensitive_config_file())
+    
+    # Reset to defaults
+    settings = DEFAULT_SETTINGS.copy()
+    settings["_meta"]["last_updated"] = time.time()
+    return save_settings(settings)
+
+def add_chat_history_item(item: Dict[str, Any]) -> bool:
+    """Add an item to the chat history.
+    
+    Args:
+        item: A dictionary containing chat history data
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    settings = load_settings()
+    
+    # Ensure chat section exists
+    if "chat" not in settings:
+        settings["chat"] = DEFAULT_SETTINGS["chat"].copy()
+    
+    # Add timestamp if not present
+    if "timestamp" not in item:
+        item["timestamp"] = time.time()
+    
+    # Add to history
+    settings["chat"]["history"].append(item)
+    
+    # Trim history if it exceeds the maximum
+    max_items = settings["chat"].get("max_history_items", 100)
+    if len(settings["chat"]["history"]) > max_items:
+        settings["chat"]["history"] = settings["chat"]["history"][-max_items:]
+    
+    return save_settings(settings)
+
+def get_chat_history(limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    """Get the chat history.
+    
+    Args:
+        limit: Maximum number of items to return (most recent first)
+        
+    Returns:
+        List of chat history items
+    """
+    settings = load_settings()
+    
+    if "chat" not in settings or "history" not in settings["chat"]:
+        return []
+    
+    history = settings["chat"]["history"]
+    
+    # Sort by timestamp (newest first)
+    history.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+    
+    if limit is not None:
+        return history[:limit]
+    
+    return history
+
+def clear_chat_history() -> bool:
+    """Clear the chat history.
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    settings = load_settings()
+    
+    if "chat" in settings:
+        # Create a backup before clearing
+        create_backup(get_config_file())
+        
+        # Clear history
+        settings["chat"]["history"] = []
+        return save_settings(settings)
+    
+    return True
 
 @config_app.callback()
 def config_callback():
@@ -268,18 +547,31 @@ def reset(
             console.print("Reset cancelled.")
             return
     
-    reset_settings()
-    console.print("[green]Configuration reset to defaults.[/]")
+    if reset_settings():
+        console.print("[green]Configuration reset to defaults.[/]")
+    else:
+        console.print("[bold red]Error:[/] Failed to reset configuration.")
 
 @config_app.command("edit")
 @with_explanation("Open the configuration file in your default editor.")
-def edit():
+def edit(
+    sensitive: bool = typer.Option(False, "--sensitive", "-s", help="Edit sensitive configuration")
+):
     """Open the configuration file in your default editor."""
-    config_file = get_config_file()
+    config_file = get_sensitive_config_file() if sensitive else get_config_file()
     
     if not config_file.exists():
         # Create default config if it doesn't exist
-        save_settings(DEFAULT_SETTINGS)
+        if sensitive:
+            with open(config_file, "w") as f:
+                json.dump({}, f, indent=2)
+        else:
+            settings = DEFAULT_SETTINGS.copy()
+            settings["_meta"]["last_updated"] = time.time()
+            save_settings(settings)
+    
+    # Create a backup before editing
+    create_backup(config_file)
     
     # Use the EDITOR environment variable, or fall back to common editors
     editor = os.environ.get("EDITOR", "nano")
@@ -289,7 +581,166 @@ def edit():
         exit_code = os.system(f"{editor} {config_file}")
         if exit_code == 0:
             console.print("[green]Configuration file edited successfully.[/]")
+            
+            # Validate the edited file
+            try:
+                with open(config_file, "r") as f:
+                    json.load(f)
+            except json.JSONDecodeError as e:
+                console.print(f"[bold red]Warning:[/] The edited file contains invalid JSON: {str(e)}")
+                console.print("You may want to fix this by running the edit command again.")
         else:
             console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
+
+@config_app.command("backup")
+@with_explanation("Create a backup of the configuration files.")
+def backup():
+    """Create a backup of the configuration files."""
+    config_file = get_config_file()
+    sensitive_file = get_sensitive_config_file()
+    
+    backup_paths = []
+    if config_file.exists():
+        backup_path = create_backup(config_file)
+        if backup_path:
+            backup_paths.append(backup_path)
+    
+    if sensitive_file.exists():
+        backup_path = create_backup(sensitive_file)
+        if backup_path:
+            backup_paths.append(backup_path)
+    
+    if backup_paths:
+        console.print("[green]Backups created successfully:[/]")
+        for path in backup_paths:
+            console.print(f"  - {path}")
+    else:
+        console.print("[yellow]No configuration files to backup.[/]")
+
+@config_app.command("restore")
+@with_explanation("Restore configuration from a backup.")
+def restore(
+    backup_file: Optional[Path] = typer.Argument(
+        None, help="Path to the backup file (if not specified, uses the most recent backup)"
+    ),
+    confirm: bool = typer.Option(False, "--yes", "-y", help="Confirm restore without prompting")
+):
+    """Restore configuration from a backup."""
+    if backup_file is None:
+        # Find the most recent backup
+        backup_dir = get_backup_dir()
+        if not backup_dir.exists():
+            console.print("[bold red]Error:[/] No backups found.")
+            return
+            
+        backup_files = list(backup_dir.glob("*.bak"))
+        if not backup_files:
+            console.print("[bold red]Error:[/] No backups found.")
+            return
+            
+        # Sort by modification time (newest first)
+        backup_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        backup_file = backup_files[0]
+    
+    if not backup_file.exists():
+        console.print(f"[bold red]Error:[/] Backup file not found: {backup_file}")
+        return
+    
+    if not confirm:
+        should_restore = typer.confirm(f"Are you sure you want to restore from {backup_file}?")
+        if not should_restore:
+            console.print("Restore cancelled.")
+            return
+    
+    try:
+        # Determine target file based on backup filename
+        if "credentials" in backup_file.name:
+            target_file = get_sensitive_config_file()
+        else:
+            target_file = get_config_file()
+        
+        # Create a backup of the current file before restoring
+        create_backup(target_file)
+        
+        # Copy the backup to the target file
+        shutil.copy2(backup_file, target_file)
+        console.print(f"[green]Configuration restored from {backup_file}[/]")
+        
+        # Validate the restored file
+        try:
+            with open(target_file, "r") as f:
+                json.load(f)
+        except json.JSONDecodeError:
+            console.print("[bold red]Warning:[/] The restored file contains invalid JSON.")
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to restore: {str(e)}")
+
+@config_app.command("list-backups")
+@with_explanation("List available configuration backups.")
+def list_backups():
+    """List available configuration backups."""
+    backup_dir = get_backup_dir()
+    if not backup_dir.exists():
+        console.print("[yellow]No backups found.[/]")
+        return
+        
+    backup_files = list(backup_dir.glob("*.bak"))
+    if not backup_files:
+        console.print("[yellow]No backups found.[/]")
+        return
+        
+    # Sort by modification time (newest first)
+    backup_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    
+    console.print("[bold]Available backups:[/]")
+    for i, backup in enumerate(backup_files):
+        mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(backup.stat().st_mtime))
+        size = backup.stat().st_size / 1024  # Size in KB
+        console.print(f"{i+1}. {backup.name} ({mtime}, {size:.1f} KB)")
+
+@config_app.command("chat-history")
+@with_explanation("Manage chat history.")
+def chat_history(
+    clear: bool = typer.Option(False, "--clear", help="Clear chat history"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Number of history items to show"),
+    json_output: bool = typer.Option(False, "--json", "-j", help="Output in JSON format")
+):
+    """Manage chat history."""
+    if clear:
+        if typer.confirm("Are you sure you want to clear all chat history?"):
+            if clear_chat_history():
+                console.print("[green]Chat history cleared.[/]")
+            else:
+                console.print("[bold red]Error:[/] Failed to clear chat history.")
+        return
+    
+    history = get_chat_history(limit)
+    
+    if not history:
+        console.print("[yellow]No chat history found.[/]")
+        return
+    
+    if json_output:
+        print(json.dumps(history, indent=2))
+        return
+    
+    console.print(f"[bold]Chat history (showing {len(history)} of {len(get_chat_history())} items):[/]")
+    for i, item in enumerate(history):
+        timestamp = time.strftime(
+            "%Y-%m-%d %H:%M:%S", 
+            time.localtime(item.get("timestamp", 0))
+        )
+        console.print(f"[bold]{i+1}. {timestamp}[/]")
+        
+        if "session_id" in item:
+            console.print(f"  Session: {item['session_id']}")
+            
+        if "message" in item:
+            console.print(f"  Message: {item['message'][:50]}...")
+            
+        if "metadata" in item:
+            console.print(f"  Metadata: {json.dumps(item['metadata'], indent=2)}")
+        
+        console.print("")
