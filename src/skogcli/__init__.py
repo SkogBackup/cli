@@ -44,6 +44,27 @@ def show_explanation_callback(ctx: typer.Context):
 @app.callback()
 def app_callback(ctx: typer.Context):
     """Main app callback to handle explanation display."""
+    # Handle agent.name format at the top level
+    if ctx.invoked_subcommand is None and len(ctx.args) > 0:
+        arg = ctx.args[0]
+        if arg.startswith("agent.") and "." in arg:
+            # This is an agent command in the format agent.name
+            agent_name = arg.split(".", 1)[1]
+            
+            # Check if there are remaining arguments
+            remaining_args = ctx.args[1:] if len(ctx.args) > 1 else []
+            
+            if remaining_args and remaining_args[0] == "send" and len(remaining_args) > 1:
+                # Call the agent send command
+                from .agent import send
+                ctx.invoke(send, message=remaining_args[1], agent_name=agent_name)
+                raise typer.Exit()
+            elif remaining_args and remaining_args[0] == "read":
+                # Call the agent read command
+                from .agent import read_agent
+                ctx.invoke(read_agent, name=agent_name)
+                raise typer.Exit()
+    
     show_explanation_callback(ctx)
 
 def main():

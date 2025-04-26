@@ -37,21 +37,21 @@ def agent_callback(ctx: typer.Context):
     if ctx.invoked_subcommand is None and len(ctx.args) > 0:
         # Get the first argument which should be in format "agent.name"
         arg = ctx.args[0]
-        if "." in arg:
-            # Split into command and agent name
+        if "." in arg and not arg.startswith("-"):
+            # Split into agent name and command
             parts = arg.split(".", 1)
             if len(parts) == 2:
-                command, agent_name = parts
+                agent_name = parts[1]
                 
                 # Check if there are remaining arguments
                 remaining_args = ctx.args[1:] if len(ctx.args) > 1 else []
                 
-                if command == "send" and remaining_args:
+                if remaining_args and remaining_args[0] == "send" and len(remaining_args) > 1:
                     # Call the send command with the agent name
-                    message = remaining_args[0]
+                    message = remaining_args[1]
                     ctx.invoke(send, message=message, agent_name=agent_name)
                     raise typer.Exit()
-                elif command == "read":
+                elif remaining_args and remaining_args[0] == "read":
                     # Call the read command with the agent name
                     ctx.invoke(read_agent, name=agent_name)
                     raise typer.Exit()
