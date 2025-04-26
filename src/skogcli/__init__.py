@@ -50,7 +50,7 @@ def app_callback(ctx: typer.Context):
         import sys
         args = sys.argv[1:]
         
-        if args and args[0].startswith("agent."):
+        if args and "." in args[0] and args[0].split(".", 1)[0] == "agent":
             # This is an agent command in the format agent.name
             agent_name = args[0].split(".", 1)[1]
             

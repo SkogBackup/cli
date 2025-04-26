@@ -35,7 +35,7 @@ def agent_callback(ctx: typer.Context):
     """Interact with SkogAI agents."""
     # Check if we're using dot notation format (agent.name)
     if ctx.invoked_subcommand is None and len(ctx.args) > 0:
-        # Get the first argument which should be in format "agent.name"
+        # Get the first argument which should be in format "name"
         arg = ctx.args[0]
         if "." in arg and not arg.startswith("-"):
             # Split into agent name and command
