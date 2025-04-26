@@ -354,6 +354,60 @@ def get_agent_config(
     else:
         console.print(f"[bold]{full_key}[/] = {value}")
 
+@agent_app.command("read")
+@with_explanation("Read information about an agent.")
+def read_agent(
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the agent to read",
+        autocompletion=get_agent_names
+    ),
+    raw: bool = typer.Option(
+        False, "--raw", "-r", 
+        help="Display raw response without formatting"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", "-j", 
+        help="Output response in JSON format"
+    ),
+):
+    """
+    Read information about an agent.
+    
+    Examples:
+    
+    Read agent information:
+      skogcli agent read default
+    
+    Get raw output:
+      skogcli agent read researcher --raw
+    """
+    # This is a placeholder implementation that just returns "Hello world"
+    # In a real implementation, this would fetch and display agent information
+    
+    # Get agent configuration
+    agent_config = get_setting(f"agent.{name}") or {}
+    
+    # For now, just return a simple message
+    message = f"Hello world from agent: {name}"
+    
+    # Display the response
+    if json_output:
+        output = {
+            "agent": name,
+            "message": message,
+            "config": agent_config
+        }
+        print(json.dumps(output, indent=2))
+    elif raw:
+        print(message)
+    else:
+        console.print(Panel(
+            Markdown(message),
+            title=f"Agent: {name}",
+            border_style="blue"
+        ))
+
 @agent_app.command("delete")
 @with_explanation("Delete an agent.")
 def delete_agent(
