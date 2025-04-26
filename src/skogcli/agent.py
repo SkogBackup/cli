@@ -380,8 +380,13 @@ def get_agent_config(
 @with_explanation("Read information about an agent.")
 def read_agent(
     name: str = typer.Argument(
-        ..., 
+        None, 
         help="Name of the agent to read",
+        autocompletion=get_agent_names
+    ),
+    agent_name: str = typer.Option(
+        None, "--agent", "-a", 
+        help="Name of the agent to read (alternative to NAME argument)",
         autocompletion=get_agent_names
     ),
     raw: bool = typer.Option(
@@ -400,6 +405,9 @@ def read_agent(
     
     Read agent information:
       skogcli agent read default
+      
+    Read agent using option:
+      skogcli agent read --agent default
     
     Get raw output:
       skogcli agent read researcher --raw
@@ -407,11 +415,19 @@ def read_agent(
     # This is a placeholder implementation that just returns "Hello world"
     # In a real implementation, this would fetch and display agent information
     
+    # Use either the argument or the option for the agent name
+    agent = agent_name if agent_name is not None else name
+    
+    # Handle case where neither is provided
+    if agent is None:
+        console.print("[bold red]Error:[/] Agent name must be provided either as an argument or with --agent")
+        raise typer.Exit(1)
+    
     # Get agent configuration
-    agent_config = get_setting(f"agent.{name}") or {}
+    agent_config = get_setting(f"agent.{agent}") or {}
     
     # For now, just return a simple message
-    message = f"Hello world from agent: {name}"
+    message = f"Hello world from agent: {agent}"
     
     # Display the response
     if json_output:

@@ -64,6 +64,11 @@ def app_callback(ctx: typer.Context):
                 from .agent import read_agent
                 ctx.invoke(read_agent, name=agent_name)
                 raise typer.Exit()
+            else:
+                # Default to read if no command is specified
+                from .agent import read_agent
+                ctx.invoke(read_agent, name=agent_name)
+                raise typer.Exit()
     
     show_explanation_callback(ctx)
 
