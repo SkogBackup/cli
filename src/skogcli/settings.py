@@ -11,6 +11,12 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich import print as rprint
 from .decorators import with_explanation
+from .default_settings import (
+    load_default_settings, 
+    save_default_settings, 
+    get_default_settings_file,
+    CONFIG_VERSION
+)
 
 console = Console()
 
@@ -20,31 +26,9 @@ config_app = typer.Typer(
     no_args_is_help=True
 )
 
-# Configuration version - increment when making breaking changes
-CONFIG_VERSION = 1
-
-DEFAULT_SETTINGS = {
-    "_meta": {
-        "version": CONFIG_VERSION,
-        "last_updated": None,  # Will be set when saving
-    },
-    "memory": {
-        "default_project": None,
-        "page_size": 10,
-    },
-    "ui": {
-        "theme": "default",
-        "verbose": False,
-    },
-    "chat": {
-        "history_enabled": True,
-        "max_history_items": 100,
-        "history": [],
-    },
-    "credentials": {
-        # This section will store API keys and other sensitive data
-    }
-}
+# Ensure the data directory exists
+from .default_settings import ensure_data_dir
+ensure_data_dir()
 
 def get_config_dir() -> Path:
     """Get the configuration directory, creating it if it doesn't exist."""
@@ -117,7 +101,7 @@ def load_settings() -> Dict[str, Any]:
     
     if not config_file.exists():
         # Create default config
-        settings = DEFAULT_SETTINGS.copy()
+        settings = load_default_settings()
         settings["_meta"]["last_updated"] = time.time()
         save_settings(settings)
         return settings
@@ -130,9 +114,10 @@ def load_settings() -> Dict[str, Any]:
         settings = migrate_config(settings)
         
         # Ensure all required sections exist
-        for section, defaults in DEFAULT_SETTINGS.items():
+        defaults = load_default_settings()
+        for section, section_defaults in defaults.items():
             if section not in settings:
-                settings[section] = defaults
+                settings[section] = section_defaults
                 
         return settings
     except json.JSONDecodeError:
@@ -146,13 +131,13 @@ def load_settings() -> Dict[str, Any]:
             
         # If no backup, reset to defaults
         console.print("[yellow]Resetting to default configuration.[/]")
-        settings = DEFAULT_SETTINGS.copy()
+        settings = load_default_settings()
         settings["_meta"]["last_updated"] = time.time()
         save_settings(settings)
         return settings
     except Exception as e:
         console.print(f"[bold red]Error:[/] Failed to load configuration: {str(e)}")
-        return DEFAULT_SETTINGS.copy()
+        return load_default_settings()
 
 def load_sensitive_settings() -> Dict[str, Any]:
     """Load sensitive settings like API keys from a separate file."""
@@ -324,7 +309,7 @@ def reset_settings() -> bool:
     create_backup(get_sensitive_config_file())
     
     # Reset to defaults
-    settings = DEFAULT_SETTINGS.copy()
+    settings = load_default_settings()
     settings["_meta"]["last_updated"] = time.time()
     return save_settings(settings)
 
@@ -555,6 +540,286 @@ def reset(
     else:
         console.print("[bold red]Error:[/] Failed to reset configuration.")
 
+@config_app.command("show-defaults")
+@with_explanation("Display the default configuration.")
+def show_defaults():
+    """Display the default configuration."""
+    settings = load_default_settings()
+    json_str = json.dumps(settings, indent=2)
+    syntax = Syntax(json_str, "json", theme="monokai", line_numbers=True)
+    console.print(syntax)
+    return 0  # Ensure the command returns 0
+
+@config_app.command("edit-defaults")
+@with_explanation("Edit the default configuration.")
+def edit_defaults(
+    key: Optional[str] = typer.Argument(
+        None, 
+        help="Configuration key to edit (if not specified, opens the entire file)",
+        autocompletion=lambda: get_config_keys()
+    ),
+    value: Optional[str] = typer.Argument(
+        None, 
+        help="Value to set (if not specified with key, opens the file in editor)"
+    )
+):
+    """Edit the default configuration."""
+    # If key and value are provided, set the specific value
+    if key and value is not None:
+        defaults = load_default_settings()
+        
+        # Try to parse as JSON first (for objects, arrays, etc.)
+        try:
+            json_value = json.loads(value)
+            
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = json_value
+            else:
+                defaults[key] = json_value
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                if isinstance(json_value, dict) or isinstance(json_value, list):
+                    json_str = json.dumps(json_value, indent=2)
+                    console.print(f"[green]Set default[/] {key} = ")
+                    syntax = Syntax(json_str, "json", theme="monokai")
+                    console.print(syntax)
+                else:
+                    console.print(f"[green]Set default[/] {key} = {json_value}")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        except json.JSONDecodeError:
+            # Not valid JSON, continue with other type conversions
+            pass
+        
+        # Try as int
+        try:
+            int_value = int(value)
+            
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = int_value
+            else:
+                defaults[key] = int_value
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                console.print(f"[green]Set default[/] {key} = {int_value}")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        except ValueError:
+            pass
+        
+        # Try as float
+        try:
+            float_value = float(value)
+            
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = float_value
+            else:
+                defaults[key] = float_value
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                console.print(f"[green]Set default[/] {key} = {float_value}")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        except ValueError:
+            pass
+        
+        # Try as boolean
+        if value.lower() in ("true", "yes", "1"):
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = True
+            else:
+                defaults[key] = True
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                console.print(f"[green]Set default[/] {key} = True")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        elif value.lower() in ("false", "no", "0"):
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = False
+            else:
+                defaults[key] = False
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                console.print(f"[green]Set default[/] {key} = False")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        
+        # Try as null/None
+        if value.lower() in ("null", "none"):
+            # Update the defaults
+            if "." in key:
+                # Handle nested keys
+                parts = key.split(".")
+                current = defaults
+                for i, part in enumerate(parts[:-1]):
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value at the final level
+                current[parts[-1]] = None
+            else:
+                defaults[key] = None
+                
+            # Save the updated defaults
+            if save_default_settings(defaults):
+                console.print(f"[green]Set default[/] {key} = None")
+                return 0
+            else:
+                console.print("[bold red]Error:[/] Failed to save default settings.")
+                return 1
+        
+        # Default to string
+        # Update the defaults
+        if "." in key:
+            # Handle nested keys
+            parts = key.split(".")
+            current = defaults
+            for i, part in enumerate(parts[:-1]):
+                if part not in current:
+                    current[part] = {}
+                current = current[part]
+            
+            # Set the value at the final level
+            current[parts[-1]] = value
+        else:
+            defaults[key] = value
+            
+        # Save the updated defaults
+        if save_default_settings(defaults):
+            console.print(f"[green]Set default[/] {key} = \"{value}\"")
+            return 0
+        else:
+            console.print("[bold red]Error:[/] Failed to save default settings.")
+            return 1
+    
+    # If only key is provided, show the current value
+    elif key:
+        defaults = load_default_settings()
+        
+        # Handle nested keys
+        if "." in key:
+            parts = key.split(".")
+            current = defaults
+            for part in parts:
+                if part not in current:
+                    console.print(f"[bold red]Error:[/] Key '{key}' not found in default configuration.")
+                    return 1
+                current = current[part]
+            value = current
+        else:
+            if key not in defaults:
+                console.print(f"[bold red]Error:[/] Key '{key}' not found in default configuration.")
+                return 1
+            value = defaults[key]
+        
+        # Display the value
+        if isinstance(value, dict) or isinstance(value, list):
+            json_str = json.dumps(value, indent=2)
+            console.print(f"Default {key} = ")
+            syntax = Syntax(json_str, "json", theme="monokai")
+            console.print(syntax)
+        else:
+            console.print(f"Default {key} = {value}")
+        
+        return 0
+    
+    # If no key is provided, open the entire file in the editor
+    else:
+        default_file = get_default_settings_file()
+        
+        # Ensure the file exists
+        if not default_file.exists():
+            defaults = load_default_settings()
+            save_default_settings(defaults)
+        
+        # Use the EDITOR environment variable, or fall back to common editors
+        editor = os.environ.get("EDITOR", "nano")
+        
+        try:
+            # Use os.system to properly invoke the editor with the file path
+            exit_code = os.system(f"{editor} {default_file}")
+            if exit_code == 0:
+                console.print("[green]Default configuration file edited successfully.[/]")
+                
+                # Validate the edited file
+                try:
+                    with open(default_file, "r") as f:
+                        json.load(f)
+                except json.JSONDecodeError as e:
+                    console.print(f"[bold red]Warning:[/] The edited file contains invalid JSON: {str(e)}")
+                    console.print("You may want to fix this by running the edit command again.")
+            else:
+                console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] {str(e)}")
+
 @config_app.command("edit")
 @with_explanation("Open the configuration file in your default editor.")
 def edit(
@@ -702,6 +967,34 @@ def list_backups():
         mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(backup.stat().st_mtime))
         size = backup.stat().st_size / 1024  # Size in KB
         console.print(f"{i+1}. {backup.name} ({mtime}, {size:.1f} KB)")
+
+@config_app.command("factory-reset")
+@with_explanation("Reset configuration to factory default values (ignoring custom defaults).")
+def factory_reset(
+    confirm: bool = typer.Option(False, "--yes", "-y", help="Confirm reset without prompting")
+):
+    """Reset configuration to factory default values."""
+    if not confirm:
+        should_reset = typer.confirm("Are you sure you want to reset all settings to factory defaults?")
+        if not should_reset:
+            console.print("Factory reset cancelled.")
+            return 1
+    
+    # Create a backup before resetting
+    create_backup(get_config_file())
+    create_backup(get_sensitive_config_file())
+    
+    # Import the original defaults directly from the module
+    from .default_settings import DEFAULT_SETTINGS
+    
+    # Reset to factory defaults
+    settings = DEFAULT_SETTINGS.copy()
+    settings["_meta"]["last_updated"] = time.time()
+    
+    if save_settings(settings):
+        console.print("[green]Configuration reset to factory defaults.[/]")
+    else:
+        console.print("[bold red]Error:[/] Failed to reset configuration.")
 
 @config_app.command("chat-history")
 @with_explanation("Manage chat history.")
