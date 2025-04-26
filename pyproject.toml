@@ -3,17 +3,13 @@ name = "skogcli"
 version = "0.1.0"
 description = "CLI tool for the SkogAI-project"
 readme = "README.md"
-authors = [
-    { name = "Emil Skogsund", email = "emil@skogsund.se" }
-]
+authors = [{ name = "Emil Skogsund", email = "emil@skogsund.se" }]
 requires-python = ">=3.12"
-dependencies = [
-    "pytest>=8.3.5",
-    "tiktoken>=0.9.0",
-    "typer>=0.15.2",
-]
+dependencies = ["pytest>=8.3.5", "tiktoken>=0.9.0", "typer>=0.15.2"]
 
 [project.scripts]
+s = "skogcli:main"
+skog = "skogcli:main"
 skogcli = "skogcli:main"
 
 [build-system]
