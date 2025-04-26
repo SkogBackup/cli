@@ -79,6 +79,8 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
         
         # Add new sections that didn't exist in older versions
         if "chat" not in settings:
+            # Import default settings from the module
+            from .default_settings import DEFAULT_SETTINGS
             settings["chat"] = DEFAULT_SETTINGS["chat"].copy()
             
         if "credentials" not in settings:
@@ -326,6 +328,8 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     
     # Ensure chat section exists
     if "chat" not in settings:
+        # Import default settings from the module
+        from .default_settings import DEFAULT_SETTINGS
         settings["chat"] = DEFAULT_SETTINGS["chat"].copy()
     
     # Add timestamp if not present
@@ -834,7 +838,8 @@ def edit(
             with open(config_file, "w") as f:
                 json.dump({}, f, indent=2)
         else:
-            settings = DEFAULT_SETTINGS.copy()
+            # Load default settings
+            settings = load_default_settings()
             settings["_meta"]["last_updated"] = time.time()
             save_settings(settings)
     
