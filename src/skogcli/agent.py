@@ -46,16 +46,20 @@ def agent_callback(ctx: typer.Context):
                 # Check if there are remaining arguments
                 remaining_args = ctx.args[1:] if len(ctx.args) > 1 else []
                 
-                if remaining_args and remaining_args[0] == "send" and len(remaining_args) > 1:
-                    # Call the send command with the agent name
-                    message = remaining_args[1]
-                    ctx.invoke(send, message=message, agent_name=agent_name)
-                    raise typer.Exit()
-                elif remaining_args and remaining_args[0] == "read":
-                    # Call the read command with the agent name
-                    ctx.invoke(read_agent, name=agent_name)
-                    raise typer.Exit()
-    pass
+                try:
+                    if remaining_args and remaining_args[0] == "send" and len(remaining_args) > 1:
+                        # Call the send command with the agent name
+                        message = remaining_args[1]
+                        ctx.invoke(send, message=message, agent_name=agent_name)
+                    elif remaining_args and remaining_args[0] == "read":
+                        # Call the read command with the agent name
+                        ctx.invoke(read_agent, name=agent_name)
+                    else:
+                        # Default to read if no command is specified
+                        ctx.invoke(read_agent, name=agent_name)
+                    return
+                except Exception as e:
+                    console.print(f"[bold red]Error:[/] {str(e)}")
 
 @agent_app.command("send")
 @with_explanation("Send a message to an agent.")
@@ -432,7 +436,7 @@ def read_agent(
     # Display the response
     if json_output:
         output = {
-            "agent": name,
+            "agent": agent,
             "message": message,
             "config": agent_config
         }
@@ -442,7 +446,7 @@ def read_agent(
     else:
         console.print(Panel(
             Markdown(message),
-            title=f"Agent: {name}",
+            title=f"Agent: {agent}",
             border_style="blue"
         ))
 
