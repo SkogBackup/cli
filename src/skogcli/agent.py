@@ -51,15 +51,18 @@ def agent_callback(ctx: typer.Context):
                         # Call the send command with the agent name
                         message = remaining_args[1]
                         ctx.invoke(send, message=message, agent_name=agent_name)
+                        return
                     elif remaining_args and remaining_args[0] == "read":
                         # Call the read command with the agent name
                         ctx.invoke(read_agent, name=agent_name)
+                        return
                     else:
                         # Default to read if no command is specified
                         ctx.invoke(read_agent, name=agent_name)
-                    return
+                        return
                 except Exception as e:
                     console.print(f"[bold red]Error:[/] {str(e)}")
+                    raise typer.Exit(1)
 
 @agent_app.command("send")
 @with_explanation("Send a message to an agent.")

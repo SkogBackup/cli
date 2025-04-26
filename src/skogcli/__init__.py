@@ -50,7 +50,7 @@ def app_callback(ctx: typer.Context):
         import sys
         args = sys.argv[1:]
         
-        if args and args[0].startswith("agent.") and "." in args[0]:
+        if args and args[0].startswith("agent."):
             # This is an agent command in the format agent.name
             agent_name = args[0].split(".", 1)[1]
             
@@ -59,17 +59,19 @@ def app_callback(ctx: typer.Context):
             
             try:
                 if len(args) > 2 and args[1] == "send":
-                    # Call the agent send command
+                    # Call the agent send command with the message
                     ctx.invoke(send, message=args[2], agent_name=agent_name)
+                    return
                 elif len(args) > 1 and args[1] == "read":
                     # Call the agent read command
                     ctx.invoke(read_agent, name=agent_name)
+                    return
                 else:
                     # Default to read if no command is specified
                     ctx.invoke(read_agent, name=agent_name)
-                return
+                    return
             except Exception as e:
-                typer.echo(f"Error executing agent command: {str(e)}")
+                typer.echo(f"Error executing agent command: {e}")
                 raise typer.Exit(1)
     
     show_explanation_callback(ctx)
