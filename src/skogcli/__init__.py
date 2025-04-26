@@ -41,27 +41,27 @@ def show_explanation_callback(ctx: typer.Context):
             ctx.invoke(ctx.command.get_help)
             raise typer.Exit()
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def app_callback(ctx: typer.Context):
     """Main app callback to handle explanation display."""
     # Handle agent.name format at the top level
-    if ctx.invoked_subcommand is None and len(ctx.args) > 0:
-        arg = ctx.args[0]
-        if arg.startswith("agent.") and "." in arg:
+    if ctx.invoked_subcommand is None:
+        # Get all command line arguments
+        import sys
+        args = sys.argv[1:]
+        
+        if args and args[0].startswith("agent.") and "." in args[0]:
             # This is an agent command in the format agent.name
-            agent_name = arg.split(".", 1)[1]
+            agent_name = args[0].split(".", 1)[1]
             
             # Import agent commands
             from .agent import send, read_agent
             
-            # Check if there are remaining arguments
-            remaining_args = ctx.args[1:] if len(ctx.args) > 1 else []
-            
             try:
-                if remaining_args and remaining_args[0] == "send" and len(remaining_args) > 1:
+                if len(args) > 2 and args[1] == "send":
                     # Call the agent send command
-                    ctx.invoke(send, message=remaining_args[1], agent_name=agent_name)
-                elif remaining_args and remaining_args[0] == "read":
+                    ctx.invoke(send, message=args[2], agent_name=agent_name)
+                elif len(args) > 1 and args[1] == "read":
                     # Call the agent read command
                     ctx.invoke(read_agent, name=agent_name)
                 else:
