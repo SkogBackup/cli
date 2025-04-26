@@ -31,8 +31,30 @@ def get_agent_names() -> List[str]:
     return ["default", "assistant", "researcher", "coder"]
 
 @agent_app.callback()
-def agent_callback():
+def agent_callback(ctx: typer.Context):
     """Interact with SkogAI agents."""
+    # Check if we're using dot notation format (agent.name)
+    if ctx.invoked_subcommand is None and len(ctx.args) > 0:
+        # Get the first argument which should be in format "agent.name"
+        arg = ctx.args[0]
+        if "." in arg:
+            # Split into command and agent name
+            parts = arg.split(".", 1)
+            if len(parts) == 2:
+                command, agent_name = parts
+                
+                # Check if there are remaining arguments
+                remaining_args = ctx.args[1:] if len(ctx.args) > 1 else []
+                
+                if command == "send" and remaining_args:
+                    # Call the send command with the agent name
+                    message = remaining_args[0]
+                    ctx.invoke(send, message=message, agent_name=agent_name)
+                    raise typer.Exit()
+                elif command == "read":
+                    # Call the read command with the agent name
+                    ctx.invoke(read_agent, name=agent_name)
+                    raise typer.Exit()
     pass
 
 @agent_app.command("send")
