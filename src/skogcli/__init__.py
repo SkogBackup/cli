@@ -21,6 +21,10 @@ app.add_typer(config_app, name="config")
 from .misc import misc_app
 app.add_typer(misc_app, name="misc")
 
+# Import and add the agent subcommand
+from .agent import agent_app
+app.add_typer(agent_app, name="agent")
+
 @app.command()
 def version():
     """Show the current version of SkogCLI."""
