@@ -587,7 +587,8 @@ def sync(
     result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
-        typer.echo("Synchronization completed successfully.")
+        # Output the actual return from the original command
+        typer.echo(result.stdout)
         return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
