@@ -74,13 +74,17 @@ def create_agent_script(agent_name: str, command: str) -> Path:
     scripts_dir = get_scripts_dir()
     script_path = scripts_dir / f"{agent_name}.sh"
     
-    # Create the script content
+    # Create the script content with $1 as the message parameter
+    # Replace {message} with $1 in the command
+    command_with_param = command.replace("{message}", "$1")
+    
     script_content = f"""#!/bin/bash
 # Agent script for {agent_name}
 # This file is managed by skogcli - manual changes may be overwritten
 
 # Execute the agent command
-{command}
+# $1 is the message parameter passed to the script
+{command_with_param}
 """
     
     # Write the script
@@ -140,7 +144,7 @@ def migrate_scripts():
         elif message_template:
             command = message_template.format(message="{message}")
         else:
-            command = f"echo \"Agent {agent_name} is responding to: {{message}}\""
+            command = f"echo \"Agent {agent_name} is responding to: $1\""
         
         # Create the script
         script_path = create_agent_script(agent_name, command)
@@ -267,29 +271,13 @@ def send(
     
     # Call the command with the provided message
     try:
-        # Read the script content
-        with open(args[0], 'r') as f:
-            script_content = f.read()
-        
-        # Replace {message} with the actual message in the script content
-        temp_script_path = Path(args[0]).with_suffix('.tmp.sh')
-        with open(temp_script_path, 'w') as f:
-            f.write(script_content.replace('{message}', message))
-        
-        # Make the temporary script executable
-        ensure_executable(str(temp_script_path))
-        
-        # Execute the temporary script
+        # Execute the script with the message as an argument
         result = subprocess.run(
-            [str(temp_script_path)],
+            [args[0], message],  # Pass message as an argument to the script
             capture_output=True,
             text=True,
             check=True
         )
-        
-        # Clean up the temporary script
-        temp_script_path.unlink(missing_ok=True)
-        
         response = result.stdout
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr
