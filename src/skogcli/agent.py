@@ -2,6 +2,8 @@
 
 import typer
 import json
+import os
+import stat
 from typing import Optional, List, Dict, Any
 from rich.console import Console
 from rich.markdown import Markdown
@@ -16,6 +18,34 @@ agent_app = typer.Typer(
 )
 
 console = Console()
+
+def ensure_executable(path: str) -> bool:
+    """
+    Ensure a file is executable by adding execute permissions if needed.
+    
+    Args:
+        path: Path to the file to check
+        
+    Returns:
+        bool: True if the file is now executable, False otherwise
+    """
+    try:
+        # Check if the file exists
+        if not os.path.isfile(path):
+            return False
+            
+        # Check if the file is already executable
+        if os.access(path, os.X_OK):
+            return True
+            
+        # Add execute permission
+        current_permissions = os.stat(path).st_mode
+        os.chmod(path, current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        
+        # Verify the change worked
+        return os.access(path, os.X_OK)
+    except Exception:
+        return False
 
 def get_agent_config_keys() -> List[str]:
     """Get a list of agent configuration keys for completion."""
@@ -154,6 +184,22 @@ def send(
         any(op in original_command for op in ['|', '>', '<', '&&', '||', ';', '$', "'"])):
         args = [original_command]  # Use as a single string for shell execution
     
+    # Special handling for binary files that might need execution permission
+    binary_path = None
+    if ".skogai/agents" in original_command and "/target/release/" in original_command:
+        # Extract the binary path
+        for part in original_command.split():
+            if ".skogai/agents" in part and "/target/release/" in part:
+                binary_path = part
+                break
+        
+        # Make sure we use shell=True for agent binaries
+        args = [original_command]
+        
+        # Try to ensure the binary is executable
+        if binary_path:
+            ensure_executable(binary_path)
+    
     # Call the command with the provided message
     try:
         # Execute the command as configured
@@ -177,9 +223,30 @@ def send(
             )
         response = result.stdout
     except subprocess.CalledProcessError as e:
-        response = f"[bold red]Error:[/] {e.stderr}"
+        error_msg = e.stderr
+        
+        # Check for specific binary execution errors
+        if "cannot execute binary file" in error_msg:
+            # Try to fix the issue by suggesting chmod +x
+            binary_path = None
+            for part in args:
+                if ".skogai/agents" in part and "/target/release/" in part:
+                    binary_path = part
+                    break
+            
+            if binary_path:
+                response = f"[bold red]Error:[/] Cannot execute binary file: {binary_path}\n\n"
+                response += "The binary file may not have execution permissions. Try running:\n"
+                response += f"chmod +x {binary_path}\n\n"
+                response += "Or update your agent configuration to use 'bash' or another interpreter."
+            else:
+                response = f"[bold red]Error:[/] {error_msg}"
+        else:
+            response = f"[bold red]Error:[/] {error_msg}"
     except FileNotFoundError:
         response = f"[bold red]Error:[/] Command not found: {args[0]}"
+    except Exception as e:
+        response = f"[bold red]Error:[/] {str(e)}"
     
     # Display the response
     if json_output:
