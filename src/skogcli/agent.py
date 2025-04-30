@@ -116,12 +116,19 @@ def send(
     # Get the message template from the agent configuration
     message_template = get_setting(f"agent.{agent_name}.message")
     
-    if message_template:
-        # Replace {message} with the actual message
-        response = message_template.format(message=message)
-    else:
-        # Simulate a response for now if no template is found
-        response = f"This is a simulated response from the {agent_name} agent using {model_to_use}.\n\nYou asked: {message}"
+    import subprocess
+    
+    # Call the goose run command with the provided message
+    try:
+        result = subprocess.run(
+            ["goose", "run", "--text", message],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        response = result.stdout
+    except subprocess.CalledProcessError as e:
+        response = f"[bold red]Error:[/] {e.stderr}"
     
     # Display the response
     if json_output:
