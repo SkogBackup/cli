@@ -1,4 +1,4 @@
-"""Miscellaneous commands for SkogCLI."""
+"""Script management commands for SkogCLI."""
 
 import os
 import sys
@@ -18,9 +18,9 @@ from .settings import get_setting, set_setting
 
 console = Console()
 
-# Create a Typer app for the misc commands
-misc_app = typer.Typer(
-    help="Miscellaneous utility commands",
+# Create a Typer app for the script commands
+script_app = typer.Typer(
+    help="Script management commands",
     no_args_is_help=True
 )
 
@@ -719,12 +719,12 @@ def is_executable(path: Path) -> bool:
     """Check if a file is executable."""
     return os.access(path, os.X_OK)
 
-@misc_app.callback()
-def misc_callback():
-    """Miscellaneous utility commands."""
+@script_app.callback()
+def script_callback():
+    """Script management commands."""
     pass
 
-@misc_app.command("list")
+@script_app.command("list")
 @with_explanation("List all available custom scripts.")
 def list_scripts(
     global_scripts: bool = typer.Option(True, "--global/--no-global", help="Include global scripts"),
@@ -789,7 +789,7 @@ def list_scripts(
             
             console.print(f"  [bold]{script.stem}[/] - {script_type} script ({location})")
 
-@misc_app.command("run")
+@script_app.command("run")
 @with_explanation("Run a custom script.")
 def run_script(
     name: str = typer.Argument(
@@ -856,7 +856,7 @@ def run_script(
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
-@misc_app.command("add")
+@script_app.command("add")
 @with_explanation("Add a new custom script.")
 def add_script(
     name: str = typer.Argument(..., help="Name for the new script"),
@@ -947,7 +947,7 @@ def add_script(
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
-@misc_app.command("edit")
+@script_app.command("edit")
 @with_explanation("Edit an existing custom script.")
 def edit_script(
     name: str = typer.Argument(
@@ -989,7 +989,7 @@ def edit_script(
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
 
-@misc_app.command("remove")
+@script_app.command("remove")
 @with_explanation("Remove a custom script.")
 def remove_script(
     name: str = typer.Argument(
@@ -1036,7 +1036,7 @@ def remove_script(
         console.print(f"[green]Removed {location} script:[/] {name}")
     except Exception as e:
         console.print(f"[bold red]Error:[/] {str(e)}")
-@misc_app.command("info")
+@script_app.command("info")
 @with_explanation("Show detailed information about a script.")
 def script_info(
     name: str = typer.Argument(
@@ -1082,7 +1082,7 @@ def script_info(
     else:
         console.print("\n[yellow]No metadata available for this script.[/]")
 
-@misc_app.command("code")
+@script_app.command("code")
 @with_explanation("View or update script code without using an editor.")
 def script_code(
     name: str = typer.Argument(
@@ -1180,7 +1180,7 @@ def script_code(
         except Exception as e:
             console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
 
-@misc_app.command("batch")
+@script_app.command("batch")
 @with_explanation("Process multiple scripts with a single command.")
 def batch_process(
     script_list: Path = typer.Argument(
@@ -1435,7 +1435,7 @@ def batch_process(
     
     console.print("\n[green]Batch processing complete.[/]")
 
-@misc_app.command("update-metadata")
+@script_app.command("update-metadata")
 @with_explanation("Update metadata for a script.")
 def update_metadata(
     name: str = typer.Argument(
@@ -1466,7 +1466,7 @@ def update_metadata(
     update_script_metadata(script_path, new_metadata)
     console.print(f"[green]Updated metadata for script:[/] {name}")
 
-@misc_app.command("templates")
+@script_app.command("templates")
 @with_explanation("List available script templates.")
 def list_templates():
     """List available script templates."""
@@ -1476,7 +1476,7 @@ def list_templates():
         available_types = ", ".join(template_data.keys())
         console.print(f"  [bold]{template_name}[/] (Types: {available_types})")
 
-@misc_app.command("export")
+@script_app.command("export")
 @with_explanation("Export a script to share with others.")
 def export_script(
     name: str = typer.Argument(
@@ -1525,7 +1525,7 @@ def export_script(
     
     console.print(f"[green]Exported script to:[/] {output_file}")
 
-@misc_app.command("transform")
+@script_app.command("transform")
 @with_explanation("Transform script content using regular expressions.")
 def transform_script(
     name: str = typer.Argument(
@@ -1613,7 +1613,7 @@ def transform_script(
     except Exception as e:
         console.print(f"[bold red]Error:[/] Failed to transform script: {str(e)}")
 
-@misc_app.command("search")
+@script_app.command("search")
 @with_explanation("Search for text in scripts.")
 def search_scripts(
     pattern: str = typer.Argument(..., help="Text or regular expression to search for"),
@@ -1723,7 +1723,7 @@ def search_scripts(
         if errors and not ignore_errors:
             console.print(f"[yellow]Note: {len(errors)} errors occurred during search. Use --ignore-errors to suppress these messages.[/]")
 
-@misc_app.command("generate")
+@script_app.command("generate")
 @with_explanation("Generate a script from a description using AI or templates.")
 def generate_script(
     name: str = typer.Argument(..., help="Name for the new script"),
@@ -1953,7 +1953,7 @@ Return ONLY the code with no additional text or explanations.
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
-@misc_app.command("import")
+@script_app.command("import")
 @with_explanation("Import a script from an export file.")
 def import_script(
     file: Path = typer.Argument(..., help="Path to the export file"),
@@ -2024,7 +2024,7 @@ def import_script(
     location = "global" if global_script else "user"
     console.print(f"[green]Imported {location} script:[/] {name}")
 
-@misc_app.command("copy")
+@script_app.command("copy")
 @with_explanation("Copy a script to create a new one.")
 def copy_script(
     source: str = typer.Argument(

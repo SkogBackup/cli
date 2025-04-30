@@ -17,9 +17,9 @@ app.add_typer(memory_app, name="memory")
 from .settings import config_app
 app.add_typer(config_app, name="config")
 
-# Import and add the misc subcommand
-from .misc import misc_app
-app.add_typer(misc_app, name="misc")
+# Import and add the script subcommand
+from .script import script_app
+app.add_typer(script_app, name="script")
 
 # Import and add the agent subcommand
 from .agent import agent_app
