@@ -113,13 +113,15 @@ def send(
     # Use provided system prompt or fall back to agent config or default
     system_to_use = system_prompt or agent_config.get("system_prompt") or get_setting("agent.default_system_prompt") or ""
     
-    # This is a placeholder for actual agent interaction
-    # In a real implementation, this would call an API or local model
-    console.print(f"[bold]Sending message to agent:[/] {agent_name}")
-    console.print(f"[bold]Using model:[/] {model_to_use}")
+    # Get the message template from the agent configuration
+    message_template = get_setting(f"agent.{agent_name}.message")
     
-    # Simulate a response for now
-    response = f"This is a simulated response from the {agent_name} agent using {model_to_use}.\n\nYou asked: {message}"
+    if message_template:
+        # Replace {message} with the actual message
+        response = message_template.format(message=message)
+    else:
+        # Simulate a response for now if no template is found
+        response = f"This is a simulated response from the {agent_name} agent using {model_to_use}.\n\nYou asked: {message}"
     
     # Display the response
     if json_output:
