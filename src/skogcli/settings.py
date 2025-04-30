@@ -452,7 +452,7 @@ def get(
         return
     
     # Output raw value for leaf nodes or when --raw flag is used
-    if raw or is_leaf_node:
+    if raw:
         print(value)
     elif isinstance(value, dict) or isinstance(value, list):
         json_str = json.dumps(value, indent=2)
