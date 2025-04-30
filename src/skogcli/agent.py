@@ -133,41 +133,19 @@ def send(
         command = message_template.format(message=message)
         args = split(command)
     else:
-        # Default to the original command if no template is found
-        args = ["goose", "run", "--text", message]
+        # Default to a simple echo command if no template is found
+        args = ["echo", f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set command_template \"your command {message}\" --agent {agent_name}'"]
     
     # Call the command with the provided message
     try:
-        # Check if the command exists and is executable
-        if args and args[0] == "goose":
-            # Try to use python -m goose instead of direct binary execution
-            python_args = ["python", "-m", "goose"] + args[1:]
-            try:
-                result = subprocess.run(
-                    python_args,
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-                response = result.stdout
-            except subprocess.CalledProcessError as e:
-                # Fall back to the original command if python module approach fails
-                result = subprocess.run(
-                    args,
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-                response = result.stdout
-        else:
-            # For non-goose commands, use the original approach
-            result = subprocess.run(
-                args,
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            response = result.stdout
+        # Execute the command as configured
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        response = result.stdout
     except subprocess.CalledProcessError as e:
         response = f"[bold red]Error:[/] {e.stderr}"
     except FileNotFoundError:
