@@ -242,29 +242,15 @@ def send(
     import subprocess
     from shlex import split
     
-    # Get the command template from the agent configuration
-    # Check all possible configuration keys for backward compatibility
-    command_template = get_setting(f"agent.{agent_name}.command_template")
-    message_template = get_setting(f"agent.{agent_name}.message_template")
-    message_setting = get_setting(f"agent.{agent_name}.message")
+    # Get the script path for the agent
+    scripts_dir = get_scripts_dir()
+    script_path = scripts_dir / f"{agent_name}.sh"
     
-    # Determine the command to run
-    if message_setting:
-        # This is the primary setting that should be used
-        command = message_setting.format(message=message)
-    elif command_template:
-        # Secondary option
-        command = command_template.format(message=message)
-    elif message_template:
-        # Legacy support
-        command = message_template.format(message=message)
-    else:
-        # Default to a simple echo command if no template is found
-        default_msg = f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set message \"your command {{message}}\" --agent {agent_name}'"
-        command = f"echo \"{default_msg}\""
-    
-    # Create or update the agent script
-    script_path = create_agent_script(agent_name, command)
+    # Check if the script exists
+    if not script_path.exists():
+        # Create a default script if it doesn't exist
+        default_cmd = f"echo \"Agent {agent_name} is responding to: {{message}}\""
+        script_path = create_agent_script(agent_name, default_cmd)
     
     # Prepare the command to run the script
     args = [str(script_path)]
