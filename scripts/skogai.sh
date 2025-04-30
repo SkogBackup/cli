@@ -4,4 +4,4 @@
 
 # Execute the agent command
 # $1 is the message parameter passed to the script
-echo "Agent skogai is responding to: $1"
+aichat --agent skogai -- "$1"
