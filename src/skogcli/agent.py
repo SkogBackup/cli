@@ -120,30 +120,38 @@ def send(
     from shlex import split
     
     # Get the command template from the agent configuration
+    # Check all possible configuration keys for backward compatibility
     command_template = get_setting(f"agent.{agent_name}.command_template")
     message_template = get_setting(f"agent.{agent_name}.message_template")
+    message_setting = get_setting(f"agent.{agent_name}.message")
     
-    if command_template:
-        # Replace {message} with the actual message
-        command = command_template.format(message=message)
-        # Keep the original command string and also split it for subprocess
+    # Use the first available template in order of preference
+    if message_setting:
+        # This is the primary setting that should be used
+        command = message_setting.format(message=message)
         args = split(command)
-        # Store the original command for shell execution if needed
+        original_command = command
+    elif command_template:
+        # Secondary option
+        command = command_template.format(message=message)
+        args = split(command)
         original_command = command
     elif message_template:
-        # Legacy support for message_template
+        # Legacy support
         command = message_template.format(message=message)
         args = split(command)
         original_command = command
     else:
         # Default to a simple echo command if no template is found
-        default_msg = f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set command_template \"your command {message}\" --agent {agent_name}'"
+        default_msg = f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set message \"your command {{message}}\" --agent {agent_name}'"
         args = ["echo", default_msg]
         original_command = f"echo \"{default_msg}\""
     
     # If the command starts with certain patterns that might need shell interpretation
     # or if it contains shell operators, use the original command with shell=True
-    if any(op in original_command for op in ['|', '>', '<', '&&', '||', ';', '$']):
+    if (original_command.startswith("bash ") or 
+        original_command.startswith("sh ") or
+        any(op in original_command for op in ['|', '>', '<', '&&', '||', ';', '$', "'"])):
         args = [original_command]  # Use as a single string for shell execution
     
     # Call the command with the provided message
