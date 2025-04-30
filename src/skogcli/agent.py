@@ -126,25 +126,47 @@ def send(
     if command_template:
         # Replace {message} with the actual message
         command = command_template.format(message=message)
-        # Split the command into a list of arguments
+        # Keep the original command string and also split it for subprocess
         args = split(command)
+        # Store the original command for shell execution if needed
+        original_command = command
     elif message_template:
         # Legacy support for message_template
         command = message_template.format(message=message)
         args = split(command)
+        original_command = command
     else:
         # Default to a simple echo command if no template is found
-        args = ["echo", f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set command_template \"your command {message}\" --agent {agent_name}'"]
+        default_msg = f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set command_template \"your command {message}\" --agent {agent_name}'"
+        args = ["echo", default_msg]
+        original_command = f"echo \"{default_msg}\""
+    
+    # If the command starts with certain patterns that might need shell interpretation
+    # or if it contains shell operators, use the original command with shell=True
+    if any(op in original_command for op in ['|', '>', '<', '&&', '||', ';', '$']):
+        args = [original_command]  # Use as a single string for shell execution
     
     # Call the command with the provided message
     try:
         # Execute the command as configured
-        result = subprocess.run(
-            args,
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        # Use shell=True for complex commands that might need shell interpretation
+        if len(args) == 1:
+            # If it's a single string, run it as a shell command
+            result = subprocess.run(
+                args[0],
+                shell=True,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+        else:
+            # Otherwise run it as a list of arguments
+            result = subprocess.run(
+                args,
+                capture_output=True,
+                text=True,
+                check=True
+            )
         response = result.stdout
     except subprocess.CalledProcessError as e:
         response = f"[bold red]Error:[/] {e.stderr}"
