@@ -3,4 +3,5 @@
 # This file is managed by skogcli - manual changes may be overwritten
 
 # Execute the agent command
-echo "Agent claude is responding to: {message}"
+# $1 is the message parameter passed to the script
+echo "Agent claude is responding to: $1"
