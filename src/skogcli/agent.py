@@ -267,13 +267,29 @@ def send(
     
     # Call the command with the provided message
     try:
-        # Execute the script
+        # Read the script content
+        with open(args[0], 'r') as f:
+            script_content = f.read()
+        
+        # Replace {message} with the actual message in the script content
+        temp_script_path = Path(args[0]).with_suffix('.tmp.sh')
+        with open(temp_script_path, 'w') as f:
+            f.write(script_content.replace('{message}', message))
+        
+        # Make the temporary script executable
+        ensure_executable(str(temp_script_path))
+        
+        # Execute the temporary script
         result = subprocess.run(
-            args,
+            [str(temp_script_path)],
             capture_output=True,
             text=True,
             check=True
         )
+        
+        # Clean up the temporary script
+        temp_script_path.unlink(missing_ok=True)
+        
         response = result.stdout
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr
