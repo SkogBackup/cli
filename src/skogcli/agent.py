@@ -117,11 +117,24 @@ def send(
     message_template = get_setting(f"agent.{agent_name}.message")
     
     import subprocess
+    from shlex import split
+    
+    # Get the message template from the agent configuration
+    message_template = get_setting(f"agent.{agent_name}.message")
+    
+    if message_template:
+        # Replace {message} with the actual message
+        message_template = message_template.format(message=message)
+        # Split the message template into a list of arguments
+        args = split(message_template)
+    else:
+        # Default to the original command if no template is found
+        args = ["goose", "run", "--text", message]
     
     # Call the goose run command with the provided message
     try:
         result = subprocess.run(
-            ["goose", "run", "--text", message],
+            args,
             capture_output=True,
             text=True,
             check=True
