@@ -4,6 +4,8 @@ import typer
 import json
 import os
 import stat
+import shutil
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 from rich.console import Console
 from rich.markdown import Markdown
@@ -18,6 +20,17 @@ agent_app = typer.Typer(
 )
 
 console = Console()
+
+def get_scripts_dir() -> Path:
+    """
+    Get the path to the scripts directory, creating it if it doesn't exist.
+    
+    Returns:
+        Path: Path to the scripts directory
+    """
+    scripts_dir = Path("./scripts")
+    scripts_dir.mkdir(exist_ok=True)
+    return scripts_dir
 
 def ensure_executable(path: str) -> bool:
     """
@@ -47,6 +60,38 @@ def ensure_executable(path: str) -> bool:
     except Exception:
         return False
 
+def create_agent_script(agent_name: str, command: str) -> Path:
+    """
+    Create or update a script for the specified agent.
+    
+    Args:
+        agent_name: Name of the agent
+        command: Command to run in the script
+        
+    Returns:
+        Path: Path to the created script
+    """
+    scripts_dir = get_scripts_dir()
+    script_path = scripts_dir / f"{agent_name}.sh"
+    
+    # Create the script content
+    script_content = f"""#!/bin/bash
+# Agent script for {agent_name}
+# This file is managed by skogcli - manual changes may be overwritten
+
+# Execute the agent command
+{command}
+"""
+    
+    # Write the script
+    with open(script_path, "w") as f:
+        f.write(script_content)
+    
+    # Make it executable
+    ensure_executable(str(script_path))
+    
+    return script_path
+
 def get_agent_config_keys() -> List[str]:
     """Get a list of agent configuration keys for completion."""
     all_keys = get_config_keys()
@@ -59,6 +104,50 @@ def get_agent_names() -> List[str]:
     if isinstance(agents, list):
         return agents
     return ["default", "assistant", "researcher", "coder"]
+
+@agent_app.command("migrate-scripts")
+@with_explanation("Migrate all agents to use script files.")
+def migrate_scripts():
+    """
+    Create script files for all existing agents.
+    
+    This command will create script files in the ./scripts directory for all
+    configured agents, based on their current command templates.
+    """
+    # Get all agents
+    agents = get_setting("agent.agents") or []
+    
+    if not agents:
+        console.print("[yellow]No agents configured.[/]")
+        return
+    
+    # Create scripts directory if it doesn't exist
+    scripts_dir = get_scripts_dir()
+    
+    # Migrate each agent
+    migrated = 0
+    for agent_name in agents:
+        # Get the command template
+        command_template = get_setting(f"agent.{agent_name}.command_template")
+        message_template = get_setting(f"agent.{agent_name}.message_template")
+        message_setting = get_setting(f"agent.{agent_name}.message")
+        
+        # Determine the command to use
+        if message_setting:
+            command = message_setting.format(message="{message}")
+        elif command_template:
+            command = command_template.format(message="{message}")
+        elif message_template:
+            command = message_template.format(message="{message}")
+        else:
+            command = f"echo \"Agent {agent_name} is responding to: {{message}}\""
+        
+        # Create the script
+        script_path = create_agent_script(agent_name, command)
+        console.print(f"Created script for agent '{agent_name}': {script_path}")
+        migrated += 1
+    
+    console.print(f"[green]Migration complete:[/] {migrated} agent scripts created in {scripts_dir}")
 
 @agent_app.callback()
 def agent_callback(ctx: typer.Context):
@@ -155,96 +244,42 @@ def send(
     message_template = get_setting(f"agent.{agent_name}.message_template")
     message_setting = get_setting(f"agent.{agent_name}.message")
     
-    # Use the first available template in order of preference
+    # Determine the command to run
     if message_setting:
         # This is the primary setting that should be used
         command = message_setting.format(message=message)
-        args = split(command)
-        original_command = command
     elif command_template:
         # Secondary option
         command = command_template.format(message=message)
-        args = split(command)
-        original_command = command
     elif message_template:
         # Legacy support
         command = message_template.format(message=message)
-        args = split(command)
-        original_command = command
     else:
         # Default to a simple echo command if no template is found
         default_msg = f"No command template configured for agent '{agent_name}'. Please set one using 'skogcli agent set message \"your command {{message}}\" --agent {agent_name}'"
-        args = ["echo", default_msg]
-        original_command = f"echo \"{default_msg}\""
+        command = f"echo \"{default_msg}\""
     
-    # If the command starts with certain patterns that might need shell interpretation
-    # or if it contains shell operators, use the original command with shell=True
-    if (original_command.startswith("bash ") or 
-        original_command.startswith("sh ") or
-        any(op in original_command for op in ['|', '>', '<', '&&', '||', ';', '$', "'"])):
-        args = [original_command]  # Use as a single string for shell execution
+    # Create or update the agent script
+    script_path = create_agent_script(agent_name, command)
     
-    # Special handling for binary files that might need execution permission
-    binary_path = None
-    if ".skogai/agents" in original_command and "/target/release/" in original_command:
-        # Extract the binary path
-        for part in original_command.split():
-            if ".skogai/agents" in part and "/target/release/" in part:
-                binary_path = part
-                break
-        
-        # Make sure we use shell=True for agent binaries
-        args = [original_command]
-        
-        # Try to ensure the binary is executable
-        if binary_path:
-            ensure_executable(binary_path)
+    # Prepare the command to run the script
+    args = [str(script_path)]
     
     # Call the command with the provided message
     try:
-        # Execute the command as configured
-        # Use shell=True for complex commands that might need shell interpretation
-        if len(args) == 1:
-            # If it's a single string, run it as a shell command
-            result = subprocess.run(
-                args[0],
-                shell=True,
-                capture_output=True,
-                text=True,
-                check=True
-            )
-        else:
-            # Otherwise run it as a list of arguments
-            result = subprocess.run(
-                args,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+        # Execute the script
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            check=True
+        )
         response = result.stdout
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr
-        
-        # Check for specific binary execution errors
-        if "cannot execute binary file" in error_msg:
-            # Try to fix the issue by suggesting chmod +x
-            binary_path = None
-            for part in args:
-                if ".skogai/agents" in part and "/target/release/" in part:
-                    binary_path = part
-                    break
-            
-            if binary_path:
-                response = f"[bold red]Error:[/] Cannot execute binary file: {binary_path}\n\n"
-                response += "The binary file may not have execution permissions. Try running:\n"
-                response += f"chmod +x {binary_path}\n\n"
-                response += "Or update your agent configuration to use 'bash' or another interpreter."
-            else:
-                response = f"[bold red]Error:[/] {error_msg}"
-        else:
-            response = f"[bold red]Error:[/] {error_msg}"
+        response = f"[bold red]Error:[/] {error_msg}"
     except FileNotFoundError:
-        response = f"[bold red]Error:[/] Command not found: {args[0]}"
+        response = f"[bold red]Error:[/] Script not found: {args[0]}"
     except Exception as e:
         response = f"[bold red]Error:[/] {str(e)}"
     
@@ -342,6 +377,14 @@ def create_agent(
         agent_config["description"] = description
     if command_template:
         agent_config["command_template"] = command_template
+        
+        # Create the agent script
+        command = command_template.format(message="{message}")
+        create_agent_script(name, command)
+    else:
+        # Create a default script
+        default_cmd = f"echo \"Agent {name} is responding to: {{message}}\""
+        create_agent_script(name, default_cmd)
     
     # Save agent configuration
     set_setting(f"agent.{name}", agent_config)
@@ -351,6 +394,7 @@ def create_agent(
     set_setting("agent.agents", agents)
     
     console.print(f"[green]Created agent:[/] {name}")
+    console.print(f"Script created at: ./scripts/{name}.sh")
 
 @agent_app.command("set")
 @with_explanation("Set a configuration value for an agent.")
@@ -586,6 +630,55 @@ def read_agent(
             border_style="blue"
         ))
 
+@agent_app.command("edit-script")
+@with_explanation("Edit the script for an agent.")
+def edit_agent_script(
+    name: str = typer.Argument(
+        ..., 
+        help="Name of the agent whose script to edit",
+        autocompletion=get_agent_names
+    ),
+):
+    """
+    Open the agent's script in your default editor.
+    
+    Examples:
+    
+    Edit an agent script:
+      skogcli agent edit-script researcher
+    """
+    script_path = get_scripts_dir() / f"{name}.sh"
+    
+    # Check if the script exists
+    if not script_path.exists():
+        # Get the command template
+        command_template = get_setting(f"agent.{name}.command_template")
+        message_template = get_setting(f"agent.{name}.message_template")
+        message_setting = get_setting(f"agent.{name}.message")
+        
+        # Determine the command to use
+        if message_setting:
+            command = message_setting.format(message="{message}")
+        elif command_template:
+            command = command_template.format(message="{message}")
+        elif message_template:
+            command = message_template.format(message="{message}")
+        else:
+            command = f"echo \"Agent {name} is responding to: {{message}}\""
+        
+        # Create the script
+        create_agent_script(name, command)
+        console.print(f"Created script: {script_path}")
+    
+    # Open the editor
+    import subprocess
+    editor = os.environ.get("EDITOR", "vim")
+    try:
+        subprocess.run([editor, script_path])
+        console.print(f"[green]Edited script:[/] {script_path}")
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] Failed to open editor: {str(e)}")
+
 @agent_app.command("delete")
 @with_explanation("Delete an agent.")
 def delete_agent(
@@ -631,5 +724,11 @@ def delete_agent(
     
     # Remove agent configuration
     set_setting(f"agent.{name}", None)
+    
+    # Remove agent script if it exists
+    script_path = get_scripts_dir() / f"{name}.sh"
+    if script_path.exists():
+        script_path.unlink()
+        console.print(f"Removed script: {script_path}")
     
     console.print(f"[green]Deleted agent:[/] {name}")
