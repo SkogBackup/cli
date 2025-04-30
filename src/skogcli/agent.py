@@ -119,29 +119,59 @@ def send(
     import subprocess
     from shlex import split
     
-    # Get the message template from the agent configuration
-    message_template = get_setting(f"agent.{agent_name}.message")
+    # Get the command template from the agent configuration
+    command_template = get_setting(f"agent.{agent_name}.command_template")
+    message_template = get_setting(f"agent.{agent_name}.message_template")
     
-    if message_template:
+    if command_template:
         # Replace {message} with the actual message
-        message_template = message_template.format(message=message)
-        # Split the message template into a list of arguments
-        args = split(message_template)
+        command = command_template.format(message=message)
+        # Split the command into a list of arguments
+        args = split(command)
+    elif message_template:
+        # Legacy support for message_template
+        command = message_template.format(message=message)
+        args = split(command)
     else:
         # Default to the original command if no template is found
         args = ["goose", "run", "--text", message]
     
-    # Call the goose run command with the provided message
+    # Call the command with the provided message
     try:
-        result = subprocess.run(
-            args,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        response = result.stdout
+        # Check if the command exists and is executable
+        if args and args[0] == "goose":
+            # Try to use python -m goose instead of direct binary execution
+            python_args = ["python", "-m", "goose"] + args[1:]
+            try:
+                result = subprocess.run(
+                    python_args,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                response = result.stdout
+            except subprocess.CalledProcessError as e:
+                # Fall back to the original command if python module approach fails
+                result = subprocess.run(
+                    args,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                response = result.stdout
+        else:
+            # For non-goose commands, use the original approach
+            result = subprocess.run(
+                args,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            response = result.stdout
     except subprocess.CalledProcessError as e:
         response = f"[bold red]Error:[/] {e.stderr}"
+    except FileNotFoundError:
+        response = f"[bold red]Error:[/] Command not found: {args[0]}"
     
     # Display the response
     if json_output:
@@ -199,6 +229,10 @@ def create_agent(
         None, "--description", "-d", 
         help="Description of this agent"
     ),
+    command_template: Optional[str] = typer.Option(
+        None, "--command", "-c",
+        help="Command template to use for this agent (e.g., 'python -m goose run --text {message}')"
+    ),
 ):
     """
     Create a new agent with the specified configuration.
@@ -231,6 +265,8 @@ def create_agent(
         agent_config["system_prompt"] = system_prompt
     if description:
         agent_config["description"] = description
+    if command_template:
+        agent_config["command_template"] = command_template
     
     # Save agent configuration
     set_setting(f"agent.{name}", agent_config)
