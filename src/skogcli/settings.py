@@ -434,7 +434,7 @@ def get(
         help="Configuration key (e.g., 'memory.page_size')",
         autocompletion=lambda: get_config_keys()
     ),
-    raw: bool = typer.Option(False, "--raw", "-r", help="Output raw value without formatting"),
+    raw: bool = typer.Option(True, "--raw", "-r", help="Output raw value without formatting"),
     json_format: bool = typer.Option(False, "--json", "-j", help="Output as formatted JSON")
 ):
     """Get the value of a specific configuration key."""
