@@ -55,7 +55,7 @@ console = Console()
 
 def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
     """Run skogai-memory with the given arguments."""
-    cmd = ["uvx", "skogai-memory"] + args
+    cmd = ["skogai-memory"] + args
     try:
         return subprocess.run(cmd, capture_output=True, text=True)
     except FileNotFoundError:
@@ -378,7 +378,11 @@ def search(
                 table.add_row(
                     item.get("type", ""),
                     item.get("title", ""),
-                    item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
+                    (
+                        item.get("created_at", "").split(".")[0]
+                        if item.get("created_at")
+                        else ""
+                    ),
                     item.get("file_path", ""),
                 )
 
@@ -389,8 +393,10 @@ def search(
             total_results = len(data.get("results", []))
             current_page = data.get("current_page", 1)
             page_size = data.get("page_size", 10)
-            total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
-            
+            total_pages = (
+                (total_results + page_size - 1) // page_size if total_results > 0 else 0
+            )
+
             console.print(f"\nTotal results: {total_results}")
             console.print(f"Page {current_page} of {total_pages}")
 
@@ -532,7 +538,11 @@ def list_notes(
                     table.add_row(
                         item.get("type", ""),
                         item.get("title", ""),
-                        item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
+                        (
+                            item.get("created_at", "").split(".")[0]
+                            if item.get("created_at")
+                            else ""
+                        ),
                         item.get("file_path", ""),
                     )
 
@@ -542,17 +552,21 @@ def list_notes(
                 # Show metadata - handle both formats
                 results = data.get("results", data.get("primary_results", []))
                 metadata = data.get("metadata", {})
-                
+
                 # Get total results either from metadata or by counting
                 total_results = metadata.get("total_results", len(results))
-                
+
                 # Get current page and page size
                 current_page = data.get("current_page", data.get("page", 1))
                 page_size = data.get("page_size", 10)
-                
+
                 # Calculate total pages
-                total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
-                
+                total_pages = (
+                    (total_results + page_size - 1) // page_size
+                    if total_results > 0
+                    else 0
+                )
+
                 console.print(f"\nTotal results: {total_results}")
                 console.print(f"Page {current_page} of {total_pages}")
 
@@ -619,10 +633,10 @@ def status(
     - Files that need to be synchronized
     """
     cmd = ["project", "info"]
-    
+
     if json_output:
         cmd.append("--json")
-        
+
     if project:
         cmd = ["--project", project] + cmd
 
@@ -636,42 +650,55 @@ def status(
             try:
                 # Try to parse the JSON output for better formatting
                 import json
+
                 data = json.loads(result.stdout)
-                
+
                 # Create a rich display
                 from rich.panel import Panel
-                
+
                 # Project info section
                 project_name = data.get("project_name", "default")
                 project_path = data.get("project_path", "")
-                
-                console.print(Panel(f"[bold cyan]Project:[/bold cyan] {project_name}\n"
-                                   f"[bold cyan]Path:[/bold cyan] {project_path}",
-                                   title="Project Information"))
-                
+
+                console.print(
+                    Panel(
+                        f"[bold cyan]Project:[/bold cyan] {project_name}\n"
+                        f"[bold cyan]Path:[/bold cyan] {project_path}",
+                        title="Project Information",
+                    )
+                )
+
                 # Stats section
                 stats = data.get("stats", {})
                 entities = stats.get("entities", 0)
                 notes = stats.get("notes", 0)
                 last_sync = stats.get("last_sync", "Never")
-                
-                console.print(Panel(f"[bold cyan]Entities:[/bold cyan] {entities}\n"
-                                   f"[bold cyan]Notes:[/bold cyan] {notes}\n"
-                                   f"[bold cyan]Last Sync:[/bold cyan] {last_sync}",
-                                   title="Statistics"))
-                
+
+                console.print(
+                    Panel(
+                        f"[bold cyan]Entities:[/bold cyan] {entities}\n"
+                        f"[bold cyan]Notes:[/bold cyan] {notes}\n"
+                        f"[bold cyan]Last Sync:[/bold cyan] {last_sync}",
+                        title="Statistics",
+                    )
+                )
+
                 # Sync status
                 sync_status = data.get("sync_status", {})
                 needs_sync = sync_status.get("needs_sync", False)
                 files_to_sync = sync_status.get("files_to_sync", [])
-                
+
                 if needs_sync:
-                    console.print("[bold yellow]Files needing synchronization:[/bold yellow]")
+                    console.print(
+                        "[bold yellow]Files needing synchronization:[/bold yellow]"
+                    )
                     for file in files_to_sync:
                         console.print(f"  • {file}")
                 else:
-                    console.print("[bold green]All files are synchronized.[/bold green]")
-                
+                    console.print(
+                        "[bold green]All files are synchronized.[/bold green]"
+                    )
+
             except (json.JSONDecodeError, KeyError):
                 # Fallback to raw output if JSON parsing fails
                 console.print(result.stdout)
@@ -781,7 +808,11 @@ def recent_activity(
                     table.add_row(
                         item.get("type", ""),
                         item.get("title", ""),
-                        item.get("created_at", "").split(".")[0] if item.get("created_at") else "",
+                        (
+                            item.get("created_at", "").split(".")[0]
+                            if item.get("created_at")
+                            else ""
+                        ),
                         item.get("file_path", ""),
                     )
 
@@ -791,17 +822,21 @@ def recent_activity(
                 # Show metadata - handle both formats
                 results = data.get("results", data.get("primary_results", []))
                 metadata = data.get("metadata", {})
-                
+
                 # Get total results either from metadata or by counting
                 total_results = metadata.get("total_results", len(results))
-                
+
                 # Get current page and page size
                 current_page = data.get("current_page", data.get("page", 1))
                 page_size = data.get("page_size", 10)
-                
+
                 # Calculate total pages
-                total_pages = (total_results + page_size - 1) // page_size if total_results > 0 else 0
-                
+                total_pages = (
+                    (total_results + page_size - 1) // page_size
+                    if total_results > 0
+                    else 0
+                )
+
                 console.print(f"\nTotal results: {total_results}")
                 console.print(f"Page {current_page} of {total_pages}")
 
