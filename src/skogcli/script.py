@@ -2030,6 +2030,99 @@ def import_script(
     location = "global" if global_script else "user"
     console.print(f"[green]Imported {location} script:[/] {name}")
 
+@script_app.command("add-file")
+@with_explanation("Add an existing script file to the scripts directory.")
+def add_file(
+    file: Path = typer.Argument(..., help="Path to the existing script file to add"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Name for the script (defaults to original filename)"),
+    global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing script"),
+    edit: bool = typer.Option(False, "--edit", "-e", help="Open the script in an editor after adding"),
+    editor: Optional[str] = typer.Option(None, "--editor", help="Specify which editor to use (defaults to $EDITOR)")
+):
+    """Add an existing script file to the scripts directory.
+    
+    This command copies a script file from anywhere on your filesystem into the SkogCLI
+    scripts directory, making it available as a SkogCLI script.
+    """
+    # Check if file exists
+    if not file.exists():
+        console.print(f"[bold red]Error:[/] File '{file}' not found.")
+        return
+    
+    if not file.is_file():
+        console.print(f"[bold red]Error:[/] '{file}' is not a file.")
+        return
+    
+    # Determine script name
+    script_name = name if name else file.stem
+    
+    # Determine the scripts directory
+    if global_script:
+        # Check if user has permission to write to global directory
+        global_dir = get_global_scripts_dir()
+        if not os.access(global_dir.parent, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to create global scripts.")
+            console.print("Try running with sudo or use --no-global for a user script.")
+            return
+        scripts_dir = global_dir
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        scripts_dir = get_user_scripts_dir()
+    
+    # Determine destination path (preserve original extension)
+    dest_path = scripts_dir / f"{script_name}{file.suffix}"
+    
+    # Check if destination already exists
+    if dest_path.exists() and not overwrite:
+        console.print(f"[bold red]Error:[/] Script '{script_name}' already exists.")
+        console.print("Use --overwrite to replace the existing script.")
+        return
+    
+    # Copy the file
+    try:
+        shutil.copy2(file, dest_path)
+        
+        # Make the script executable
+        dest_path.chmod(dest_path.stat().st_mode | 0o755)
+        
+        # Determine script type
+        script_type = "unknown"
+        if file.suffix == ".py":
+            script_type = "python"
+        elif file.suffix == ".sh":
+            script_type = "shell"
+        
+        # Create metadata
+        metadata = {
+            "description": f"Added from {file}",
+            "type": script_type,
+            "created": datetime.now().isoformat(),
+            "source_file": str(file),
+            "run_count": 0
+        }
+        update_script_metadata(dest_path, metadata)
+        
+        location = "global" if global_script else "user"
+        console.print(f"[green]Added {location} script:[/] {dest_path}")
+        
+        # Open in editor if requested
+        if edit:
+            # Get the editor from the environment or use the provided one
+            editor_cmd = editor or os.environ.get("EDITOR", "nano")
+            try:
+                exit_code = subprocess.call([editor_cmd, str(dest_path)])
+                if exit_code == 0:
+                    console.print("[green]Script edited successfully.[/]")
+                else:
+                    console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+            except FileNotFoundError:
+                console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] {str(e)}")
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] {str(e)}")
+
 @script_app.command("copy")
 @with_explanation("Copy a script to create a new one.")
 def copy_script(
