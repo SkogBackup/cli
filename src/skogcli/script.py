@@ -1477,18 +1477,21 @@ def list_templates():
         console.print(f"  [bold]{template_name}[/] (Types: {available_types})")
 
 @script_app.command("export")
-@with_explanation("Export a script to share with others.")
+@with_explanation("Export a script to a JSON file to share with others.")
 def export_script(
     name: str = typer.Argument(
         ..., 
         help="Name of the script to export",
         autocompletion=lambda: get_script_names()
     ),
-    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Output JSON file path"),
     include_metadata: bool = typer.Option(True, "--metadata/--no-metadata", help="Include metadata in export"),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
-    """Export a script to share with others."""
+    """Export a script to a JSON file that can be shared and imported by others.
+    
+    The export file contains the script's code, metadata, and other information.
+    """
     # Find the script
     script_path = find_script(name, global_script)
     
@@ -1956,11 +1959,14 @@ Return ONLY the code with no additional text or explanations.
 @script_app.command("import")
 @with_explanation("Import a script from an export file.")
 def import_script(
-    file: Path = typer.Argument(..., help="Path to the export file"),
+    file: Path = typer.Argument(..., help="Path to the JSON export file created by 'script export'"),
     global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
     overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing script")
 ):
-    """Import a script from an export file."""
+    """Import a script from a JSON export file created by the 'script export' command.
+    
+    The export file contains the script's code, metadata, and other information.
+    """
     # Check if file exists
     if not file.exists():
         console.print(f"[bold red]Error:[/] Export file '{file}' not found.")
