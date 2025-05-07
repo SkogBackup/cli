@@ -856,9 +856,9 @@ def run_script(
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
-@script_app.command("add")
-@with_explanation("Add a new custom script.")
-def add_script(
+@script_app.command("create")
+@with_explanation("Create a new custom script.")
+def create_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     type: str = typer.Option(
         "python", 
@@ -877,7 +877,7 @@ def add_script(
     edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation"),
     editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)")
 ):
-    """Add a new custom script."""
+    """Create a new custom script."""
     # Determine the scripts directory
     if global_script:
         # Check if user has permission to write to global directory
@@ -2030,9 +2030,9 @@ def import_script(
     location = "global" if global_script else "user"
     console.print(f"[green]Imported {location} script:[/] {name}")
 
-@script_app.command("add-file")
-@with_explanation("Add an existing script file to the scripts directory.")
-def add_file(
+@script_app.command("import-file")
+@with_explanation("Import an existing script file into the scripts directory.")
+def import_file(
     file: Path = typer.Argument(..., help="Path to the existing script file to add"),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Name for the script (defaults to original filename)"),
     global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
@@ -2040,7 +2040,7 @@ def add_file(
     edit: bool = typer.Option(False, "--edit", "-e", help="Open the script in an editor after adding"),
     editor: Optional[str] = typer.Option(None, "--editor", help="Specify which editor to use (defaults to $EDITOR)")
 ):
-    """Add an existing script file to the scripts directory.
+    """Import an existing script file into the scripts directory.
     
     This command copies a script file from anywhere on your filesystem into the SkogCLI
     scripts directory, making it available as a SkogCLI script.
