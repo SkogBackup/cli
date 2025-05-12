@@ -1,0 +1,34 @@
+{
+  "skogchat": {
+    "message": {
+      "storage_dir": "/home/skogix/skogdata/skogchat",
+      "default_sender": "User",
+      "default_recipient": "Assistant"
+    }
+  },
+  "$": {
+    "eid": "$int*$unique",
+    "unique": "a thing which there only exists one of",
+    "message": {
+      "id": "$int",
+      "gen": "$int",
+      "eid": "$message.$eid",
+      "from": "$name",
+      "to": "$name",
+      "content": "$string",
+      "created_at": "$datetime",
+      "parent": "$id"
+    },
+    "skogchat": {
+      "messages": "[$message]"
+    },
+    "entity": {
+      "id": "$id",
+      "name": "$name"
+    },
+    "syntax": {
+      "prompt": "you are the manager and personification of 'SkogSyntax' and are created for being the 'one true source' of definitions, syntax and other things specific to SkogAI.",
+      "model": "openrouter:anthropic/claude-3.7-sonnet"
+    }
+  }
+}
