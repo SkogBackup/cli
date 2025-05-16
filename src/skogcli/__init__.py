@@ -1,80 +1,24 @@
+from typer import Typer
+from .memory import memory_app
+from .settings import config_app
+from .script import script_app
+from .agent import agent_app
+
 """SkogCLI - A demonstration Typer-based CLI tool for the SkogAI project."""
 
-import os
-import subprocess
-import typer
-from typing import Optional, List, Callable, Iterable
-from pathlib import Path
 
 # Create the main Typer app
-app = typer.Typer(no_args_is_help=True)
-
-# Import and add the memory subcommand
-from .memory import memory_app
+app = Typer(no_args_is_help=True, name="SkogCLI")
 app.add_typer(memory_app, name="memory")
-
-# Import and add the config subcommand
-from .settings import config_app
 app.add_typer(config_app, name="config")
-
-# Import and add the script subcommand
-from .script import script_app
 app.add_typer(script_app, name="script")
-
-# Import and add the agent subcommand
-from .agent import agent_app
 app.add_typer(agent_app, name="agent")
 
 
-# Add a callback to handle explanation display
-def show_explanation_callback(ctx: typer.Context):
-    """Show explanation for commands if available and no args provided."""
-    if ctx.invoked_subcommand is None and hasattr(ctx.command, "callback"):
-        callback = ctx.command.callback
-        if hasattr(callback, "_explanation") and len(ctx.args) == 0 and len(ctx.params) == 1:
-            typer.echo(callback._explanation)
-            typer.echo("\nCommand help:")
-            ctx.invoke(ctx.command.get_help)
-            raise typer.Exit()
-
-@app.callback(invoke_without_command=True)
-def app_callback(ctx: typer.Context):
-    """Main app callback to handle explanation display."""
-    # Handle agent.name format at the top level
-    if ctx.invoked_subcommand is None:
-        # Get all command line arguments
-        import sys
-        args = sys.argv[1:]
-        
-        if args and "." in args[0] and args[0].split(".", 1)[0] == "agent":
-            # This is an agent command in the format agent.name
-            agent_name = args[0].split(".", 1)[1]
-            
-            # Import agent commands
-            from .agent import send, read_agent
-            
-            try:
-                if len(args) > 2 and args[1] == "send":
-                    # Call the agent send command with the message
-                    ctx.invoke(send, message=args[2], agent_name=agent_name)
-                    return
-                elif len(args) > 1 and args[1] == "read":
-                    # Call the agent read command
-                    ctx.invoke(read_agent, name=agent_name)
-                    return
-                else:
-                    # Default to read if no command is specified
-                    ctx.invoke(read_agent, name=agent_name)
-                    return
-            except Exception as e:
-                typer.echo(f"Error executing agent command: {e}")
-                raise typer.Exit(1)
-    
-    show_explanation_callback(ctx)
-
 def main():
-    """Entry point for the CLI application."""
     app()
+    """Entry point for the CLI application."""
 
-if __name__ == "__main__":
+
+if __name__ == "__init__":
     main()

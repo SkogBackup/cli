@@ -1,9 +1,8 @@
 import typer
 import subprocess
-from typing import Optional, List, Callable, Iterable
+from typing import Optional, List
 from rich.console import Console
 from rich.markdown import Markdown
-from .decorators import with_explanation
 from .settings import get_setting
 
 memory_app = typer.Typer(
@@ -65,14 +64,17 @@ def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
         raise typer.Exit(code=1)
 
 
-@memory_app.callback()
+@memory_app.callback(invoke_without_command=True)
 def memory_callback():
     """Knowledge management powered by skogai-memory."""
     pass
 
 
-@memory_app.command("create")
-@with_explanation("Create or update a note in your knowledge base.")
+@memory_app.command(
+    name="create",
+    no_args_is_help=True,
+    help="Create or update a note in your knowledge base.",
+)
 def create(
     title: str = typer.Argument(..., help="Title of the note"),
     folder: str = typer.Argument(
@@ -129,8 +131,11 @@ def create(
         raise typer.Exit(code=1)
 
 
-@memory_app.command("write")
-@with_explanation("Create or update a note in your knowledge base (alias for create).")
+@memory_app.command(
+    name="write",
+    no_args_is_help=True,
+    help="Create or update a note in your knowledge base.",
+)
 def write(
     title: str = typer.Argument(..., help="Title of the note"),
     folder: str = typer.Argument(
@@ -216,8 +221,9 @@ def get_note_identifiers() -> List[str]:
     return ["latest", "recent", "last-meeting", "project-ideas", "todo"]
 
 
-@memory_app.command("read")
-@with_explanation("Read a note from your knowledge base.")
+@memory_app.command(
+    name="read", no_args_is_help=True, help="Read a note from your knowledge base."
+)
 def read(
     identifier: str = typer.Argument(
         ..., help="Note identifier", autocompletion=get_note_identifiers
