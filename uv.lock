@@ -230,7 +230,8 @@ source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "pytest" },
-    { name = "tiktoken" },
+    { name = "requests" },
+    { name = "rich" },
     { name = "typer" },
 ]
 
@@ -272,9 +273,6 @@ version = "0.15.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "rich" },
-    { name = "shellingham" },
-    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/98/1a/5f36851f439884bcfe8539f6a20ff7516e7b60f319bbaf69a90dc35cc2eb/typer-0.15.3.tar.gz", hash = "sha256:818873625d0569653438316567861899f7e9972f2e6e0c16dab608345ced713c", size = 101641, upload-time = "2025-04-28T21:40:59.204Z" }
 wheels = [
