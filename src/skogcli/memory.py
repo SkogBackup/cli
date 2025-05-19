@@ -789,8 +789,9 @@ def list_notes(
                 console.print(table)
 
                 # Show metadata
-                total_results = len(data.get("results", []))
-                current_page = data.get("current_page", 1)
+                results = data.get("primary_results", []) or data.get("results", [])
+                total_results = len(results)
+                current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
                 total_pages = (
                     (total_results + page_size - 1) // page_size
