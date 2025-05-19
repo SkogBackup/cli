@@ -938,6 +938,7 @@ def status(
         show_default=True,
     ),
 ):
+    import json  # Import json here to ensure it's available
     """
     Show project information and sync status.
 
@@ -964,8 +965,8 @@ def status(
     elif output_format == "yaml":
         cmd.append("--yaml")
 
-    if show_all and not project:
-        cmd.append("--all")
+    # Note: --all is not supported by the underlying command
+    # We'll handle multiple projects differently if needed
 
     if project:
         cmd = ["--project", project] + cmd
@@ -977,7 +978,19 @@ def status(
             # Only return status code
             status_code = 0  # Default success
             try:
-                data = json.loads(result.stdout)
+                # Force JSON output for check mode
+                if output_format != "json":
+                    # Re-run with JSON output for reliable parsing
+                    json_cmd = cmd.copy()
+                    if "--json" not in json_cmd:
+                        json_cmd.append("--json")
+                    json_result = run_skogai_memory(json_cmd)
+                    if json_result.returncode != 0:
+                        return 2  # Error
+                    data = json.loads(json_result.stdout)
+                else:
+                    data = json.loads(result.stdout)
+                
                 # Check for warning conditions
                 if data.get("sync_status", {}).get("needs_sync", False):
                     status_code = 1  # Warning
