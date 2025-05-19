@@ -1,7 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List
 
 import typer
 from rich.console import Console
@@ -301,8 +301,6 @@ def get_note_identifiers() -> List[str]:
             ]  # Increased limit for better UX
         )
         if result.returncode == 0:
-            import json
-
             notes_data = json.loads(result.stdout)
             identifiers = []
             for note in notes_data.get("notes", []):
@@ -416,8 +414,6 @@ def read(
         else:
             try:
                 # Try to parse the JSON output for better formatting
-                import json
-
                 data = json.loads(result.stdout)
 
                 # Extract the content if available
@@ -577,8 +573,6 @@ def search(
         else:
             try:
                 # Try to parse the JSON output for better formatting
-                import json
-
                 data = json.loads(result.stdout)
 
                 # Create a table for the results
@@ -632,7 +626,6 @@ def search(
 
 @memory_app.command(
     name="list",
-    no_args_is_help=True,
     help="List recent activity across your knowledge base.",
     short_help="List recent notes and activity",
 )
@@ -711,13 +704,6 @@ def list_notes(
         help="Output format (table, json, csv, markdown)",
         show_default=True,
     ),
-    all: bool = typer.Option(
-        False,
-        "--all",
-        "-a",
-        help="Show all items (ignores pagination)",
-        show_default=True,
-    ),
 ):
     """
     List recent activity across your knowledge base.
@@ -759,6 +745,7 @@ def list_notes(
     if project:
         cmd = ["--project", project] + cmd
 
+    typer.echo(cmd)
     result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
@@ -771,8 +758,6 @@ def list_notes(
         else:
             try:
                 # Try to parse the JSON output for better formatting
-                import json
-
                 data = json.loads(result.stdout)
 
                 # Create a table for the results
@@ -826,7 +811,7 @@ def list_notes(
 
 @memory_app.command(
     name="sync",
-    no_args_is_help=True,
+    # no_args_is_help=True,
     help="Synchronize your knowledge files with the database.",
     short_help="Sync notes with the database",
 )
@@ -938,7 +923,6 @@ def status(
         show_default=True,
     ),
 ):
-    import json  # Import json here to ensure it's available
     """
     Show project information and sync status.
 
@@ -970,29 +954,31 @@ def status(
         # First get a list of all projects
         projects_cmd = ["tool", "list-projects", "--format", "json"]
         projects_result = run_skogai_memory(projects_cmd)
-        
+
         if projects_result.returncode == 0:
             try:
                 projects_data = json.loads(projects_result.stdout)
                 project_list = [p["name"] for p in projects_data.get("projects", [])]
-                
+
                 # If we have multiple projects, show status for each
                 if len(project_list) > 1:
                     console.print("[bold]Status for all projects:[/bold]\n")
-                    
+
                     for idx, proj in enumerate(project_list):
                         # Run the command for each project
                         proj_cmd = cmd.copy()
                         proj_cmd = ["--project", proj] + proj_cmd
                         proj_result = run_skogai_memory(proj_cmd)
-                        
+
                         if proj_result.returncode == 0:
                             if idx > 0:
                                 console.print("\n" + "-" * 50 + "\n")
                             typer.echo(proj_result.stdout)
                         else:
-                            console.print(f"[red]Error getting status for project {proj}[/red]")
-                    
+                            console.print(
+                                f"[red]Error getting status for project {proj}[/red]"
+                            )
+
                     return 0
             except (json.JSONDecodeError, KeyError):
                 # Fall back to single project if parsing fails
@@ -1020,7 +1006,7 @@ def status(
                     data = json.loads(json_result.stdout)
                 else:
                     data = json.loads(result.stdout)
-                
+
                 # Check for warning conditions
                 if data.get("sync_status", {}).get("needs_sync", False):
                     status_code = 1  # Warning
@@ -1029,21 +1015,18 @@ def status(
                     status_code = 2  # Error
             except (json.JSONDecodeError, KeyError):
                 status_code = 2  # Error parsing JSON
-            
+
             return status_code
-            
+
         if output_format in ["json", "yaml"]:
             # Just print the raw output
             typer.echo(result.stdout)
         else:
             try:
                 # Try to parse the JSON output for better formatting
-                import json
-
                 data = json.loads(result.stdout)
 
                 # Create a rich display
-                from rich.panel import Panel
 
                 # Project info section
                 project_name = data.get("project_name", "default")
@@ -1063,10 +1046,12 @@ def status(
                 notes = stats.get("entity_types", {}).get("note", 0)
                 observations = stats.get("total_observations", 0)
                 relations = stats.get("total_relations", 0)
-                
+
                 # Get last sync time from system info if available
                 system_info = data.get("system", {})
-                last_sync = system_info.get("watch_status", {}).get("last_scan", "Never")
+                last_sync = system_info.get("watch_status", {}).get(
+                    "last_scan", "Never"
+                )
 
                 console.print(
                     Panel(
@@ -1081,10 +1066,9 @@ def status(
 
                 # Sync status - check watch status from system info
                 watch_status = data.get("system", {}).get("watch_status", {})
-                is_running = watch_status.get("running", False)
                 needs_sync = False
                 files_to_sync = []
-                
+
                 # Check if there are recent events that need syncing
                 recent_events = watch_status.get("recent_events", [])
                 if recent_events:
@@ -1203,5 +1187,4 @@ def recent_activity(
         max_related=max_related,
         project=project,
         output_format=output_format,
-        all=show_all,
     )
