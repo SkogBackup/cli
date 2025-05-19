@@ -603,8 +603,8 @@ def search(
                 console.print(table)
 
                 # Show metadata
-                total_results = len(data.get("results", []))
-                current_page = data.get("current_page", 1)
+                total_results = len(results)
+                current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
                 total_pages = (
                     (total_results + page_size - 1) // page_size
@@ -745,7 +745,6 @@ def list_notes(
     if project:
         cmd = ["--project", project] + cmd
 
-    typer.echo(cmd)
     result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
@@ -772,7 +771,8 @@ def list_notes(
                 table.add_column("Path", style="blue")
 
                 # Add rows
-                for item in data.get("results", []):
+                results = data.get("primary_results", []) or data.get("results", [])
+                for item in results:
                     table.add_row(
                         item.get("type", ""),
                         item.get("title", ""),
