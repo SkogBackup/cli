@@ -965,8 +965,38 @@ def status(
     elif output_format == "yaml":
         cmd.append("--yaml")
 
-    # Note: --all is not supported by the underlying command
-    # We'll handle multiple projects differently if needed
+    # Handle show_all parameter by listing all projects if requested
+    if show_all and not project:
+        # First get a list of all projects
+        projects_cmd = ["tool", "list-projects", "--format", "json"]
+        projects_result = run_skogai_memory(projects_cmd)
+        
+        if projects_result.returncode == 0:
+            try:
+                projects_data = json.loads(projects_result.stdout)
+                project_list = [p["name"] for p in projects_data.get("projects", [])]
+                
+                # If we have multiple projects, show status for each
+                if len(project_list) > 1:
+                    console.print("[bold]Status for all projects:[/bold]\n")
+                    
+                    for idx, proj in enumerate(project_list):
+                        # Run the command for each project
+                        proj_cmd = cmd.copy()
+                        proj_cmd = ["--project", proj] + proj_cmd
+                        proj_result = run_skogai_memory(proj_cmd)
+                        
+                        if proj_result.returncode == 0:
+                            if idx > 0:
+                                console.print("\n" + "-" * 50 + "\n")
+                            typer.echo(proj_result.stdout)
+                        else:
+                            console.print(f"[red]Error getting status for project {proj}[/red]")
+                    
+                    return 0
+            except (json.JSONDecodeError, KeyError):
+                # Fall back to single project if parsing fails
+                pass
 
     if project:
         cmd = ["--project", project] + cmd
