@@ -964,12 +964,31 @@ def status(
     elif output_format == "yaml":
         cmd.append("--yaml")
 
+    if show_all and not project:
+        cmd.append("--all")
+
     if project:
         cmd = ["--project", project] + cmd
 
     result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
+        if check:
+            # Only return status code
+            status_code = 0  # Default success
+            try:
+                data = json.loads(result.stdout)
+                # Check for warning conditions
+                if data.get("sync_status", {}).get("needs_sync", False):
+                    status_code = 1  # Warning
+                # Check for error conditions (could add more checks here)
+                if "error" in data:
+                    status_code = 2  # Error
+            except (json.JSONDecodeError, KeyError):
+                status_code = 2  # Error parsing JSON
+            
+            return status_code
+            
         if output_format in ["json", "yaml"]:
             # Just print the raw output
             typer.echo(result.stdout)
@@ -996,24 +1015,38 @@ def status(
                 )
 
                 # Stats section
-                stats = data.get("stats", {})
-                entities = stats.get("entities", 0)
-                notes = stats.get("notes", 0)
-                last_sync = stats.get("last_sync", "Never")
+                stats = data.get("statistics", {}) or data.get("stats", {})
+                entities = stats.get("total_entities", 0)
+                notes = stats.get("entity_types", {}).get("note", 0)
+                observations = stats.get("total_observations", 0)
+                relations = stats.get("total_relations", 0)
+                
+                # Get last sync time from system info if available
+                system_info = data.get("system", {})
+                last_sync = system_info.get("watch_status", {}).get("last_scan", "Never")
 
                 console.print(
                     Panel(
                         f"[bold cyan]Entities:[/bold cyan] {entities}\n"
                         f"[bold cyan]Notes:[/bold cyan] {notes}\n"
+                        f"[bold cyan]Observations:[/bold cyan] {observations}\n"
+                        f"[bold cyan]Relations:[/bold cyan] {relations}\n"
                         f"[bold cyan]Last Sync:[/bold cyan] {last_sync}",
                         title="Statistics",
                     )
                 )
 
-                # Sync status
-                sync_status = data.get("sync_status", {})
-                needs_sync = sync_status.get("needs_sync", False)
-                files_to_sync = sync_status.get("files_to_sync", [])
+                # Sync status - check watch status from system info
+                watch_status = data.get("system", {}).get("watch_status", {})
+                is_running = watch_status.get("running", False)
+                needs_sync = False
+                files_to_sync = []
+                
+                # Check if there are recent events that need syncing
+                recent_events = watch_status.get("recent_events", [])
+                if recent_events:
+                    needs_sync = True
+                    files_to_sync = [event.get("path", "") for event in recent_events]
 
                 if needs_sync:
                     console.print(
