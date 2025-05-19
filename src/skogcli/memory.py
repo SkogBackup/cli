@@ -603,6 +603,7 @@ def search(
                 console.print(table)
 
                 # Show metadata
+                results = data.get("results", [])
                 total_results = len(results)
                 current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
