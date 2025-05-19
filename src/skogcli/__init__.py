@@ -25,12 +25,22 @@ def callback(
     """SkogCLI - Command line interface for SkogAI."""
     if helpall:
         import subprocess
+        import sys
         
-        # Generate the documentation and pipe it directly to stdout
-        subprocess.run(
-            ["typer", "skogcli", "utils", "docs", "--name", "SkogCLI"],
-            check=True
-        )
+        # If a command is specified, show help for that command group
+        if ctx.invoked_subcommand:
+            # Generate the documentation for the specific command
+            subprocess.run(
+                ["typer", f"skogcli.{ctx.invoked_subcommand}", "utils", "docs", 
+                 "--name", f"SkogCLI {ctx.invoked_subcommand}"],
+                check=True
+            )
+        else:
+            # Generate the documentation for all commands
+            subprocess.run(
+                ["typer", "skogcli", "utils", "docs", "--name", "SkogCLI"],
+                check=True
+            )
         
         raise Exit()
 
