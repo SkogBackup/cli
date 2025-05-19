@@ -959,8 +959,10 @@ def status(
     """
     cmd = ["project", "info"]
 
-    if json_output:
+    if output_format == "json":
         cmd.append("--json")
+    elif output_format == "yaml":
+        cmd.append("--yaml")
 
     if project:
         cmd = ["--project", project] + cmd
@@ -968,8 +970,8 @@ def status(
     result = run_skogai_memory(cmd)
 
     if result.returncode == 0:
-        if json_output:
-            # Just print the raw JSON
+        if output_format in ["json", "yaml"]:
+            # Just print the raw output
             typer.echo(result.stdout)
         else:
             try:
