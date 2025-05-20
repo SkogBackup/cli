@@ -889,7 +889,6 @@ def sync(
 
 @memory_app.command(
     name="status",
-    no_args_is_help=True,
     help="Show project information and sync status.",
     short_help="Show project status and statistics",
 )
