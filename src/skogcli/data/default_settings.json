@@ -20,6 +20,17 @@
     "*": "$*$=$",
     "id": "$int*$unique",
     "unique": "a thing which there only exists one of",
+    "name": {
+      "1": "$unique.$string",
+      "2": "$string@$unique",
+      "3": "$string{@->}$unique"
+    },
+    "skogparse": {
+      "action": "$@",
+      "type": "$type",
+      "value": "$value",
+      "eid": "$eid"
+    },
     "message": {
       "eid": "$eid",
       "from": "$name",
