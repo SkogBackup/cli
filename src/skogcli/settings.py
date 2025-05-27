@@ -113,7 +113,10 @@ def load_settings() -> Dict[str, Any]:
     if not config_file.exists():
         # Create default config
         settings = load_default_settings()
-        settings["_meta"]["last_updated"] = time.time()
+        settings["settings"]["meta"] = {
+            "last_updated": time.time(),
+            "version": CONFIG_VERSION
+        }
         save_settings(settings)
         return settings
 
@@ -217,10 +220,13 @@ def save_settings(settings: Dict[str, Any]) -> bool:
     config_file = get_config_file()
 
     # Update metadata
-    if "_meta" not in settings:
-        settings["_meta"] = {"version": CONFIG_VERSION}
+    if "settings" not in settings:
+        settings["settings"] = {}
+    
+    if "meta" not in settings["settings"]:
+        settings["settings"]["meta"] = {"version": CONFIG_VERSION}
 
-    settings["_meta"]["last_updated"] = time.time()
+    settings["settings"]["meta"]["last_updated"] = time.time()
 
     # Create a backup before saving
     create_backup(config_file)
@@ -330,7 +336,11 @@ def reset_settings() -> bool:
 
     # Reset to defaults
     settings = load_default_settings()
-    settings["_meta"]["last_updated"] = time.time()
+    if "settings" not in settings:
+        settings["settings"] = {}
+    if "meta" not in settings["settings"]:
+        settings["settings"]["meta"] = {}
+    settings["settings"]["meta"]["last_updated"] = time.time()
     return save_settings(settings)
 
 
@@ -1078,7 +1088,11 @@ def factory_reset(
 
     # Reset to factory defaults
     settings = DEFAULT_SETTINGS.copy()
-    settings["_meta"]["last_updated"] = time.time()
+    if "settings" not in settings:
+        settings["settings"] = {}
+    if "meta" not in settings["settings"]:
+        settings["settings"]["meta"] = {}
+    settings["settings"]["meta"]["last_updated"] = time.time()
 
     if save_settings(settings):
         console.print("[green]Configuration reset to factory defaults.[/]")
