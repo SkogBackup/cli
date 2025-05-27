@@ -85,11 +85,11 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
         }
 
         # Add new sections that didn't exist in older versions
-        if "chat" not in settings:
+        if "module" not in settings["settings"]:
             # Import default settings from the module
             from .default_settings import DEFAULT_SETTINGS
 
-            settings["settings"]["chat"] = DEFAULT_SETTINGS["chat"].copy()
+            settings["settings"]["module"] = DEFAULT_SETTINGS["settings"]["module"].copy()
 
         if "credentials" not in settings:
             settings["credentials"] = {}
@@ -345,24 +345,31 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     """
     settings = load_settings()
 
-    # Ensure chat section exists
-    if "chat" not in settings:
+    # Ensure module section exists
+    if "settings" not in settings:
+        settings["settings"] = {}
+    
+    if "module" not in settings["settings"]:
         # Import default settings from the module
         from .default_settings import DEFAULT_SETTINGS
 
-        settings["chat"] = DEFAULT_SETTINGS["chat"].copy()
+        settings["settings"]["module"] = DEFAULT_SETTINGS["settings"]["module"].copy()
+    
+    # Ensure history section exists
+    if "history" not in settings["settings"]["module"]:
+        settings["settings"]["module"]["history"] = []
 
     # Add timestamp if not present
     if "timestamp" not in item:
         item["timestamp"] = time.time()
 
     # Add to history
-    settings["chat"]["history"].append(item)
+    settings["settings"]["module"]["history"].append(item)
 
     # Trim history if it exceeds the maximum
-    max_items = settings["chat"].get("max_history_items", 100)
-    if len(settings["chat"]["history"]) > max_items:
-        settings["chat"]["history"] = settings["chat"]["history"][-max_items:]
+    max_items = settings["settings"]["module"].get("max_history_items", 100)
+    if len(settings["settings"]["module"]["history"]) > max_items:
+        settings["settings"]["module"]["history"] = settings["settings"]["module"]["history"][-max_items:]
 
     return save_settings(settings)
 
@@ -378,10 +385,12 @@ def get_chat_history(limit: Optional[int] = None) -> List[Dict[str, Any]]:
     """
     settings = load_settings()
 
-    if "chat" not in settings or "history" not in settings["chat"]:
+    if ("settings" not in settings or 
+        "module" not in settings["settings"] or 
+        "history" not in settings["settings"]["module"]):
         return []
 
-    history = settings["chat"]["history"]
+    history = settings["settings"]["module"]["history"]
 
     # Sort by timestamp (newest first)
     history.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
@@ -400,12 +409,12 @@ def clear_chat_history() -> bool:
     """
     settings = load_settings()
 
-    if "chat" in settings:
+    if "settings" in settings and "module" in settings["settings"]:
         # Create a backup before clearing
         create_backup(get_config_file())
 
         # Clear history
-        settings["chat"]["history"] = []
+        settings["settings"]["module"]["history"] = []
         return save_settings(settings)
 
     return True
