@@ -97,6 +97,19 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
 
         if "credentials" not in settings:
             settings["credentials"] = {}
+    
+    # Migrate chat history from old location to new location if needed
+    if "chat" in settings and "history" in settings["chat"]:
+        # Ensure module section exists
+        if "module" not in settings["settings"]:
+            settings["settings"]["module"] = {}
+        
+        # Ensure history section exists in module
+        if "history" not in settings["settings"]["module"]:
+            settings["settings"]["module"]["history"] = []
+            
+        # Copy history from old location to new location
+        settings["settings"]["module"]["history"] = settings["chat"]["history"]
 
     # Handle future migrations based on version numbers
     version = settings["settings"]["meta"].get("version", 0)
