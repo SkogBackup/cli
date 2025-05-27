@@ -71,6 +71,10 @@ def create_backup(config_file: Path) -> Path:
 
 def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate configuration from older versions to the current version."""
+    # Ensure settings structure exists
+    if "settings" not in settings:
+        settings["settings"] = {}
+        
     if (
         "meta" not in settings["settings"]
         or "version" not in settings["settings"]["meta"]
@@ -86,16 +90,16 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
 
         # Add new sections that didn't exist in older versions
         if "module" not in settings["settings"]:
-            # Import default settings from the module
-            from .default_settings import DEFAULT_SETTINGS
-
-            settings["settings"]["module"] = DEFAULT_SETTINGS["settings"]["module"].copy()
+            # Initialize empty module settings
+            settings["settings"]["module"] = {
+                "history": []
+            }
 
         if "credentials" not in settings:
             settings["credentials"] = {}
 
     # Handle future migrations based on version numbers
-    version = settings["_meta"]["version"]
+    version = settings["settings"]["meta"].get("version", 0)
 
     # Example of future migration:
     # if version < 2:
