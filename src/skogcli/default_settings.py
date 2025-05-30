@@ -13,58 +13,51 @@ from typing import Dict, Any
 CONFIG_VERSION = 1
 
 DEFAULT_SETTINGS = {
-    "_meta": {
-        "version": CONFIG_VERSION,
-        "last_updated": None,  # Will be set when saving
-    },
-    "memory": {
-        "default_project": None,
-        "page_size": 10,
-    },
-    "ui": {
-        "theme": "default",
-        "verbose": False,
-    },
-    "chat": {
-        "history_enabled": True,
-        "max_history_items": 100,
-        "history": [],
-    },
-    "credentials": {
-        # This section will store API keys and other sensitive data
+    "settings": {
+        "cli": {
+            "last-updated": "1970-01-01T00:00:00Z",
+            "version": "0",
+        }
     }
 }
+
 
 def get_default_settings_file() -> Path:
     """Get the path to the default settings file."""
     return Path(__file__).parent / "data" / "default_settings.json"
+
 
 def ensure_data_dir() -> None:
     """Ensure the data directory exists."""
     data_dir = Path(__file__).parent / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
+
 def load_default_settings() -> Dict[str, Any]:
     """Load default settings from file or return the built-in defaults."""
     default_file = get_default_settings_file()
-    
+
     if default_file.exists():
         try:
             with open(default_file, "r") as f:
                 settings = json.load(f)
-                
+
             # Ensure all required sections exist by merging with built-in defaults
             result = DEFAULT_SETTINGS.copy()
-            
+
             # Deep merge the loaded settings with built-in defaults
             def deep_merge(source, destination):
                 for key, value in source.items():
-                    if isinstance(value, dict) and key in destination and isinstance(destination[key], dict):
+                    if (
+                        isinstance(value, dict)
+                        and key in destination
+                        and isinstance(destination[key], dict)
+                    ):
                         deep_merge(value, destination[key])
                     else:
                         destination[key] = value
                 return destination
-            
+
             deep_merge(settings, result)
             return result
         except Exception:
@@ -73,21 +66,20 @@ def load_default_settings() -> Dict[str, Any]:
     else:
         return DEFAULT_SETTINGS.copy()
 
+
 def save_default_settings(settings: Dict[str, Any]) -> bool:
     """Save default settings to file.
-    
+
     Returns:
         bool: True if successful, False otherwise
     """
     ensure_data_dir()
     default_file = get_default_settings_file()
-    
+
     # Update metadata
-    if "_meta" not in settings:
-        settings["_meta"] = {"version": CONFIG_VERSION}
-    
-    settings["_meta"]["last_updated"] = time.time()
-    
+    settings["settings"]["cli"] = {"version": CONFIG_VERSION}
+    settings["settings"]["cli"]["last-updated"] = time.time()
+
     try:
         with open(default_file, "w") as f:
             # Create a copy without sensitive data for the defaults file
