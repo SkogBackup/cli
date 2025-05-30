@@ -1,29 +1,55 @@
-import typer
+"""Decorators for the skogcli application."""
 from functools import wraps
-from typing import Callable, Optional
+from typing import Any, Callable, TypeVar, cast
 
-def with_explanation(explanation: str) -> Callable:
-    """
-    A decorator that adds an explanation to a command.
-    
-    This decorator stores the explanation text in the command's callback context
-    for later retrieval and display.
+import typer
+
+F = TypeVar('F', bound=Callable[..., Any])
+
+def with_explanation(explanation: str) -> Callable[[F], F]:
+    """Add an explanation to a command's help text.
     
     Args:
-        explanation: The explanation text to associate with the command
+        explanation: The explanation text to add to the command's help.
         
     Returns:
-        A decorator function that wraps the command
+        A decorator that adds the explanation to the command's help text.
     """
-    def decorator(f: Callable) -> Callable:
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            # Simply store the explanation as an attribute
-            # No need to access the context here
-            return f(*args, **kwargs)
-        
-        # Store the explanation directly on the function for access outside of execution
-        wrapper.__explanation__ = explanation
-        return wrapper
-    
+    def decorator(func: F) -> F:
+        # Add the explanation to the function's docstring
+        if func.__doc__ is None:
+            func.__doc__ = explanation
+        else:
+            func.__doc__ = f"{func.__doc__}\n\n{explanation}"
+            
+        # Preserve the original function's attributes
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            return func(*args, **kwargs)
+            
+        return cast(F, wrapper)
     return decorator
+
+def handle_errors(func: F) -> F:
+    """Handle common errors in command functions.
+    
+    This decorator catches common exceptions and displays them to the user
+    in a user-friendly way.
+    """
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError as e:
+            typer.echo(f"Error: File or directory not found - {e}", err=True)
+            raise typer.Exit(1)
+        except PermissionError as e:
+            typer.echo(f"Error: Permission denied - {e}", err=True)
+            raise typer.Exit(1)
+        except ValueError as e:
+            typer.echo(f"Error: Invalid value - {e}", err=True)
+            raise typer.Exit(1)
+        except Exception as e:
+            typer.echo(f"Unexpected error: {e}", err=True)
+            raise typer.Exit(1)
+    return cast(F, wrapper)

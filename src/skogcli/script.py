@@ -24,582 +24,69 @@ script_app = typer.Typer(
     no_args_is_help=True
 )
 
-# Script templates
-TEMPLATES = {
-    "basic": {
-        "python": """#!/usr/bin/env python3
-\"\"\"
-Custom script for SkogCLI.
-\"\"\"
-
-def main(args=None):
-    \"\"\"Main entry point for the script.\"\"\"
-    if args is None:
-        args = []
+def get_templates_dir() -> Path:
+    """Get the directory containing script templates."""
+    # First check if there's a user templates directory
+    user_templates_dir = Path.home() / ".config" / "skogcli" / "templates"
+    if user_templates_dir.exists() and user_templates_dir.is_dir():
+        return user_templates_dir
     
-    print(f"Hello from {__file__}!")
-    print(f"Arguments: {args}")
+    # Otherwise use the package templates directory
+    return Path(__file__).parent / "data" / "templates"
 
-if __name__ == "__main__":
-    import sys
-    main(sys.argv[1:])
-""",
-        "shell": """#!/bin/bash
-# Custom script for SkogCLI
-
-echo "Hello from $(basename $0)!"
-echo "Arguments: $@"
-"""
-    },
-    "line_counter": {
-        "python": """#!/usr/bin/env python3
-\"\"\"
-Line counting script for files and directories.
-\"\"\"
-import os
-import sys
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
-
-def count_lines_in_file(file_path: Path) -> Tuple[int, int, int]:
-    \"\"\"
-    Count the number of lines, blank lines, and comment lines in a file.
+def get_template_content(template_name: str, script_type: str) -> str:
+    """Get the content of a template file."""
+    templates_dir = get_templates_dir()
     
-    Args:
-        file_path: Path to the file
+    # Map script type to directory name
+    type_dir = script_type.lower()
+    
+    # Determine file extension
+    extension = ".py" if script_type.lower() == "python" else ".sh"
+    
+    # Check for the template file
+    template_path = templates_dir / type_dir / f"{template_name}{extension}"
+    
+    if not template_path.exists():
+        # Check in the package templates directory as fallback
+        package_templates_dir = Path(__file__).parent / "data" / "templates"
+        template_path = package_templates_dir / type_dir / f"{template_name}{extension}"
         
-    Returns:
-        Tuple of (total lines, blank lines, comment lines)
-    \"\"\"
-    if not file_path.exists():
-        print(f"Error: File {file_path} does not exist")
-        return (0, 0, 0)
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template {template_name} for {script_type} not found")
     
-    try:
-        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
-            lines = f.readlines()
-            
-        total_lines = len(lines)
-        blank_lines = sum(1 for line in lines if line.strip() == '')
-        
-        # Count comment lines based on file extension
-        comment_lines = 0
-        ext = file_path.suffix.lower()
-        
-        # Define comment markers for different file types
-        comment_markers = {
-            '.py': '#',
-            '.js': '//',
-            '.java': '//',
-            '.c': '//',
-            '.cpp': '//',
-            '.h': '//',
-            '.sh': '#',
-            '.rb': '#',
-            '.pl': '#',
-            '.php': '//',
-            '.html': '<!--',
-            '.xml': '<!--',
-            '.css': '/*',
-        }
-        
-        if ext in comment_markers:
-            marker = comment_markers[ext]
-            comment_lines = sum(1 for line in lines if line.strip().startswith(marker))
-        
-        return (total_lines, blank_lines, comment_lines)
-    
-    except Exception as e:
-        print(f"Error reading file {file_path}: {str(e)}")
-        return (0, 0, 0)
+    with open(template_path, "r") as f:
+        return f.read()
 
-def count_lines_in_directory(dir_path: Path, extensions: Optional[List[str]] = None) -> Dict[str, Tuple[int, int, int]]:
-    \"\"\"
-    Count lines in all files in a directory (recursively).
+def list_available_templates() -> Dict[str, List[str]]:
+    """List all available templates by type."""
+    templates_dir = get_templates_dir()
+    package_templates_dir = Path(__file__).parent / "data" / "templates"
     
-    Args:
-        dir_path: Path to the directory
-        extensions: List of file extensions to include (e.g., ['.py', '.js'])
-                   If None, count all files
+    templates = {}
     
-    Returns:
-        Dictionary mapping file paths to line counts
-    \"\"\"
-    if not dir_path.exists() or not dir_path.is_dir():
-        print(f"Error: Directory {dir_path} does not exist or is not a directory")
-        return {}
-    
-    results = {}
-    
-    try:
-        for root, _, files in os.walk(dir_path):
-            for file in files:
-                file_path = Path(root) / file
-                
-                # Skip if we're filtering by extension and this file doesn't match
-                if extensions and not any(file.lower().endswith(ext) for ext in extensions):
-                    continue
-                
-                # Skip binary files and very large files
-                if file_path.stat().st_size > 1024 * 1024:  # Skip files > 1MB
-                    continue
-                
-                try:
-                    # Try to read the first few bytes to check if it's binary
-                    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
-                        f.read(1024)
-                    
-                    # If we got here, it's probably a text file
-                    line_counts = count_lines_in_file(file_path)
-                    if line_counts[0] > 0:  # Only include files with lines
-                        results[str(file_path)] = line_counts
-                
-                except UnicodeDecodeError:
-                    # Probably a binary file
-                    continue
-                except Exception as e:
-                    print(f"Error processing {file_path}: {str(e)}")
-    
-    except Exception as e:
-        print(f"Error scanning directory {dir_path}: {str(e)}")
-    
-    return results
-
-def print_summary(results: Dict[str, Tuple[int, int, int]]) -> None:
-    \"\"\"Print a summary of the line counting results.\"\"\"
-    if not results:
-        print("No files found or processed.")
-        return
-    
-    # Calculate totals
-    total_files = len(results)
-    total_lines = sum(counts[0] for counts in results.values())
-    total_blank = sum(counts[1] for counts in results.values())
-    total_comments = sum(counts[2] for counts in results.values())
-    total_code = total_lines - total_blank - total_comments
-    
-    # Print summary
-    print(f"\\nSummary:")
-    print(f"  Total files: {total_files}")
-    print(f"  Total lines: {total_lines}")
-    print(f"  Code lines: {total_code}")
-    print(f"  Blank lines: {total_blank}")
-    print(f"  Comment lines: {total_comments}")
-    
-    if total_lines > 0:
-        print(f"\\nPercentages:")
-        print(f"  Code: {total_code / total_lines * 100:.1f}%")
-        print(f"  Comments: {total_comments / total_lines * 100:.1f}%")
-        print(f"  Blank: {total_blank / total_lines * 100:.1f}%")
-
-def main(args=None):
-    \"\"\"Main entry point for the script.\"\"\"
-    if args is None or len(args) == 0:
-        print("Usage: count_lines [file_or_directory] [extension1,extension2,...]")
-        print("Examples:")
-        print("  count_lines myfile.py")
-        print("  count_lines src/")
-        print("  count_lines src/ .py,.js,.html")
-        return
-    
-    path = Path(args[0])
-    
-    # Parse extensions if provided
-    extensions = None
-    if len(args) > 1 and args[1]:
-        extensions = [ext if ext.startswith('.') else f'.{ext}' for ext in args[1].split(',')]
-        print(f"Filtering by extensions: {', '.join(extensions)}")
-    
-    if path.is_file():
-        # Count lines in a single file
-        total, blank, comments = count_lines_in_file(path)
-        code = total - blank - comments
-        
-        print(f"File: {path}")
-        print(f"  Total lines: {total}")
-        print(f"  Code lines: {code}")
-        print(f"  Blank lines: {blank}")
-        print(f"  Comment lines: {comments}")
-    
-    elif path.is_dir():
-        # Count lines in a directory
-        print(f"Scanning directory: {path}")
-        results = count_lines_in_directory(path, extensions)
-        
-        # Print detailed results for each file
-        for file_path, (total, blank, comments) in sorted(results.items()):
-            code = total - blank - comments
-            rel_path = Path(file_path).relative_to(path)
-            print(f"{rel_path}: {total} lines ({code} code, {blank} blank, {comments} comments)")
-        
-        # Print summary
-        print_summary(results)
-    
-    else:
-        print(f"Error: {path} does not exist")
-
-if __name__ == "__main__":
-    import sys
-    main(sys.argv[1:])
-""",
-        "shell": """#!/bin/bash
-# Line counting script for files and directories
-
-# Function to count lines in a file
-count_lines_in_file() {
-    local file="$1"
-    
-    if [ ! -f "$file" ]; then
-        echo "Error: File $file does not exist"
-        return 1
-    fi
-    
-    # Count total lines
-    local total_lines=$(wc -l < "$file")
-    
-    # Count blank lines
-    local blank_lines=$(grep -c "^[[:space:]]*$" "$file")
-    
-    # Count comment lines (basic detection)
-    local comment_lines=0
-    local ext="${file##*.}"
-    
-    case "$ext" in
-        py|sh|bash|rb)
-            comment_lines=$(grep -c "^[[:space:]]*#" "$file")
-            ;;
-        js|java|c|cpp|h|php)
-            comment_lines=$(grep -c "^[[:space:]]*//" "$file")
-            comment_lines=$((comment_lines + $(grep -c "^[[:space:]]*/\\*" "$file")))
-            ;;
-        html|xml)
-            comment_lines=$(grep -c "^[[:space:]]*<!--" "$file")
-            ;;
-    esac
-    
-    # Calculate code lines
-    local code_lines=$((total_lines - blank_lines - comment_lines))
-    
-    echo "File: $file"
-    echo "  Total lines: $total_lines"
-    echo "  Code lines: $code_lines"
-    echo "  Blank lines: $blank_lines"
-    echo "  Comment lines: $comment_lines"
-}
-
-# Function to count lines in all files in a directory
-count_lines_in_directory() {
-    local dir="$1"
-    local extensions="$2"
-    
-    if [ ! -d "$dir" ]; then
-        echo "Error: Directory $dir does not exist"
-        return 1
-    fi
-    
-    echo "Scanning directory: $dir"
-    
-    local total_files=0
-    local total_lines=0
-    local total_blank=0
-    local total_comments=0
-    local total_code=0
-    
-    # Create a temporary file to store results
-    local temp_file=$(mktemp)
-    
-    # Find files and process them
-    if [ -z "$extensions" ]; then
-        # Process all text files
-        find "$dir" -type f -size -1M | while read -r file; do
-            # Skip binary files (simple check)
-            if file "$file" | grep -q "text"; then
-                process_file "$file" >> "$temp_file"
-            fi
-        done
-    else
-        # Process only files with specified extensions
-        local ext_pattern=$(echo "$extensions" | sed 's/,/\\|/g')
-        find "$dir" -type f -size -1M -name "*.$ext_pattern" | while read -r file; do
-            process_file "$file" >> "$temp_file"
-        done
-    fi
-    
-    # Display results
-    if [ -s "$temp_file" ]; then
-        cat "$temp_file"
-        
-        # Calculate totals
-        total_files=$(grep -c "^File:" "$temp_file")
-        total_lines=$(grep "Total lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
-        total_blank=$(grep "Blank lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
-        total_comments=$(grep "Comment lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
-        total_code=$(grep "Code lines:" "$temp_file" | awk '{sum += $3} END {print sum}')
-        
-        # Print summary
-        echo -e "\\nSummary:"
-        echo "  Total files: $total_files"
-        echo "  Total lines: $total_lines"
-        echo "  Code lines: $total_code"
-        echo "  Blank lines: $total_blank"
-        echo "  Comment lines: $total_comments"
-        
-        if [ "$total_lines" -gt 0 ]; then
-            echo -e "\\nPercentages:"
-            echo "  Code: $(awk -v code=$total_code -v total=$total_lines 'BEGIN {printf "%.1f", (code/total*100)}')%"
-            echo "  Comments: $(awk -v comments=$total_comments -v total=$total_lines 'BEGIN {printf "%.1f", (comments/total*100)}')%"
-            echo "  Blank: $(awk -v blank=$total_blank -v total=$total_lines 'BEGIN {printf "%.1f", (blank/total*100)}')%"
-        fi
-    else
-        echo "No files found or processed."
-    fi
-    
-    # Clean up
-    rm -f "$temp_file"
-}
-
-# Function to process a single file
-process_file() {
-    local file="$1"
-    
-    # Count total lines
-    local total_lines=$(wc -l < "$file" 2>/dev/null || echo 0)
-    
-    # Count blank lines
-    local blank_lines=$(grep -c "^[[:space:]]*$" "$file" 2>/dev/null || echo 0)
-    
-    # Count comment lines (basic detection)
-    local comment_lines=0
-    local ext="${file##*.}"
-    
-    case "$ext" in
-        py|sh|bash|rb)
-            comment_lines=$(grep -c "^[[:space:]]*#" "$file" 2>/dev/null || echo 0)
-            ;;
-        js|java|c|cpp|h|php)
-            comment_lines=$(grep -c "^[[:space:]]*//" "$file" 2>/dev/null || echo 0)
-            comment_lines=$((comment_lines + $(grep -c "^[[:space:]]*/\\*" "$file" 2>/dev/null || echo 0)))
-            ;;
-        html|xml)
-            comment_lines=$(grep -c "^[[:space:]]*<!--" "$file" 2>/dev/null || echo 0)
-            ;;
-    esac
-    
-    # Calculate code lines
-    local code_lines=$((total_lines - blank_lines - comment_lines))
-    
-    # Print results for this file
-    echo "File: $file"
-    echo "  Total lines: $total_lines"
-    echo "  Code lines: $code_lines"
-    echo "  Blank lines: $blank_lines"
-    echo "  Comment lines: $comment_lines"
-    echo ""
-}
-
-# Main function
-main() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: count_lines [file_or_directory] [extensions]"
-        echo "Examples:"
-        echo "  count_lines myfile.py"
-        echo "  count_lines src/"
-        echo "  count_lines src/ py,js,html"
-        return 1
-    fi
-    
-    local path="$1"
-    local extensions="$2"
-    
-    if [ -f "$path" ]; then
-        # Count lines in a single file
-        count_lines_in_file "$path"
-    elif [ -d "$path" ]; then
-        # Count lines in a directory
-        count_lines_in_directory "$path" "$extensions"
-    else
-        echo "Error: $path does not exist"
-        return 1
-    fi
-}
-
-# Run the script
-main "$@"
-"""
-    },
-    "data_processing": {
-        "python": """#!/usr/bin/env python3
-\"\"\"
-Data processing script for SkogCLI.
-\"\"\"
-import json
-import csv
-import sys
-from pathlib import Path
-
-def process_json(input_file, output_file=None):
-    \"\"\"Process JSON data.\"\"\"
-    with open(input_file, 'r') as f:
-        data = json.load(f)
-    
-    # Process the data here
-    processed_data = data
-    
-    if output_file:
-        with open(output_file, 'w') as f:
-            json.dump(processed_data, f, indent=2)
-        print(f"Processed data written to {output_file}")
-    else:
-        print(json.dumps(processed_data, indent=2))
-
-def process_csv(input_file, output_file=None):
-    \"\"\"Process CSV data.\"\"\"
-    rows = []
-    with open(input_file, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            rows.append(row)
-    
-    # Process the data here
-    processed_rows = rows
-    
-    if output_file:
-        with open(output_file, 'w') as f:
-            if rows:
-                writer = csv.DictWriter(f, fieldnames=rows[0].keys())
-                writer.writeheader()
-                writer.writerows(processed_rows)
-        print(f"Processed data written to {output_file}")
-    else:
-        for row in processed_rows:
-            print(row)
-
-def main(args=None):
-    \"\"\"Main entry point for the script.\"\"\"
-    if args is None or len(args) < 1:
-        print("Usage: script input_file [output_file]")
-        return
-    
-    input_file = args[0]
-    output_file = args[1] if len(args) > 1 else None
-    
-    if not Path(input_file).exists():
-        print(f"Error: Input file {input_file} does not exist")
-        return
-    
-    if input_file.endswith('.json'):
-        process_json(input_file, output_file)
-    elif input_file.endswith('.csv'):
-        process_csv(input_file, output_file)
-    else:
-        print(f"Error: Unsupported file format for {input_file}")
-
-if __name__ == "__main__":
-    import sys
-    main(sys.argv[1:])
-"""
-    },
-    "api_client": {
-        "python": """#!/usr/bin/env python3
-\"\"\"
-API client script for SkogCLI.
-\"\"\"
-import json
-import sys
-import requests
-from urllib.parse import urljoin
-
-BASE_URL = "https://api.example.com"  # Replace with your API base URL
-
-def make_request(endpoint, method="GET", data=None, params=None):
-    \"\"\"Make an API request.\"\"\"
-    url = urljoin(BASE_URL, endpoint)
-    headers = {
-        "Content-Type": "application/json",
-        # Add any authentication headers here
-    }
-    
-    try:
-        if method.upper() == "GET":
-            response = requests.get(url, headers=headers, params=params)
-        elif method.upper() == "POST":
-            response = requests.post(url, headers=headers, json=data)
-        elif method.upper() == "PUT":
-            response = requests.put(url, headers=headers, json=data)
-        elif method.upper() == "DELETE":
-            response = requests.delete(url, headers=headers)
-        else:
-            print(f"Error: Unsupported method {method}")
-            return None
-        
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error: {e}")
-        return None
-
-def main(args=None):
-    \"\"\"Main entry point for the script.\"\"\"
-    if args is None or len(args) < 1:
-        print("Usage: script endpoint [method] [data]")
-        return
-    
-    endpoint = args[0]
-    method = args[1].upper() if len(args) > 1 else "GET"
-    data = None
-    
-    if len(args) > 2 and (method == "POST" or method == "PUT"):
-        try:
-            data = json.loads(args[2])
-        except json.JSONDecodeError:
-            print(f"Error: Invalid JSON data: {args[2]}")
+    # Function to scan a templates directory
+    def scan_templates_dir(dir_path):
+        if not dir_path.exists() or not dir_path.is_dir():
             return
+            
+        for type_dir in dir_path.iterdir():
+            if type_dir.is_dir():
+                type_name = type_dir.name
+                if type_name not in templates:
+                    templates[type_name] = []
+                
+                for template_file in type_dir.iterdir():
+                    if template_file.is_file():
+                        template_name = template_file.stem
+                        if template_name not in templates[type_name]:
+                            templates[type_name].append(template_name)
     
-    result = make_request(endpoint, method, data)
-    if result:
-        print(json.dumps(result, indent=2))
-
-if __name__ == "__main__":
-    import sys
-    main(sys.argv[1:])
-"""
-    },
-    "system_info": {
-        "shell": """#!/bin/bash
-# System information script for SkogCLI
-
-echo "=== System Information ==="
-echo "Hostname: $(hostname)"
-echo "Kernel: $(uname -r)"
-echo "OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"')"
-echo
-
-echo "=== CPU Information ==="
-echo "CPU Model: $(grep 'model name' /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/^[ \t]*//')"
-echo "CPU Cores: $(grep -c processor /proc/cpuinfo)"
-echo
-
-echo "=== Memory Information ==="
-free -h
-echo
-
-echo "=== Disk Usage ==="
-df -h
-echo
-
-echo "=== Network Information ==="
-ip -br addr show
-echo
-
-echo "=== Process Information ==="
-echo "Top 5 CPU processes:"
-ps aux --sort=-%cpu | head -6
-echo
-echo "Top 5 Memory processes:"
-ps aux --sort=-%mem | head -6
-"""
-    }
-}
+    # Scan both user and package template directories
+    scan_templates_dir(package_templates_dir)
+    scan_templates_dir(templates_dir)  # User templates can override package templates
+    
+    return templates
 
 def get_global_scripts_dir() -> Path:
     """Get the global scripts directory, creating it if it doesn't exist."""
@@ -689,7 +176,12 @@ def get_script_names() -> List[str]:
 
 def get_script_templates() -> List[str]:
     """Get a list of available script templates for completion."""
-    return list(TEMPLATES.keys())
+    templates = list_available_templates()
+    # Flatten the dictionary to get a unique list of template names
+    template_names = set()
+    for type_templates in templates.values():
+        template_names.update(type_templates)
+    return sorted(list(template_names))
 
 def get_script_types() -> List[str]:
     """Get a list of available script types for completion."""
@@ -856,9 +348,9 @@ def run_script(
         except Exception as e:
             console.print(f"[bold red]Error:[/] {str(e)}")
 
-@script_app.command("add")
-@with_explanation("Add a new custom script.")
-def add_script(
+@script_app.command("create")
+@with_explanation("Create a new custom script.")
+def create_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     type: str = typer.Option(
         "python", 
@@ -877,7 +369,7 @@ def add_script(
     edit: bool = typer.Option(True, "--edit/--no-edit", help="Open the script in an editor after creation"),
     editor: Optional[str] = typer.Option(None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)")
 ):
-    """Add a new custom script."""
+    """Create a new custom script."""
     # Determine the scripts directory
     if global_script:
         # Check if user has permission to write to global directory
@@ -902,15 +394,31 @@ def add_script(
             return
     
     # Get template content
-    template_content = ""
-    if template in TEMPLATES and type.lower() in TEMPLATES[template]:
-        template_content = TEMPLATES[template][type.lower()]
-    else:
-        # Fall back to basic template if the requested one doesn't exist
-        available_templates = list(TEMPLATES.keys())
-        console.print(f"[yellow]Warning:[/] Template '{template}' not found. Using 'basic' template.")
-        console.print(f"Available templates: {', '.join(available_templates)}")
-        template_content = TEMPLATES["basic"][type.lower()]
+    try:
+        template_content = get_template_content(template, type.lower())
+    except FileNotFoundError:
+        # List available templates
+        templates = list_available_templates()
+        available_templates = []
+        for t_type, t_names in templates.items():
+            if t_type == type.lower():
+                available_templates = t_names
+                break
+        
+        console.print(f"[yellow]Warning:[/] Template '{template}' not found for {type}.")
+        if available_templates:
+            console.print(f"Available {type} templates: {', '.join(available_templates)}")
+            # Try to use basic template
+            if "basic" in available_templates:
+                template = "basic"
+                console.print(f"[yellow]Using 'basic' template instead.[/]")
+                template_content = get_template_content("basic", type.lower())
+            else:
+                console.print("[bold red]Error:[/] No suitable template found.")
+                return
+        else:
+            console.print(f"[bold red]Error:[/] No templates available for {type}.")
+            return
     
     # Create script with template content
     with open(script_path, "w") as f:
@@ -1472,23 +980,33 @@ def list_templates():
     """List available script templates."""
     console.print("[bold]Available script templates:[/]")
     
-    for template_name, template_data in TEMPLATES.items():
-        available_types = ", ".join(template_data.keys())
-        console.print(f"  [bold]{template_name}[/] (Types: {available_types})")
+    templates = list_available_templates()
+    if not templates:
+        console.print("[yellow]No templates found.[/]")
+        console.print(f"Templates should be placed in {get_templates_dir()}/[type]/[template].[ext]")
+        return
+    
+    for script_type, template_names in templates.items():
+        console.print(f"[bold]{script_type.upper()}[/] templates:")
+        for template_name in sorted(template_names):
+            console.print(f"  • {template_name}")
 
 @script_app.command("export")
-@with_explanation("Export a script to share with others.")
+@with_explanation("Export a script to a JSON file to share with others.")
 def export_script(
     name: str = typer.Argument(
         ..., 
         help="Name of the script to export",
         autocompletion=lambda: get_script_names()
     ),
-    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output_file: Optional[Path] = typer.Option(None, "--output", "-o", help="Output JSON file path"),
     include_metadata: bool = typer.Option(True, "--metadata/--no-metadata", help="Include metadata in export"),
     global_script: bool = typer.Option(True, "--global/--no-global", help="Include global scripts")
 ):
-    """Export a script to share with others."""
+    """Export a script to a JSON file that can be shared and imported by others.
+    
+    The export file contains the script's code, metadata, and other information.
+    """
     # Find the script
     script_path = find_script(name, global_script)
     
@@ -1771,10 +1289,15 @@ def generate_script(
     generation_method = "template"
     
     # Special case for count_lines - use the line_counter template directly
-    if name == "count_lines" and "line_counter" in TEMPLATES and type.lower() in TEMPLATES["line_counter"]:
-        use_local_template = True
-        template_name = "line_counter"
-        console.print(f"[green]Using '{template_name}' template for line counting script.[/]")
+    if name == "count_lines":
+        try:
+            generated_code = get_template_content("line_counter", type.lower())
+            use_local_template = True
+            template_name = "line_counter"
+            console.print(f"[green]Using '{template_name}' template for line counting script.[/]")
+        except FileNotFoundError:
+            # Continue with normal flow if template not found
+            pass
     
     if not use_local_template:
         # Try to use AI generation
@@ -1855,14 +1378,14 @@ Return ONLY the code with no additional text or explanations.
                 use_local_template = True
     
     # Use local template if AI generation failed or was not requested
-    if use_local_template:
+    if use_local_template and generated_code is None:
         # Choose the most appropriate template based on the description
         template_name = "basic"
         
         # Simple keyword matching to find the best template
         keywords = {
-            "data": ["data", "csv", "json", "process", "file", "read", "write", "parse"],
-            "api": ["api", "http", "request", "rest", "endpoint", "server", "client"],
+            "data_processing": ["data", "csv", "json", "process", "file", "read", "write", "parse"],
+            "api_client": ["api", "http", "request", "rest", "endpoint", "server", "client"],
             "system_info": ["system", "info", "hardware", "cpu", "memory", "disk", "network"]
         }
         
@@ -1876,19 +1399,25 @@ Return ONLY the code with no additional text or explanations.
         # Find the template with the most matches
         best_match = max(matches.items(), key=lambda x: x[1])
         if best_match[1] > 0:
-            if best_match[0] == "data" and "data_processing" in TEMPLATES and type.lower() in TEMPLATES["data_processing"]:
-                template_name = "data_processing"
-            elif best_match[0] == "api" and "api_client" in TEMPLATES and type.lower() in TEMPLATES["api_client"]:
-                template_name = "api_client"
-            elif best_match[0] == "system_info" and "system_info" in TEMPLATES and type.lower() in TEMPLATES["system_info"]:
-                template_name = "system_info"
-        
-        # Get template content
-        if template_name in TEMPLATES and type.lower() in TEMPLATES[template_name]:
-            generated_code = TEMPLATES[template_name][type.lower()]
+            try:
+                generated_code = get_template_content(best_match[0], type.lower())
+                template_name = best_match[0]
+            except FileNotFoundError:
+                # Fall back to basic template
+                try:
+                    generated_code = get_template_content("basic", type.lower())
+                    template_name = "basic"
+                except FileNotFoundError:
+                    console.print(f"[bold red]Error:[/] No templates found for {type.lower()}.")
+                    return
         else:
-            # Fall back to basic template
-            generated_code = TEMPLATES["basic"][type.lower()]
+            # Use basic template
+            try:
+                generated_code = get_template_content("basic", type.lower())
+                template_name = "basic"
+            except FileNotFoundError:
+                console.print(f"[bold red]Error:[/] No templates found for {type.lower()}.")
+                return
         
         # Customize the template with the description
         if type.lower() == "python":
@@ -1956,11 +1485,14 @@ Return ONLY the code with no additional text or explanations.
 @script_app.command("import")
 @with_explanation("Import a script from an export file.")
 def import_script(
-    file: Path = typer.Argument(..., help="Path to the export file"),
+    file: Path = typer.Argument(..., help="Path to the JSON export file created by 'script export'"),
     global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
     overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing script")
 ):
-    """Import a script from an export file."""
+    """Import a script from a JSON export file created by the 'script export' command.
+    
+    The export file contains the script's code, metadata, and other information.
+    """
     # Check if file exists
     if not file.exists():
         console.print(f"[bold red]Error:[/] Export file '{file}' not found.")
@@ -2023,6 +1555,99 @@ def import_script(
     
     location = "global" if global_script else "user"
     console.print(f"[green]Imported {location} script:[/] {name}")
+
+@script_app.command("import-file")
+@with_explanation("Import an existing script file into the scripts directory.")
+def import_file(
+    file: Path = typer.Argument(..., help="Path to the existing script file to add"),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Name for the script (defaults to original filename)"),
+    global_script: bool = typer.Option(False, "--global", "-g", help="Install as a global script"),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Overwrite existing script"),
+    edit: bool = typer.Option(False, "--edit", "-e", help="Open the script in an editor after adding"),
+    editor: Optional[str] = typer.Option(None, "--editor", help="Specify which editor to use (defaults to $EDITOR)")
+):
+    """Import an existing script file into the scripts directory.
+    
+    This command copies a script file from anywhere on your filesystem into the SkogCLI
+    scripts directory, making it available as a SkogCLI script.
+    """
+    # Check if file exists
+    if not file.exists():
+        console.print(f"[bold red]Error:[/] File '{file}' not found.")
+        return
+    
+    if not file.is_file():
+        console.print(f"[bold red]Error:[/] '{file}' is not a file.")
+        return
+    
+    # Determine script name
+    script_name = name if name else file.stem
+    
+    # Determine the scripts directory
+    if global_script:
+        # Check if user has permission to write to global directory
+        global_dir = get_global_scripts_dir()
+        if not os.access(global_dir.parent, os.W_OK):
+            console.print("[bold red]Error:[/] You don't have permission to create global scripts.")
+            console.print("Try running with sudo or use --no-global for a user script.")
+            return
+        scripts_dir = global_dir
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        scripts_dir = get_user_scripts_dir()
+    
+    # Determine destination path (preserve original extension)
+    dest_path = scripts_dir / f"{script_name}{file.suffix}"
+    
+    # Check if destination already exists
+    if dest_path.exists() and not overwrite:
+        console.print(f"[bold red]Error:[/] Script '{script_name}' already exists.")
+        console.print("Use --overwrite to replace the existing script.")
+        return
+    
+    # Copy the file
+    try:
+        shutil.copy2(file, dest_path)
+        
+        # Make the script executable
+        dest_path.chmod(dest_path.stat().st_mode | 0o755)
+        
+        # Determine script type
+        script_type = "unknown"
+        if file.suffix == ".py":
+            script_type = "python"
+        elif file.suffix == ".sh":
+            script_type = "shell"
+        
+        # Create metadata
+        metadata = {
+            "description": f"Added from {file}",
+            "type": script_type,
+            "created": datetime.now().isoformat(),
+            "source_file": str(file),
+            "run_count": 0
+        }
+        update_script_metadata(dest_path, metadata)
+        
+        location = "global" if global_script else "user"
+        console.print(f"[green]Added {location} script:[/] {dest_path}")
+        
+        # Open in editor if requested
+        if edit:
+            # Get the editor from the environment or use the provided one
+            editor_cmd = editor or os.environ.get("EDITOR", "nano")
+            try:
+                exit_code = subprocess.call([editor_cmd, str(dest_path)])
+                if exit_code == 0:
+                    console.print("[green]Script edited successfully.[/]")
+                else:
+                    console.print(f"[bold red]Error:[/] Editor exited with code {exit_code}")
+            except FileNotFoundError:
+                console.print(f"[bold red]Error:[/] Editor '{editor_cmd}' not found. Set the EDITOR environment variable or use --editor.")
+            except Exception as e:
+                console.print(f"[bold red]Error:[/] {str(e)}")
+    except Exception as e:
+        console.print(f"[bold red]Error:[/] {str(e)}")
 
 @script_app.command("copy")
 @with_explanation("Copy a script to create a new one.")

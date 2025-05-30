@@ -1,0 +1,104 @@
+{
+  "credentials": {},
+  "settings": {
+    "_meta": {
+      "version": 1,
+      "last_updated": 1748305682.7457244
+    },
+    "memory": {
+      "default_project": null,
+      "page_size": 10
+    },
+    "ui": {
+      "theme": "default",
+      "verbose": false
+    },
+    "cli": {
+      "storage_dir": "/home/skogix/config/skogai/settings/"
+    },
+    "chat": {
+      "history_enabled": true,
+      "max_history_items": 100,
+      "history": [],
+      "message": {
+        "storage_dir": "/home/skogix/config/skogai/settings/",
+        "default_sender": "User",
+        "default_recipient": "Assistant"
+      }
+    }
+  },
+  "$": {
+    "json": {
+      "@": {
+        "id": "$.json.int",
+        "gen": "$.json.int",
+        "name": "$.json.string",
+        "actions": "$.json.@.list"
+      },
+      "$type": "|$.json.$",
+      "$": {
+        "self": "$.json.$",
+        "string": "",
+        "int": 0,
+        "list": [],
+        "action": "$.json.@",
+        "parent": "$.$self",
+        "child": "$parent.$"
+      }
+    },
+    "$": "to define or reference something",
+    "|": "the act of choosing something | {$id1|$id2}->[$id1]",
+    "_": "existance?... to be anything/everything and nothing/nobody | {$id1_$id2} | ...hard one",
+    "[_]": "similarity",
+    "{_}": "difference",
+    "@": "the intent to act or do something | {$id@$id}",
+    ".": "to belong or have something via [$$]",
+    ":": "to follow or continue something via [$@]",
+    "=": "to be something | [$id=$id]",
+    "->": "{$id1@$id2}",
+    "*": "$*$=$",
+    "id": "$int*$unique",
+    "action": "$eid*$type.value.list*$type.self",
+    "self": "$self | [$id@$id]",
+    "type": {
+      "$type.self": "every base case of a $",
+      "value": "the declaration/implementation of a $",
+      "eid": "$eid"
+    },
+    "unique": "a thing which there only exists one of",
+    "name": {
+      "1": "$unique.$string",
+      "2": "$string@$unique",
+      "3": "$string{@->}$unique"
+    },
+    "skogparse": {
+      "action": "$@",
+      "type": "$type",
+      "value": "$value",
+      "eid": "$eid"
+    },
+    "message": {
+      "eid": "$eid",
+      "from": "$name",
+      "to": "$name",
+      "content": "$string",
+      "created_at": "$datetime",
+      "parent": "$eid"
+    },
+    "skogchat": {
+      "messages": "$message.$list"
+    },
+    "thread": {
+      "eid": "$eid",
+      "actors": "$entity*$entity"
+    },
+    "list": "the ordering of something",
+    "eid": "$entity.id*$entity.gen",
+    "entity": {
+      "eid": "$eid",
+      "gen": "$id",
+      "id": "$id",
+      "name": "$name"
+    }
+  }
+}
