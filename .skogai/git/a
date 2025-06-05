@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # A
+git submodule foreach --recursive git fetch
+git submodule foreach --recursive git checkout develop
 git submodule foreach --recursive mkdir -p .skogai/git
 git submodule foreach --recursive cp /home/skogix/skogai/.skogai/git/* ./.skogai/git/
 git submodule foreach --recursive git add .
