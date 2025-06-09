@@ -1,4 +1,4 @@
-"""Tests for skogcli misc functionality."""
+"""Tests for skogcli script functionality."""
 
 import pytest
 import subprocess
@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from unittest.mock import patch, MagicMock
-from skogcli.misc import (
+from skogcli.script import (
     get_user_scripts_dir,
     get_metadata_file,
     load_metadata,
@@ -18,17 +18,17 @@ from skogcli.misc import (
 )
 
 
-def test_misc_help():
-    """Test that running misc without args shows help."""
+def test_script_help():
+    """Test that running script without args shows help."""
     # Run the command
     no_args_result = subprocess.run(
-        ["uv", "run", "skogcli", "misc"],
+        ["uv", "run", "skogcli", "script"],
         capture_output=True,
         text=True,
     )
     
     help_result = subprocess.run(
-        ["uv", "run", "skogcli", "misc", "--help"],
+        ["uv", "run", "skogcli", "script", "--help"],
         capture_output=True,
         text=True,
     )
@@ -40,8 +40,8 @@ def test_misc_help():
     assert no_args_result.stdout == help_result.stdout
 
 
-class TestMiscFunctions:
-    """Tests for misc module functions."""
+class TestScriptFunctions:
+    """Tests for script module functions."""
     
     def setup_method(self):
         """Set up test environment before each test."""
@@ -121,8 +121,8 @@ class TestMiscFunctions:
         assert "data_processing" in templates
 
 
-class TestMiscCommands:
-    """Tests for misc module commands."""
+class TestScriptCommands:
+    """Tests for script module commands."""
     
     def setup_method(self):
         """Set up test environment before each test."""
@@ -137,10 +137,10 @@ class TestMiscCommands:
             os.environ["HOME"] = self.original_home
         shutil.rmtree(self.test_home, ignore_errors=True)
     
-    def test_misc_list_no_scripts(self):
-        """Test misc list when no scripts exist."""
+    def test_script_list_no_scripts(self):
+        """Test script list when no scripts exist."""
         result = subprocess.run(
-            ["uv", "run", "skogcli", "misc", "list"],
+            ["uv", "run", "skogcli", "script", "list"],
             capture_output=True,
             text=True,
         )
@@ -148,11 +148,11 @@ class TestMiscCommands:
         assert result.returncode == 0
         assert "No custom scripts found" in result.stdout
     
-    def test_misc_add_and_list(self):
-        """Test adding a script and then listing it."""
+    def test_script_create_and_list(self):
+        """Test creating a script and then listing it."""
         # Add a script
         add_result = subprocess.run(
-            ["uv", "run", "skogcli", "misc", "add", "hello", "--type", "python", "--no-edit"],
+            ["uv", "run", "skogcli", "script", "create", "hello", "--type", "python", "--no-edit"],
             capture_output=True,
             text=True,
         )
@@ -162,7 +162,7 @@ class TestMiscCommands:
         
         # List scripts
         list_result = subprocess.run(
-            ["uv", "run", "skogcli", "misc", "list"],
+            ["uv", "run", "skogcli", "script", "list"],
             capture_output=True,
             text=True,
         )
@@ -178,10 +178,10 @@ class TestMiscCommands:
         # Verify script is executable
         assert os.access(script_path, os.X_OK)
     
-    def test_misc_templates(self):
+    def test_script_templates(self):
         """Test listing templates."""
         result = subprocess.run(
-            ["uv", "run", "skogcli", "misc", "templates"],
+            ["uv", "run", "skogcli", "script", "templates"],
             capture_output=True,
             text=True,
         )
