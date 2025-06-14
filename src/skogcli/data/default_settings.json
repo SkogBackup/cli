@@ -20,8 +20,11 @@
       "history_enabled": true,
       "max_history_items": 100,
       "history": [],
+      "message_id_counter": true,
+      "thread_id_counter": true,
       "message": {
         "storage_dir": "/home/skogix/config/skogai/settings/",
+        "format_pretty": true,
         "default_sender": "User",
         "default_recipient": "Assistant"
       }
