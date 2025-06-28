@@ -1093,43 +1093,6 @@ def list_backups():
         console.print(f"{i + 1}. {backup.name} ({mtime}, {size:.1f} KB)")
 
 
-@config_app.command("factory-reset")
-@with_explanation(
-    "Reset configuration to factory default values (ignoring custom defaults)."
-)
-def factory_reset(
-    confirm: bool = typer.Option(
-        False, "--yes", "-y", help="Confirm reset without prompting"
-    ),
-):
-    """Reset configuration to factory default values."""
-    if not confirm:
-        should_reset = typer.confirm(
-            "Are you sure you want to reset all settings to factory defaults?"
-        )
-        if not should_reset:
-            console.print("Factory reset cancelled.")
-            return 1
-
-    # Create a backup before resetting
-    create_backup(get_config_file())
-    create_backup(get_sensitive_config_file())
-
-    # Import the original defaults directly from the module
-    from .default_settings import DEFAULT_SETTINGS
-
-    # Reset to factory defaults
-    settings = DEFAULT_SETTINGS.copy()
-    if "settings" not in settings:
-        settings["settings"] = {}
-    if "meta" not in settings["settings"]:
-        settings["settings"]["meta"] = {}
-    settings["settings"]["meta"]["last_updated"] = time.time()
-
-    if save_settings(settings):
-        console.print("[green]Configuration reset to factory defaults.[/]")
-    else:
-        console.print("[bold red]Error:[/] Failed to reset configuration.")
 
 
 @config_app.command("chat-history")
