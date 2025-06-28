@@ -26,8 +26,15 @@ script_app = typer.Typer(
 
 def get_templates_dir() -> Path:
     """Get the directory containing script templates."""
-    from .settings import get_setting
+    # First check if there's a SKOGAI templates directory
+    skogai_templates_dir = os.getenv("SKOGAI_TEMPLATES_DIR")
+    if skogai_templates_dir:
+        templates_path = Path(skogai_templates_dir)
+        if templates_path.exists() and templates_path.is_dir():
+            return templates_path
     
+    # Check config setting
+    from .settings import get_setting
     templates_dir = get_setting("settings.script.templates_dir")
     if templates_dir:
         templates_path = Path(templates_dir)
@@ -104,8 +111,15 @@ def get_global_scripts_dir() -> Path:
 
 def get_user_scripts_dir() -> Path:
     """Get the user scripts directory, creating it if it doesn't exist."""
-    from .settings import get_setting
+    # Check for SKOGAI scripts directory first
+    skogai_scripts_dir = os.getenv("SKOGAI_SCRIPTS_DIR")
+    if skogai_scripts_dir:
+        scripts_dir = Path(skogai_scripts_dir)
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+        return scripts_dir
     
+    # Check config setting
+    from .settings import get_setting
     scripts_dir_setting = get_setting("settings.script.user_scripts_dir")
     if scripts_dir_setting:
         scripts_dir = Path(scripts_dir_setting)
@@ -120,8 +134,15 @@ def get_user_scripts_dir() -> Path:
 
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
-    from .settings import get_setting
+    # Check for SKOGAI metadata directory first
+    skogai_metadata_dir = os.getenv("SKOGAI_SCRIPT_METADATA_DIR")
+    if skogai_metadata_dir:
+        metadata_dir = Path(skogai_metadata_dir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        return metadata_dir / "script_metadata.json"
     
+    # Check config setting
+    from .settings import get_setting
     metadata_dir_setting = get_setting("settings.script.metadata_dir")
     if metadata_dir_setting:
         metadata_dir = Path(metadata_dir_setting)

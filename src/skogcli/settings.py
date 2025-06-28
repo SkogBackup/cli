@@ -31,6 +31,14 @@ ensure_data_dir()
 
 def get_config_dir() -> Path:
     """Get the configuration directory, creating it if it doesn't exist."""
+    # Check for SKOGAI config directory first
+    skogai_config_dir = os.getenv("SKOGAI_CONFIG_DIR")
+    if skogai_config_dir:
+        config_dir = Path(skogai_config_dir)
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir
+    
+    # Check config setting
     storage_dir = get_setting("settings.cli.storage_dir")
     if storage_dir:
         config_dir = Path(storage_dir)
