@@ -16,6 +16,11 @@
     "cli": {
       "storage_dir": "/home/skogix/skogai/config/"
     },
+    "script": {
+      "templates_dir": "/home/skogix/skogai/config/templates",
+      "user_scripts_dir": "/home/skogix/skogai/config/scripts",
+      "metadata_dir": "/home/skogix/skogai/config"
+    },
     "chat": {
       "history_enabled": true,
       "max_history_items": 100,
