@@ -61,6 +61,17 @@ def callback(
         raise Exit()
 
 
+@app.command()
+def version():
+    """Show the version of SkogCLI."""
+    import importlib.metadata
+    try:
+        version = importlib.metadata.version("skogcli")
+        print(f"SkogCLI version {version}")
+    except importlib.metadata.PackageNotFoundError:
+        print("SkogCLI version: development")
+
+
 def main():
     """Entry point for the CLI application."""
     app()

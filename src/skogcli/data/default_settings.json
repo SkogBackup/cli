@@ -14,7 +14,7 @@
       "verbose": false
     },
     "cli": {
-      "storage_dir": "/home/skogix/config/skogai/settings/"
+      "storage_dir": "/home/skogix/skogai/config/"
     },
     "chat": {
       "history_enabled": true,
@@ -23,7 +23,7 @@
       "message_id_counter": true,
       "thread_id_counter": true,
       "message": {
-        "storage_dir": "/home/skogix/config/skogai/settings/",
+        "storage_dir": "/home/skogix/skogai/settings/",
         "format_pretty": true,
         "default_sender": "User",
         "default_recipient": "Assistant"

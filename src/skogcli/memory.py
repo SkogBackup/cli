@@ -70,7 +70,7 @@ def get_timeframe_options() -> List[str]:
 def get_memory_folders() -> List[str]:
     """Get a list of memory folders for completion."""
     try:
-        result = run_skogai_memory(["tool", "list-folders", "--format", "json"])
+        result = run_basic_memory(["tool", "list-folders", "--format", "json"])
         if result.returncode == 0:
             folders_data = json.loads(result.stdout)
             return [folder["name"] for folder in folders_data.get("folders", [])]
@@ -84,7 +84,7 @@ def get_memory_folders() -> List[str]:
 def get_memory_projects() -> List[str]:
     """Get a list of memory projects for completion."""
     try:
-        result = run_skogai_memory(["tool", "list-projects", "--format", "json"])
+        result = run_basic_memory(["tool", "list-projects", "--format", "json"])
         if result.returncode == 0:
             projects_data = json.loads(result.stdout)
             return [project["name"] for project in projects_data.get("projects", [])]
@@ -99,19 +99,19 @@ def get_memory_projects() -> List[str]:
     return projects
 
 
-def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
-    """Run skogai-memory with the given arguments.
+def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
+    """Run basic-memory with the given arguments.
 
     Args:
-        args: List of command line arguments to pass to skogai-memory
+        args: List of command line arguments to pass to basic-memory
 
     Returns:
         subprocess.CompletedProcess: The result of the command execution
 
     Raises:
-        typer.Exit: If skogai-memory is not found or command fails
+        typer.Exit: If basic-memory is not found or command fails
     """
-    cmd = ["skogai-memory"] + args
+    cmd = ["uvx", "basic-memory"] + args
     try:
         result = subprocess.run(
             cmd,
@@ -122,18 +122,18 @@ def run_skogai_memory(args: List[str]) -> subprocess.CompletedProcess:
         return result
     except FileNotFoundError:
         console.print(
-            "[red]Error:[/] skogai-memory not found. Please install it with 'uv add skogai-memory'",
+            "[red]Error:[/] basic-memory not found. Please install it with 'uv add basic-memory'",
             style="bold",
         )
         raise typer.Exit(code=1)
     except subprocess.SubprocessError as e:
-        console.print(f"[red]Error running skogai-memory:[/] {str(e)}", style="bold")
+        console.print(f"[red]Error running basic-memory:[/] {str(e)}", style="bold")
         raise typer.Exit(code=1)
 
 
 @memory_app.callback(invoke_without_command=True, no_args_is_help=True)
 def memory_callback():
-    """Knowledge management powered by skogai-memory.
+    """Knowledge management powered by basic-memory.
 
     This CLI provides commands to manage and interact with your knowledge base.
     """
@@ -206,12 +206,12 @@ def create(
         cmd = ["--project", project] + cmd
 
     if content:
-        result = run_skogai_memory(cmd + ["--content", content])
+        result = run_basic_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream("stdin").read()
-        result = run_skogai_memory(cmd + ["--content", from_stdin])
+        result = run_basic_memory(cmd + ["--content", from_stdin])
 
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -269,12 +269,12 @@ def write(
         cmd = ["--project", project] + cmd
 
     if content:
-        result = run_skogai_memory(cmd + ["--content", content])
+        result = run_basic_memory(cmd + ["--content", content])
     else:
         # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream("stdin").read()
-        result = run_skogai_memory(cmd + ["--content", from_stdin])
+        result = run_basic_memory(cmd + ["--content", from_stdin])
 
     if result.returncode == 0:
         typer.echo(f"✓ Note saved: {title} in {folder}")
@@ -290,7 +290,7 @@ def get_note_identifiers() -> List[str]:
         List[str]: List of note identifiers in the format 'folder/title'
     """
     try:
-        result = run_skogai_memory(
+        result = run_basic_memory(
             [
                 "tool",
                 "recent-notes",
@@ -402,7 +402,7 @@ def read(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_skogai_memory(cmd)
+    result = run_basic_memory(cmd)
 
     if result.returncode == 0:
         if raw:
@@ -561,7 +561,7 @@ def search(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_skogai_memory(cmd)
+    result = run_basic_memory(cmd)
 
     if result.returncode == 0:
         if output_format == "json":
@@ -746,7 +746,7 @@ def list_notes(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_skogai_memory(cmd)
+    result = run_basic_memory(cmd)
 
     if result.returncode == 0:
         if output_format == "json":
@@ -876,7 +876,7 @@ def sync(
     if verbose:
         cmd.append("--verbose")
 
-    result = run_skogai_memory(cmd)
+    result = run_basic_memory(cmd)
 
     if result.returncode == 0:
         # Output the actual return from the original command
@@ -954,7 +954,7 @@ def status(
     if show_all and not project:
         # First get a list of all projects
         projects_cmd = ["tool", "list-projects", "--format", "json"]
-        projects_result = run_skogai_memory(projects_cmd)
+        projects_result = run_basic_memory(projects_cmd)
 
         if projects_result.returncode == 0:
             try:
@@ -969,7 +969,7 @@ def status(
                         # Run the command for each project
                         proj_cmd = cmd.copy()
                         proj_cmd = ["--project", proj] + proj_cmd
-                        proj_result = run_skogai_memory(proj_cmd)
+                        proj_result = run_basic_memory(proj_cmd)
 
                         if proj_result.returncode == 0:
                             if idx > 0:
@@ -988,7 +988,7 @@ def status(
     if project:
         cmd = ["--project", project] + cmd
 
-    result = run_skogai_memory(cmd)
+    result = run_basic_memory(cmd)
 
     if result.returncode == 0:
         if check:
@@ -1001,7 +1001,7 @@ def status(
                     json_cmd = cmd.copy()
                     if "--json" not in json_cmd:
                         json_cmd.append("--json")
-                    json_result = run_skogai_memory(json_cmd)
+                    json_result = run_basic_memory(json_cmd)
                     if json_result.returncode != 0:
                         return 2  # Error
                     data = json.loads(json_result.stdout)

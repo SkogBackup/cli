@@ -31,7 +31,20 @@ ensure_data_dir()
 
 def get_config_dir() -> Path:
     """Get the configuration directory, creating it if it doesn't exist."""
-    config_dir = Path.home() / ".config" / "skogcli"
+    # Check for SKOGAI config directory first
+    skogai_config_dir = os.getenv("SKOGAI_CONFIG_DIR")
+    if skogai_config_dir:
+        config_dir = Path(skogai_config_dir)
+        config_dir.mkdir(parents=True, exist_ok=True)
+        return config_dir
+    
+    # Check for XDG_CONFIG_HOME as a better fallback
+    xdg_config_home = os.getenv("XDG_CONFIG_HOME")
+    if xdg_config_home:
+        config_dir = Path(xdg_config_home) / "skogcli"
+    else:
+        config_dir = Path.home() / ".config" / "skogcli"
+    
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir
 
@@ -497,7 +510,7 @@ def get(
         autocompletion=lambda: get_config_keys(),
     ),
     raw: bool = typer.Option(
-        True, "--raw", "-r", help="Output raw value without formatting"
+        False, "--raw", "-r", help="Output raw value without formatting"
     ),
     json_format: bool = typer.Option(
         False, "--json", "-j", help="Output as formatted JSON"

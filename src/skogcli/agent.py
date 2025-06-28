@@ -234,7 +234,7 @@ def send(
       skogcli agent send "Write a Python function to calculate Fibonacci numbers" --agent coder
 
     Use a specific model:
-      skogcli agent send "Summarize this article" --model gpt-4
+      skogcli agent send "Summarize this article" --model custom-model
     """
     # Get agent configuration
     agent_config = get_setting(f"agent.{agent_name}") or {}
@@ -244,7 +244,7 @@ def send(
         model
         or agent_config.get("model")
         or get_setting("agent.default_model")
-        or "gpt-3.5-turbo"
+        or "default-model"
     )
 
     # Use provided system prompt or fall back to agent config or default
@@ -326,7 +326,7 @@ def list_agents():
     for agent_name in agents:
         agent_config = get_setting(f"agent.{agent_name}") or {}
         model = agent_config.get(
-            "model", get_setting("agent.default_model") or "Not specified"
+            "model", get_setting("agent.default_model") or "not-specified"
         )
 
         console.print(f"  [bold]{agent_name}[/]")
@@ -364,7 +364,7 @@ def create_agent(
       skogcli agent create researcher
 
     Create an agent with a specific model:
-      skogcli agent create coder --model gpt-4
+      skogcli agent create coder --model custom-model
 
     Create an agent with a system prompt:
       skogcli agent create assistant --system "You are a helpful assistant."
@@ -429,13 +429,13 @@ def set_agent_config(
     Examples:
 
     Set a model for an agent:
-      skogcli agent set model gpt-4 --agent researcher
+      skogcli agent set model custom-model --agent researcher
 
     Set a system prompt:
       skogcli agent set system_prompt "You are a helpful assistant." --agent assistant
 
     Set a configuration directly:
-      skogcli agent set agent.coder.model gpt-4
+      skogcli agent set agent.coder.model custom-model
     """
     # Determine the full configuration key
     if key.startswith("agent."):

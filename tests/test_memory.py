@@ -10,7 +10,7 @@ import typer
 from skogcli.memory import (
     get_memory_folders, 
     get_memory_projects,
-    run_skogai_memory
+    run_basic_memory
 )
 
 
@@ -39,9 +39,9 @@ def test_memory_help():
 class TestMemoryFunctions:
     """Test memory module functions with mocked subprocess calls."""
     
-    @patch('skogcli.memory.run_skogai_memory')
+    @patch('skogcli.memory.run_basic_memory')
     def test_get_memory_folders_success(self, mock_run):
-        """Test get_memory_folders when skogai-memory returns data."""
+        """Test get_memory_folders when basic-memory returns data."""
         # Setup mock
         mock_result = MagicMock()
         mock_result.returncode = 0
@@ -61,9 +61,9 @@ class TestMemoryFunctions:
         assert folders == ["test1", "test2", "test3"]
         mock_run.assert_called_once_with(["tool", "list-folders", "--format", "json"])
     
-    @patch('skogcli.memory.run_skogai_memory')
+    @patch('skogcli.memory.run_basic_memory')
     def test_get_memory_folders_fallback(self, mock_run):
-        """Test get_memory_folders fallback when skogai-memory fails."""
+        """Test get_memory_folders fallback when basic-memory fails."""
         # Setup mock to raise exception
         mock_run.side_effect = Exception("Test error")
         
@@ -75,9 +75,9 @@ class TestMemoryFunctions:
         assert "meetings" in folders
         assert "projects" in folders
     
-    @patch('skogcli.memory.run_skogai_memory')
+    @patch('skogcli.memory.run_basic_memory')
     def test_get_memory_projects_success(self, mock_run):
-        """Test get_memory_projects when skogai-memory returns data."""
+        """Test get_memory_projects when basic-memory returns data."""
         # Setup mock
         mock_result = MagicMock()
         mock_result.returncode = 0
@@ -96,10 +96,10 @@ class TestMemoryFunctions:
         assert projects == ["project1", "project2"]
         mock_run.assert_called_once_with(["tool", "list-projects", "--format", "json"])
     
-    @patch('skogcli.memory.run_skogai_memory')
+    @patch('skogcli.memory.run_basic_memory')
     @patch('skogcli.memory.get_setting')
     def test_get_memory_projects_fallback(self, mock_get_setting, mock_run):
-        """Test get_memory_projects fallback when skogai-memory fails."""
+        """Test get_memory_projects fallback when basic-memory fails."""
         # Setup mocks
         mock_run.side_effect = Exception("Test error")
         mock_get_setting.return_value = "test_project"
@@ -113,8 +113,8 @@ class TestMemoryFunctions:
         mock_get_setting.assert_called_once_with("memory.default_project")
     
     @patch('subprocess.run')
-    def test_run_skogai_memory_success(self, mock_run):
-        """Test run_skogai_memory when skogai-memory is available."""
+    def test_run_basic_memory_success(self, mock_run):
+        """Test run_basic_memory when basic-memory is available."""
         # Setup mock
         mock_result = MagicMock()
         mock_result.returncode = 0
@@ -122,26 +122,26 @@ class TestMemoryFunctions:
         mock_run.return_value = mock_result
         
         # Call the function
-        result = run_skogai_memory(["test", "args"])
+        result = run_basic_memory(["test", "args"])
         
         # Check the result
         assert result.returncode == 0
         assert result.stdout == "test output"
         mock_run.assert_called_once_with(
-            ["uvx", "skogai-memory", "test", "args"],
+            ["uvx", "basic-memory", "test", "args"],
             capture_output=True,
             text=True
         )
     
     @patch('subprocess.run')
-    def test_run_skogai_memory_not_found(self, mock_run):
-        """Test run_skogai_memory when skogai-memory is not found."""
+    def test_run_basic_memory_not_found(self, mock_run):
+        """Test run_basic_memory when basic-memory is not found."""
         # Setup mock to raise FileNotFoundError
         mock_run.side_effect = FileNotFoundError("No such file")
         
         # Call the function and check for expected exception
         with pytest.raises(typer.Exit) as excinfo:
-            run_skogai_memory(["test"])
+            run_basic_memory(["test"])
         
         # Check exit code is 1
         assert excinfo.value.exit_code == 1
