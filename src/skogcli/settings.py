@@ -31,20 +31,14 @@ ensure_data_dir()
 
 def get_config_dir() -> Path:
     """Get the configuration directory, creating it if it doesn't exist."""
-    # Check for SKOGAI config directory first
-    skogai_config_dir = os.getenv("SKOGAI_CONFIG_DIR")
-    if skogai_config_dir:
-        config_dir = Path(skogai_config_dir)
+    storage_dir = get_setting("settings.cli.storage_dir")
+    if storage_dir:
+        config_dir = Path(storage_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
     
-    # Check for XDG_CONFIG_HOME as a better fallback
-    xdg_config_home = os.getenv("XDG_CONFIG_HOME")
-    if xdg_config_home:
-        config_dir = Path(xdg_config_home) / "skogcli"
-    else:
-        config_dir = Path.home() / ".config" / "skogcli"
-    
+    # Fallback to hardcoded config directory
+    config_dir = Path.home() / ".config" / "skogcli"
     config_dir.mkdir(parents=True, exist_ok=True)
     return config_dir
 

@@ -26,20 +26,13 @@ script_app = typer.Typer(
 
 def get_templates_dir() -> Path:
     """Get the directory containing script templates."""
-    # First check if there's a SKOGAI templates directory
-    skogai_templates_dir = os.getenv("SKOGAI_TEMPLATES_DIR")
-    if skogai_templates_dir:
-        templates_path = Path(skogai_templates_dir)
+    from .settings import get_setting
+    
+    templates_dir = get_setting("settings.script.templates_dir")
+    if templates_dir:
+        templates_path = Path(templates_dir)
         if templates_path.exists() and templates_path.is_dir():
             return templates_path
-    
-    # Import get_config_dir to use proper config directory logic
-    from .settings import get_config_dir
-    
-    # Fallback to user templates directory using proper config dir
-    user_templates_dir = get_config_dir() / "templates"
-    if user_templates_dir.exists() and user_templates_dir.is_dir():
-        return user_templates_dir
     
     # Otherwise use the package templates directory
     return Path(__file__).parent / "data" / "templates"
@@ -111,34 +104,32 @@ def get_global_scripts_dir() -> Path:
 
 def get_user_scripts_dir() -> Path:
     """Get the user scripts directory, creating it if it doesn't exist."""
-    # Check for SKOGAI scripts directory first
-    skogai_scripts_dir = os.getenv("SKOGAI_SCRIPTS_DIR")
-    if skogai_scripts_dir:
-        scripts_dir = Path(skogai_scripts_dir)
+    from .settings import get_setting
+    
+    scripts_dir_setting = get_setting("settings.script.user_scripts_dir")
+    if scripts_dir_setting:
+        scripts_dir = Path(scripts_dir_setting)
         scripts_dir.mkdir(parents=True, exist_ok=True)
         return scripts_dir
     
-    # Import get_config_dir to use proper config directory logic
+    # Fallback to scripts directory under config
     from .settings import get_config_dir
-    
-    # Fallback to user scripts directory using proper config dir
     scripts_dir = get_config_dir() / "scripts"
     scripts_dir.mkdir(parents=True, exist_ok=True)
     return scripts_dir
 
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
-    # Check for SKOGAI metadata directory first
-    skogai_metadata_dir = os.getenv("SKOGAI_SCRIPT_METADATA_DIR")
-    if skogai_metadata_dir:
-        metadata_dir = Path(skogai_metadata_dir)
+    from .settings import get_setting
+    
+    metadata_dir_setting = get_setting("settings.script.metadata_dir")
+    if metadata_dir_setting:
+        metadata_dir = Path(metadata_dir_setting)
         metadata_dir.mkdir(parents=True, exist_ok=True)
         return metadata_dir / "script_metadata.json"
     
-    # Import get_config_dir to use proper config directory logic
+    # Fallback to metadata file in config directory
     from .settings import get_config_dir
-    
-    # Fallback to metadata file in proper config directory
     metadata_dir = get_config_dir()
     return metadata_dir / "script_metadata.json"
 
