@@ -38,13 +38,6 @@ def get_config_dir() -> Path:
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
     
-    # Check config setting
-    storage_dir = get_setting("settings.cli.storage_dir")
-    if storage_dir:
-        config_dir = Path(storage_dir)
-        config_dir.mkdir(parents=True, exist_ok=True)
-        return config_dir
-    
     # Fallback to hardcoded config directory
     config_dir = Path.home() / ".config" / "skogcli"
     config_dir.mkdir(parents=True, exist_ok=True)
