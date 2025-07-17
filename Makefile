@@ -40,11 +40,13 @@ help:
 
 # Setup commands
 install:
-	uv pip install -e .
+	uv pip install -e . && source .venv/bin/activate 
+
 
 dev-install:
 	uv venv --seed
-	source .venv/bin/activate && uv pip install -e ".[dev,monitoring]"
+	uv sync --reinstall
+	uv pip install -e ".[test,dev,monitoring]" && source .venv/bin/activate 
 
 pre-commit:
 	pre-commit install

@@ -1,25 +1,90 @@
 # CLAUDE.md
 
-IMPORTANT: THIS FILE CONTAINS EVERYTHING YOU NEED. NO ADDITIONAL CALLS, EXTERNAL INFORMATION, OR FILES ARE NEEDED. DO NOT LOOK AT OTHER FILES OR MAKE ADDITIONAL CALLS.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-- SkogCLI: A Typer-based CLI tool for the SkogAI project
-- Uses Python 3.12+ with Typer for CLI interface
-- Package management: UV (uv add, uv lock, uv sync) instead of pip
-- Run CLI: `uv run skogcli`
+**SkogCLI** is a professional-grade Typer-based CLI tool for the SkogAI project, built with Python 3.12+ and following modern development practices.
+
+- **Architecture**: Modular CLI with subcommands (`memory`, `config`, `script`, `agent`)
+- **CLI Entry Points**: `skogcli`, `skog`, `s` (all equivalent)
+- **Package Management**: UV (use `uv add <package> && uv lock && uv sync`)
+- **Run CLI**: `uv run skogcli`
 
 ## Build/Test Commands
 
-- Run all tests: `pytest` or `uv run pytest tests/`
-- Run a specific test: `pytest tests/test_file.py::test_name`
-- Run tests with verbose output: `pytest -v`
-- Install dependencies: `uv add <package> && uv lock && uv sync`
+### Development Setup
+- **Complete setup**: `make dev` (installs dependencies, virtual env, pre-commit hooks)
+- **Install dependencies**: `uv add <package> && uv lock && uv sync`
+- **Development install**: `make dev-install`
+
+### Testing
+- **Run all tests**: `pytest` or `make test`
+- **Run specific test**: `pytest tests/test_file.py::test_name`
+- **Run with coverage**: `make test-cov`
+- **Run tests parallel**: `make test-fast`
+- **Verbose output**: `pytest -v`
+
+### Code Quality
+- **Format code**: `make format` (Black + Ruff)
+- **Lint code**: `make lint` (Ruff)
+- **Type check**: `make type-check` (MyPy)
+- **Security scan**: `make security` (Bandit + Safety)
+- **All checks**: `make all-checks`
+- **Pre-commit check**: `make check`
+
+### Documentation
+- **Serve docs**: `make docs-serve` (MkDocs at localhost:8000)
+- **Build docs**: `make docs-build`
+- **Deploy docs**: `make docs-deploy`
+
+## Architecture Overview
+
+### CLI Structure
+```
+skogcli/
+├── __init__.py          # Main app with command registration
+├── memory.py            # Knowledge management (wraps basic-memory)
+├── settings.py          # Configuration management
+├── script.py            # Script generation and templates
+├── agent.py             # Agent interaction commands
+├── decorators.py        # Custom decorators (@with_explanation)
+├── completion.py        # Shell completion functionality
+├── monitoring.py        # Optional telemetry/monitoring
+└── data/                # Templates and default settings
+    ├── default_settings.json
+    └── templates/       # Python/shell script templates
+```
+
+### Key Commands
+- **`memory`**: Knowledge management (`create`, `read`, `search`, `list`, `sync`, `status`)
+- **`config`**: Configuration management (`show`, `get`, `set`, `reset`, `list`, `edit`)
+- **`script`**: Script generation with templates
+- **`agent`**: Agent interaction commands
+- **`version`**: Version information
+
+### Configuration System
+- **Location**: `~/.config/skogcli/config.json`
+- **Sensitive data**: Separate `credentials.json` 
+- **Features**: Dot notation, backups, environment variable overrides
+- **Environment**: `SKOGAI_CONFIG_DIR`, `SKOGAI_SCRIPTS_DIR`, `SKOGAI_TEMPLATES_DIR`
+
+### Testing Architecture
+- **Structure**: `tests/unit/`, `tests/integration/`, `tests/functional/`
+- **Framework**: pytest with comprehensive fixtures in `conftest.py`
+- **CLI Testing**: Uses `typer.testing.CliRunner`
+- **Coverage**: Configured with HTML/XML reports
+- **Markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.slow`
 
 ## Features
 
-- Configuration management (`config` command)
-- Memory module for knowledge management
+### Core Functionality
+- **Memory Module**: Wraps `basic-memory` with enhanced UX (Rich output, pagination)
+- **Configuration**: JSON-based with dot notation support
+- **Script Templates**: Python/shell script generation
+- **Agent Integration**: Command interface for SkogAI agents
+- **Shell Completion**: Built-in autocompletion support
+- **Help System**: `--helpall` for comprehensive documentation
 
 ## Code Style Guidelines
 
@@ -158,3 +223,70 @@ def process_markdown(markdown_str: str, raw: bool = False) -> Union[str, Markdow
    - `list` command for recent activity
    - `sync` and `status` commands for database maintenance
 5. Update tests as needed to verify actual functionality instead of placeholders
+
+## Dependencies and Integration
+
+### Core Dependencies
+- **Typer**: CLI framework with Rich integration
+- **Rich**: Terminal formatting and styling
+- **Click**: Foundation for Typer (version pinned <8.2.0)
+- **LiteLLM**: LLM integration for agent functionality
+- **SmoLAgents**: Agent framework integration
+- **Tiktoken**: Token counting for LLM operations
+
+### External Tool Integration
+- **basic-memory**: Knowledge management backend (called via `uvx basic-memory`)
+- **MkDocs**: Documentation site generation
+- **Pre-commit**: Code quality automation
+- **UV**: Fast Python package management
+
+### Development Dependencies
+- **Testing**: pytest, pytest-cov, pytest-xdist, pytest-mock, hypothesis
+- **Code Quality**: black, ruff, mypy, bandit, safety
+- **Documentation**: mkdocs-material, mkdocstrings
+- **Team Tools**: commitizen, semantic-release
+
+## Key Implementation Patterns
+
+### Command Structure
+- All commands use `no_args_is_help=True` for consistent help behavior
+- Subcommands registered via `app.add_typer()` pattern
+- Rich output with `console.print()` and `Table` components
+- Custom `--helpall` option for comprehensive documentation
+
+### Error Handling
+- Use appropriate exception types with context
+- Graceful degradation for missing external tools
+- Rich error formatting for user-friendly messages
+
+### Configuration Management
+- JSON-based with automatic backup/restore
+- Dot notation for nested settings (e.g., `api.key`)
+- Environment variable overrides
+- Credential separation for security
+
+### Testing Strategy
+- Three-tier testing: unit, integration, functional
+- Mock external dependencies (basic-memory, file system)
+- CLI testing with `typer.testing.CliRunner`
+- Property-based testing with Hypothesis for configuration
+
+## Development Workflow Integration
+
+### Pre-commit Hooks
+- Code formatting (Black + Ruff)
+- Type checking (MyPy)
+- Security scanning (Bandit)
+- Test execution on changed files
+
+### CI/CD Pipeline
+- Quality gates: formatting, linting, type checking, security
+- Test execution across test types
+- Documentation building and deployment
+- Semantic versioning with automated releases
+
+### Team Development
+- MkDocs documentation with Material theme
+- Structured onboarding process (`make onboard`)
+- Team standards and playbooks in dedicated directories
+- Comprehensive development tooling via Makefile
