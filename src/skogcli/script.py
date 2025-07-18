@@ -35,7 +35,7 @@ def get_templates_dir() -> Path:
     
     # Check config setting
     from .settings import get_setting
-    templates_dir = get_setting("settings.script.templates_dir")
+    templates_dir = get_setting("script.templates_dir")
     if templates_dir:
         templates_path = Path(templates_dir)
         if templates_path.exists() and templates_path.is_dir():
@@ -120,7 +120,7 @@ def get_user_scripts_dir() -> Path:
     
     # Check config setting
     from .settings import get_setting
-    scripts_dir_setting = get_setting("settings.script.user_scripts_dir")
+    scripts_dir_setting = get_setting("script.user_scripts_dir")
     if scripts_dir_setting:
         scripts_dir = Path(scripts_dir_setting)
         scripts_dir.mkdir(parents=True, exist_ok=True)
@@ -143,7 +143,7 @@ def get_metadata_file() -> Path:
     
     # Check config setting
     from .settings import get_setting
-    metadata_dir_setting = get_setting("settings.script.metadata_dir")
+    metadata_dir_setting = get_setting("script.metadata_dir")
     if metadata_dir_setting:
         metadata_dir = Path(metadata_dir_setting)
         metadata_dir.mkdir(parents=True, exist_ok=True)

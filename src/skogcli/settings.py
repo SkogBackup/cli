@@ -299,16 +299,25 @@ def get_setting(key: str) -> Any:
         return sensitive_settings.get(credential_key)
 
     if "." in key:
-        # Handle nested keys
+        # Handle nested keys - start from settings.settings for most keys
         parts = key.split(".")
-        current = settings
+        if parts[0] in ["settings", "credentials"]:
+            # Key already includes the top-level section
+            current = settings
+        else:
+            # Key is relative to settings.settings
+            current = settings.get("settings", {})
+        
         for part in parts:
             if part not in current:
                 return None
             current = current[part]
         return current
 
-    return settings.get(key)
+    # For single keys, check both root and settings.settings
+    if key in settings:
+        return settings[key]
+    return settings.get("settings", {}).get(key)
 
 
 def set_setting(key: str, value: Any) -> bool:
@@ -342,9 +351,17 @@ def set_setting(key: str, value: Any) -> bool:
             console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
             return False
     elif "." in key:
-        # Handle nested keys
+        # Handle nested keys - start from settings.settings for most keys
         parts = key.split(".")
-        current = settings
+        if parts[0] in ["settings", "credentials"]:
+            # Key already includes the top-level section
+            current = settings
+        else:
+            # Key is relative to settings.settings
+            if "settings" not in settings:
+                settings["settings"] = {}
+            current = settings["settings"]
+        
         for i, part in enumerate(parts[:-1]):
             if part not in current:
                 current[part] = {}
@@ -353,7 +370,10 @@ def set_setting(key: str, value: Any) -> bool:
         # Set the value at the final level
         current[parts[-1]] = value
     else:
-        settings[key] = value
+        # For single keys, set in settings.settings
+        if "settings" not in settings:
+            settings["settings"] = {}
+        settings["settings"][key] = value
 
     return save_settings(settings)
 
