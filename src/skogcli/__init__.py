@@ -13,18 +13,28 @@ def add_helpall_to_app(app_instance, app_name):
     def subcommand_callback(
         ctx: Context,
         helpall: bool = Option(
-            False, "--helpall", help=f"Show comprehensive documentation for {app_name} commands"
+            False,
+            "--helpall",
+            help=f"Show comprehensive documentation for {app_name} commands",
         ),
     ):
         if helpall:
             import subprocess
+
             # Generate the documentation for this specific command group
             subprocess.run(
-                ["typer", f"skogcli.{app_name}", "utils", "docs", 
-                 "--name", f"SkogCLI {app_name}"],
-                check=True
+                [
+                    "typer",
+                    f"skogcli.{app_name}",
+                    "utils",
+                    "docs",
+                    "--name",
+                    f"SkogCLI {app_name}",
+                ],
+                check=True,
             )
             raise Exit()
+
 
 # Create the main Typer app
 app = Typer(no_args_is_help=True, name="SkogCLI")
@@ -51,13 +61,12 @@ def callback(
     if helpall:
         import subprocess
         import sys
-        
+
         # Generate the documentation for all commands
         subprocess.run(
-            ["typer", "skogcli", "utils", "docs", "--name", "SkogCLI"],
-            check=True
+            ["typer", "skogcli", "utils", "docs", "--name", "SkogCLI"], check=True
         )
-        
+
         raise Exit()
 
 
@@ -65,9 +74,10 @@ def callback(
 def version():
     """Show the version of SkogCLI."""
     import importlib.metadata
+
     try:
         version = importlib.metadata.version("skogcli")
-        print(f"SkogCLI version {version}")
+        print(f"SkogCLI v{version}")
     except importlib.metadata.PackageNotFoundError:
         print("SkogCLI version: development")
 
@@ -77,5 +87,5 @@ def main():
     app()
 
 
-if __name__ == "__init__":
+if __name__ == "__main__":
     main()

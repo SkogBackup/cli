@@ -1,0 +1,11 @@
+usage: git flow release [list]
+   or: git flow release start
+   or: git flow release finish
+   or: git flow release publish
+   or: git flow release track
+   or: git flow release delete
+
+    Manage your release branches.
+
+    For more specific help type the command followed by --help
+

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Show various logs with optional filtering
+
+LOG_DIR="/home/skogix/.skogai/logs"
+
+if [ ! -d "$LOG_DIR" ]; then
+  echo "No logs directory found yet. Logs will be created as you use Claude."
+  exit 0
+fi
+
+case "${1:-all}" in
+commands)
+  echo "=== Recent Commands ==="
+  tail -20 "$LOG_DIR/commands.log" 2>/dev/null || echo "No commands logged yet"
+  ;;
+files)
+  echo "=== Recent File Changes ==="
+  tail -20 "$LOG_DIR/file-changes.log" 2>/dev/null || echo "No file changes logged yet"
+  ;;
+tools)
+  echo "=== Recent Tool Usage ==="
+  tail -20 "$LOG_DIR/tool-usage.log" 2>/dev/null || echo "No tool usage logged yet"
+  ;;
+info)
+  echo "=== Recent Information Gathering ==="
+  tail -20 "$LOG_DIR/information-gathering.log" 2>/dev/null || echo "No info gathering logged yet"
+  ;;
+notices)
+  echo "=== System Notices ==="
+  tail -20 "$LOG_DIR/system-notices.log" 2>/dev/null || echo "No system notices logged yet"
+  ;;
+responses)
+  echo "=== Recent Tool Responses ==="
+  tail -20 "$LOG_DIR/tool-responses.log" 2>/dev/null || echo "No responses logged yet"
+  ;;
+timeline)
+  echo "=== Session Timeline ==="
+  cat "$LOG_DIR/session-timeline.log" 2>/dev/null || echo "No timeline logged yet"
+  ;;
+all)
+  echo "=== All Recent Activity ==="
+  echo
+  for log in "$LOG_DIR"/*.log; do
+    if [ -f "$log" ]; then
+      echo "--- $(basename "$log") ---"
+      tail -10 "$log"
+      echo
+    fi
+  done
+  ;;
+*)
+  echo "Usage: $0 [commands|files|tools|info|notices|responses|timeline|all]"
+  echo "Default: all"
+  ;;
+esac

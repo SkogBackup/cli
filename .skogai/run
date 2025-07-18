@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+.skogai/docs/claude-code/apply_multiple_replacements.sh /home/skogix/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js /home/skogix/.skogai/docs/claude-code/system-prompt-replacements/
+./update
+/home/skogix/.claude/local/claude "$@"

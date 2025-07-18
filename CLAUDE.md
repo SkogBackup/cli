@@ -158,3 +158,7 @@ def process_markdown(markdown_str: str, raw: bool = False) -> Union[str, Markdow
    - `list` command for recent activity
    - `sync` and `status` commands for database maintenance
 5. Update tests as needed to verify actual functionality instead of placeholders
+
+### includes
+@.skogai/CLAUDE.md
+@./tmp/context

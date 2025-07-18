@@ -20,7 +20,7 @@ class TestConfig:
         self.test_config_dir = self.test_home / ".config" / "skogcli"
         self.test_config_dir.mkdir(parents=True, exist_ok=True)
         self.test_config_file = self.test_config_dir / "config.json"
-        
+
         # Point HOME to our test directory
         os.environ["HOME"] = str(self.test_home)
 
@@ -29,7 +29,7 @@ class TestConfig:
         # Restore the original HOME environment variable
         if self.original_home:
             os.environ["HOME"] = self.original_home
-        
+
         # Clean up the test directory
         shutil.rmtree(self.test_home, ignore_errors=True)
 
@@ -41,10 +41,10 @@ class TestConfig:
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the command succeeded
         assert result.returncode == 0
-        
+
         # Check that the output contains expected configuration sections
         assert "memory" in result.stdout
         assert "ui" in result.stdout
@@ -57,10 +57,10 @@ class TestConfig:
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the command succeeded
         assert result.returncode == 0
-        
+
         # Check that the output contains expected keys
         assert "Available configuration keys" in result.stdout
         assert "memory.page_size" in result.stdout
@@ -74,10 +74,10 @@ class TestConfig:
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the command succeeded
         assert result.returncode == 0
-        
+
         # Check that the output contains the key and a value
         assert "memory.page_size" in result.stdout
         assert "10" in result.stdout  # Default value from settings.py
@@ -90,18 +90,18 @@ class TestConfig:
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the set command succeeded
         assert set_result.returncode == 0
         assert "Set ui.theme" in set_result.stdout
-        
+
         # Now get the value to verify it was set
         get_result = subprocess.run(
             ["uv", "run", "skogcli", "config", "get", "ui.theme"],
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the get command succeeded and returns the set value
         assert get_result.returncode == 0
         assert "ui.theme = dark" in get_result.stdout
@@ -114,25 +114,25 @@ class TestConfig:
             capture_output=True,
             text=True,
         )
-        
+
         # Now reset the config (with --yes to skip confirmation)
         reset_result = subprocess.run(
             ["uv", "run", "skogcli", "config", "reset", "--yes"],
             capture_output=True,
             text=True,
         )
-        
+
         # Check that the reset command succeeded
         assert reset_result.returncode == 0
         assert "reset to defaults" in reset_result.stdout.lower()
-        
+
         # Verify that the value was reset by getting it
         get_result = subprocess.run(
             ["uv", "run", "skogcli", "config", "get", "ui.theme"],
             capture_output=True,
             text=True,
         )
-        
+
         # Should be back to the default value
         assert get_result.returncode == 0
         assert "ui.theme = default" in get_result.stdout

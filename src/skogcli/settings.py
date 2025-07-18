@@ -6,16 +6,16 @@ import shutil
 import time
 import typer
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, cast
 from rich.console import Console
 from rich.syntax import Syntax
-from rich import print as rprint
 from .decorators import with_explanation
 from .default_settings import (
     load_default_settings,
     save_default_settings,
     get_default_settings_file,
     CONFIG_VERSION,
+    ensure_data_dir,
 )
 
 console = Console()
@@ -24,8 +24,6 @@ console = Console()
 config_app = typer.Typer(help="Manage SkogCLI configuration", no_args_is_help=True)
 
 # Ensure the data directory exists
-from .default_settings import ensure_data_dir
-
 ensure_data_dir()
 
 
@@ -37,14 +35,14 @@ def get_config_dir() -> Path:
         config_dir = Path(skogai_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
-    
+
     # Check config setting
     storage_dir = get_setting("settings.cli.storage_dir")
     if storage_dir:
         config_dir = Path(storage_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
-    
+
     # Fallback to hardcoded config directory
     config_dir = Path.home() / ".config" / "skogcli"
     config_dir.mkdir(parents=True, exist_ok=True)
@@ -68,7 +66,7 @@ def get_sensitive_config_file() -> Path:
     return get_config_dir() / "credentials.json"
 
 
-def create_backup(config_file: Path) -> Path:
+def create_backup(config_file: Path) -> Optional[Path]:
     """Create a backup of the configuration file."""
     if not config_file.exists():
         return None
@@ -89,11 +87,15 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     # Ensure settings structure exists
     if "settings" not in settings:
         settings["settings"] = {}
-        
-    if (
-        "meta" not in settings["settings"]
-        or "version" not in settings["settings"]["meta"]
-    ):
+
+    # Check for version in both meta and _meta sections
+    has_version = False
+    if "meta" in settings["settings"] and "version" in settings["settings"]["meta"]:
+        has_version = True
+    elif "_meta" in settings["settings"] and "version" in settings["settings"]["_meta"]:
+        has_version = True
+
+    if not has_version:
         # This is an old config without versioning
         console.print("[yellow]Migrating configuration to the latest version...[/]")
 
@@ -106,28 +108,26 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
         # Add new sections that didn't exist in older versions
         if "module" not in settings["settings"]:
             # Initialize empty module settings
-            settings["settings"]["module"] = {
-                "history": []
-            }
+            settings["settings"]["module"] = {"history": []}
 
         if "credentials" not in settings:
             settings["credentials"] = {}
-    
+
     # Migrate chat history from old location to new location if needed
     if "chat" in settings and "history" in settings["chat"]:
         # Ensure module section exists
         if "module" not in settings["settings"]:
             settings["settings"]["module"] = {}
-        
+
         # Ensure history section exists in module
         if "history" not in settings["settings"]["module"]:
             settings["settings"]["module"]["history"] = []
-            
+
         # Copy history from old location to new location
         settings["settings"]["module"]["history"] = settings["chat"]["history"]
 
     # Handle future migrations based on version numbers
-    version = settings["settings"]["meta"].get("version", 0)
+    # version = settings["settings"]["meta"].get("version", 0)
 
     # Example of future migration:
     # if version < 2:
@@ -147,7 +147,7 @@ def load_settings() -> Dict[str, Any]:
         settings = load_default_settings()
         settings["settings"]["meta"] = {
             "last_updated": time.time(),
-            "version": CONFIG_VERSION
+            "version": CONFIG_VERSION,
         }
         save_settings(settings)
         return settings
@@ -172,13 +172,17 @@ def load_settings() -> Dict[str, Any]:
         # Try to restore from backup
         backup = restore_from_latest_backup()
         if backup:
-            console.print(f"[green]Restored configuration from backup.[/]")
+            console.print("[green]Restored configuration from backup.[/]")
             return backup
 
         # If no backup, reset to defaults
         console.print("[yellow]Resetting to default configuration.[/]")
         settings = load_default_settings()
-        settings["_meta"]["last_updated"] = time.time()
+        if "settings" not in settings:
+            settings["settings"] = {}
+        if "meta" not in settings["settings"]:
+            settings["settings"]["meta"] = {}
+        settings["settings"]["meta"]["last_updated"] = time.time()
         save_settings(settings)
         return settings
     except Exception as e:
@@ -195,7 +199,7 @@ def load_sensitive_settings() -> Dict[str, Any]:
 
     try:
         with open(sensitive_file, "r") as f:
-            return json.load(f)
+            return cast(Dict[str, Any], json.load(f))
     except Exception:
         console.print(
             "[bold yellow]Warning:[/] Could not load sensitive configuration."
@@ -220,7 +224,7 @@ def restore_from_latest_backup() -> Optional[Dict[str, Any]]:
     # Try to load from the most recent backup
     try:
         with open(backup_files[0], "r") as f:
-            return json.load(f)
+            return cast(Dict[str, Any], json.load(f))
     except Exception:
         return None
 
@@ -229,7 +233,7 @@ def get_config_keys() -> List[str]:
     """Get a list of all configuration keys for completion."""
     settings = load_settings()
 
-    def extract_keys(data, prefix=""):
+    def extract_keys(data: Dict[str, Any], prefix: str = "") -> List[str]:
         keys = []
         for key, value in data.items():
             full_key = f"{prefix}{key}" if prefix else key
@@ -240,7 +244,7 @@ def get_config_keys() -> List[str]:
                 keys.append(full_key)
         return keys
 
-    return extract_keys(settings)
+    return cast(List[str], extract_keys(settings))
 
 
 def save_settings(settings: Dict[str, Any]) -> bool:
@@ -254,7 +258,7 @@ def save_settings(settings: Dict[str, Any]) -> bool:
     # Update metadata
     if "settings" not in settings:
         settings["settings"] = {}
-    
+
     if "meta" not in settings["settings"]:
         settings["settings"]["meta"] = {"version": CONFIG_VERSION}
 
@@ -290,6 +294,26 @@ def get_setting(key: str) -> Any:
     """Get a setting value by its key (supports dot notation for nested settings)."""
     settings = load_settings()
 
+    # Handle SkogAI $ syntax - access definitions in the $ section
+    if key == "$":
+        # Return the entire $ section
+        return settings.get("$", {})
+    elif key.startswith("$."):
+        # Access nested keys within $ section
+        dollar_key = key[2:]  # Remove "$." prefix
+        dollar_section = settings.get("$", {})
+
+        # Handle nested access like $.claude.hello
+        if "." in dollar_key:
+            current = dollar_section
+            for part in dollar_key.split("."):
+                if not isinstance(current, dict) or part not in current:
+                    return None
+                current = current[part]
+            return current
+        else:
+            return dollar_section.get(dollar_key)
+
     # Handle credentials separately
     if key.startswith("credentials."):
         sensitive_settings = load_sensitive_settings()
@@ -297,16 +321,25 @@ def get_setting(key: str) -> Any:
         return sensitive_settings.get(credential_key)
 
     if "." in key:
-        # Handle nested keys
+        # Handle nested keys - start from settings.settings for most keys
         parts = key.split(".")
-        current = settings
+        if parts[0] in ["settings", "credentials"]:
+            # Key already includes the top-level section
+            current = settings
+        else:
+            # Key is relative to settings.settings
+            current = settings.get("settings", {})
+
         for part in parts:
             if part not in current:
                 return None
             current = current[part]
         return current
 
-    return settings.get(key)
+    # For single keys, check both root and settings.settings
+    if key in settings:
+        return settings[key]
+    return settings.get("settings", {}).get(key)
 
 
 def set_setting(key: str, value: Any) -> bool:
@@ -340,9 +373,17 @@ def set_setting(key: str, value: Any) -> bool:
             console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
             return False
     elif "." in key:
-        # Handle nested keys
+        # Handle nested keys - start from settings.settings for most keys
         parts = key.split(".")
-        current = settings
+        if parts[0] in ["settings", "credentials"]:
+            # Key already includes the top-level section
+            current = settings
+        else:
+            # Key is relative to settings.settings
+            if "settings" not in settings:
+                settings["settings"] = {}
+            current = settings["settings"]
+
         for i, part in enumerate(parts[:-1]):
             if part not in current:
                 current[part] = {}
@@ -351,7 +392,10 @@ def set_setting(key: str, value: Any) -> bool:
         # Set the value at the final level
         current[parts[-1]] = value
     else:
-        settings[key] = value
+        # For single keys, set in settings.settings
+        if "settings" not in settings:
+            settings["settings"] = {}
+        settings["settings"][key] = value
 
     return save_settings(settings)
 
@@ -390,13 +434,15 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     # Ensure module section exists
     if "settings" not in settings:
         settings["settings"] = {}
-    
+
     if "module" not in settings["settings"]:
         # Import default settings from the module
         from .default_settings import DEFAULT_SETTINGS
 
-        settings["settings"]["module"] = DEFAULT_SETTINGS["settings"]["module"].copy()
-    
+        settings["settings"]["module"] = cast(
+            Dict[str, Any], DEFAULT_SETTINGS["settings"]["module"]
+        ).copy()
+
     # Ensure history section exists
     if "history" not in settings["settings"]["module"]:
         settings["settings"]["module"]["history"] = []
@@ -411,7 +457,9 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     # Trim history if it exceeds the maximum
     max_items = settings["settings"]["module"].get("max_history_items", 100)
     if len(settings["settings"]["module"]["history"]) > max_items:
-        settings["settings"]["module"]["history"] = settings["settings"]["module"]["history"][-max_items:]
+        settings["settings"]["module"]["history"] = settings["settings"]["module"][
+            "history"
+        ][-max_items:]
 
     return save_settings(settings)
 
@@ -427,9 +475,11 @@ def get_chat_history(limit: Optional[int] = None) -> List[Dict[str, Any]]:
     """
     settings = load_settings()
 
-    if ("settings" not in settings or 
-        "module" not in settings["settings"] or 
-        "history" not in settings["settings"]["module"]):
+    if (
+        "settings" not in settings
+        or "module" not in settings["settings"]
+        or "history" not in settings["settings"]["module"]
+    ):
         return []
 
     history = settings["settings"]["module"]["history"]
@@ -463,29 +513,28 @@ def clear_chat_history() -> bool:
 
 
 @config_app.callback()
-def config_callback():
+def config_callback() -> None:
     """Manage SkogCLI configuration."""
     pass
 
 
 @config_app.command("show")
 @with_explanation("Display the current configuration.")
-def show():
+def show() -> None:
     """Display the current configuration."""
     settings = load_settings()
     json_str = json.dumps(settings, indent=2)
     syntax = Syntax(json_str, "json", theme="monokai", line_numbers=True)
     console.print(syntax)
-    return 0  # Ensure the command returns 0
 
 
 @config_app.command("list")
 @with_explanation("List all available configuration keys.")
-def list_keys():
+def list_keys() -> None:
     """List all available configuration keys."""
     settings = load_settings()
 
-    def extract_keys(data, prefix=""):
+    def extract_keys(data: Dict[str, Any], prefix: str = "") -> List[str]:
         keys = []
         for key, value in data.items():
             full_key = f"{prefix}{key}" if prefix else key
@@ -500,7 +549,6 @@ def list_keys():
     console.print("[bold]Available configuration keys:[/]")
     for key in sorted(all_keys):
         console.print(f"  {key}")
-    return 0  # Ensure the command returns 0
 
 
 @config_app.command("get")
@@ -525,7 +573,7 @@ def get(
         return
 
     # Check if this is a leaf node in a nested structure
-    is_leaf_node = "." in key and not isinstance(value, dict)
+    # is_leaf_node = "." in key and not isinstance(value, dict)
 
     # Output as JSON when --json flag is used
     if json_format:
@@ -634,13 +682,12 @@ def reset(
 
 @config_app.command("show-defaults")
 @with_explanation("Display the default configuration.")
-def show_defaults():
+def show_defaults() -> None:
     """Display the default configuration."""
     settings = load_default_settings()
     json_str = json.dumps(settings, indent=2)
     syntax = Syntax(json_str, "json", theme="monokai", line_numbers=True)
     console.print(syntax)
-    return 0  # Ensure the command returns 0
 
 
 @config_app.command("edit-defaults")
@@ -858,15 +905,15 @@ def edit_defaults(
         # Handle nested keys
         if "." in key:
             parts = key.split(".")
-            current = defaults
+            current_dict: Any = defaults
             for part in parts:
-                if part not in current:
+                if part not in current_dict:
                     console.print(
                         f"[bold red]Error:[/] Key '{key}' not found in default configuration."
                     )
                     return 1
-                current = current[part]
-            value = current
+                current_dict = current_dict[part]
+            value = current_dict
         else:
             if key not in defaults:
                 console.print(
@@ -943,7 +990,11 @@ def edit(
         else:
             # Load default settings
             settings = load_default_settings()
-            settings["_meta"]["last_updated"] = time.time()
+            if "settings" not in settings:
+                settings["settings"] = {}
+            if "meta" not in settings["settings"]:
+                settings["settings"]["meta"] = {}
+            settings["settings"]["meta"]["last_updated"] = time.time()
             save_settings(settings)
 
     # Create a backup before editing
@@ -977,7 +1028,7 @@ def edit(
 
 @config_app.command("backup")
 @with_explanation("Create a backup of the configuration files.")
-def backup():
+def backup() -> None:
     """Create a backup of the configuration files."""
     config_file = get_config_file()
     sensitive_file = get_sensitive_config_file()
@@ -1069,7 +1120,7 @@ def restore(
 
 @config_app.command("list-backups")
 @with_explanation("List available configuration backups.")
-def list_backups():
+def list_backups() -> None:
     """List available configuration backups."""
     backup_dir = get_backup_dir()
     if not backup_dir.exists():
@@ -1091,8 +1142,6 @@ def list_backups():
         )
         size = backup.stat().st_size / 1024  # Size in KB
         console.print(f"{i + 1}. {backup.name} ({mtime}, {size:.1f} KB)")
-
-
 
 
 @config_app.command("chat-history")

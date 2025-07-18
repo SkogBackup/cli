@@ -1,0 +1,15 @@
+usage: git flow feature [list]
+   or: git flow feature start
+   or: git flow feature finish
+   or: git flow feature publish
+   or: git flow feature track
+   or: git flow feature diff
+   or: git flow feature rebase
+   or: git flow feature checkout
+   or: git flow feature pull
+   or: git flow feature delete
+
+    Manage your feature branches.
+
+    For more specific help type the command followed by --help
+

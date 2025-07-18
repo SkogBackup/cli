@@ -22,42 +22,29 @@ console = Console()
 
 
 def get_activity_types() -> List[str]:
-    """Get a list of activity types for completion.
-
-    Returns:
-        List[str]: List of valid activity types
-    """
+    """Get a list of activity types for completion."""
     return ["entity", "observation", "relation", "note", "file"]
 
 
 def get_timeframe_options() -> List[str]:
-    """Get a list of common timeframe options for completion.
-
-    Returns:
-        List[str]: List of valid timeframe strings
-    """
+    """Get a list of common timeframe options for completion."""
     return [
-        # Short-term
         "15m",
         "30m",
         "1h",
         "6h",
         "12h",
         "24h",
-        # Days
         "2d",
         "3d",
         "1w",
         "2w",
         "3w",
-        # Months
         "1m",
         "3m",
         "6m",
-        # Years
         "1y",
         "2y",
-        # Special
         "today",
         "yesterday",
         "this-week",
@@ -74,10 +61,9 @@ def get_memory_folders() -> List[str]:
         if result.returncode == 0:
             folders_data = json.loads(result.stdout)
             return [folder["name"] for folder in folders_data.get("folders", [])]
-    except (json.JSONDecodeError, subprocess.SubprocessError):
+    except (json.JSONDecodeError, subprocess.SubprocessError, Exception):
         pass
 
-    # Fallback to hardcoded list
     return ["notes", "meetings", "projects", "ideas", "research", "journal"]
 
 
@@ -88,10 +74,9 @@ def get_memory_projects() -> List[str]:
         if result.returncode == 0:
             projects_data = json.loads(result.stdout)
             return [project["name"] for project in projects_data.get("projects", [])]
-    except (json.JSONDecodeError, subprocess.SubprocessError):
+    except (json.JSONDecodeError, subprocess.SubprocessError, Exception):
         pass
 
-    # Fallback to settings and defaults
     projects = ["default"]
     default_project = get_setting("memory.default_project")
     if default_project and default_project not in projects:
@@ -100,24 +85,14 @@ def get_memory_projects() -> List[str]:
 
 
 def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
-    """Run basic-memory with the given arguments.
-
-    Args:
-        args: List of command line arguments to pass to basic-memory
-
-    Returns:
-        subprocess.CompletedProcess: The result of the command execution
-
-    Raises:
-        typer.Exit: If basic-memory is not found or command fails
-    """
+    """Run basic-memory with the given arguments."""
     cmd = ["uvx", "basic-memory"] + args
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            check=False,  # We'll handle non-zero return codes manually
+            check=False,
         )
         return result
     except FileNotFoundError:
@@ -133,98 +108,26 @@ def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
 
 @memory_app.callback(invoke_without_command=True, no_args_is_help=True)
 def memory_callback():
-    """Knowledge management powered by basic-memory.
-
-    This CLI provides commands to manage and interact with your knowledge base.
-    """
+    """Knowledge management powered by basic-memory."""
     pass
 
 
-@memory_app.command(
-    name="create",
-    no_args_is_help=True,
-    help="Create or update a note in your knowledge base.",
-    short_help="Create or update a note",
-)
-@memory_app.command(name="write", hidden=True)  # Alias for create
-@memory_app.command(name="add", hidden=True)  # Another alias
-@memory_app.command(name="new", hidden=True)  # One more alias
-def create(
-    title: str = typer.Argument(
-        ...,
-        help="Title of the note",
-        show_default=False,
-    ),
-    folder: str = typer.Argument(
-        ...,
-        help="Folder to create the note in",
-        autocompletion=get_memory_folders,
-        show_default=False,
-    ),
-    content: Optional[str] = typer.Option(
-        None,
-        "--content",
-        "-c",
-        help="Note content (if not provided, read from stdin)",
-        show_default=False,
-    ),
-    tags: Optional[str] = typer.Option(
-        None,
-        "--tag",
-        "-t",
-        help="Tags to apply to the note (comma-separated)",
-        show_default=False,
-    ),
-    project: Optional[str] = typer.Option(
-        None,
-        "--project",
-        "-p",
-        help="Specific project to use",
-        autocompletion=get_memory_projects,
-        show_default=False,
-    ),
+@memory_app.command(name="bm", help="Direct passthrough to basic-memory command")
+def basic_memory_passthrough(
+    args: List[str] = typer.Argument(..., help="Arguments to pass to basic-memory")
 ):
-    """
-    Create or update a note in your knowledge base.
-
-    Examples:
-
-    Create from argument:
-      skogcli memory create "My Idea" notes --content "# My Idea\n\nThis is a great idea."
-
-    Create from stdin:
-      echo "# My Idea\n\nThis is a great idea." | skogcli memory create "My Idea" notes
-
-    Create with tags:
-      skogcli memory create "Meeting Notes" meetings --tags "work,important,2025"
-    """
-    cmd = ["tool", "write-note", "--title", title, "--folder", folder]
-    if tags:
-        cmd.extend(["--tags", tags])
-
-    if project:
-        cmd = ["--project", project] + cmd
-
-    if content:
-        result = run_basic_memory(cmd + ["--content", content])
-    else:
-        # Read from stdin
-        typer.echo("Enter note content (Ctrl+D to finish):")
-        from_stdin = typer.get_text_stream("stdin").read()
-        result = run_basic_memory(cmd + ["--content", from_stdin])
-
-    if result.returncode == 0:
-        typer.echo(f"✓ Note saved: {title} in {folder}")
-        return 0  # Ensure the command returns 0
-    else:
-        typer.echo(f"Error: {result.stderr}")
-        raise typer.Exit(code=1)
+    """Direct passthrough to basic-memory command."""
+    result = run_basic_memory(args)
+    if result.stdout:
+        typer.echo(result.stdout)
+    if result.stderr:
+        typer.echo(result.stderr, err=True)
+    if result.returncode != 0:
+        raise typer.Exit(code=result.returncode)
 
 
 @memory_app.command(
-    name="write",
-    no_args_is_help=True,
-    help="Create or update a note in your knowledge base.",
+    name="write", help="Create or update a note in your knowledge base."
 )
 def write(
     title: str = typer.Argument(..., help="Title of the note"),
@@ -245,22 +148,7 @@ def write(
         autocompletion=get_memory_projects,
     ),
 ):
-    """
-    Create or update a note in your knowledge base.
-
-    This is an alias for the 'create' command.
-
-    Examples:
-
-    Create from argument:
-      skogcli memory write "My Idea" notes --content "# My Idea\n\nThis is a great idea."
-
-    Create from stdin:
-      echo "# My Idea\n\nThis is a great idea." | skogcli memory write "My Idea" notes
-
-    Create with tags:
-      skogcli memory write "Meeting Notes" meetings --tags "work,important,2025"
-    """
+    """Create or update a note in your knowledge base."""
     cmd = ["tool", "write-note", "--title", title, "--folder", folder]
     if tags:
         cmd.extend(["--tags", tags])
@@ -271,7 +159,6 @@ def write(
     if content:
         result = run_basic_memory(cmd + ["--content", content])
     else:
-        # Read from stdin
         typer.echo("Enter note content (Ctrl+D to finish):")
         from_stdin = typer.get_text_stream("stdin").read()
         result = run_basic_memory(cmd + ["--content", from_stdin])
@@ -283,72 +170,65 @@ def write(
         raise typer.Exit(code=1)
 
 
-def get_note_identifiers() -> List[str]:
-    """Get a list of note identifiers for completion.
+@memory_app.command(name="create", help="Create or update a note")
+def create(
+    title: str = typer.Argument(..., help="Title of the note"),
+    folder: str = typer.Argument(
+        ..., help="Folder to create the note in", autocompletion=get_memory_folders
+    ),
+    content: Optional[str] = typer.Option(
+        None, "--content", "-c", help="Note content (if not provided, read from stdin)"
+    ),
+    tags: Optional[str] = typer.Option(
+        None, "--tag", "-t", help="Tags to apply to the note (comma-separated)"
+    ),
+    project: Optional[str] = typer.Option(
+        None,
+        "--project",
+        "-p",
+        help="Specific project to use",
+        autocompletion=get_memory_projects,
+    ),
+):
+    """Create or update a note in your knowledge base."""
+    # Delegate to write command
+    write(title=title, folder=folder, content=content, tags=tags, project=project)
 
-    Returns:
-        List[str]: List of note identifiers in the format 'folder/title'
-    """
+
+def get_note_identifiers() -> List[str]:
+    """Get a list of note identifiers for completion."""
     try:
         result = run_basic_memory(
-            [
-                "tool",
-                "recent-notes",
-                "--format",
-                "json",
-                "--limit",
-                "20",
-            ]  # Increased limit for better UX
+            ["tool", "recent-notes", "--format", "json", "--limit", "20"]
         )
         if result.returncode == 0:
             notes_data = json.loads(result.stdout)
             identifiers = []
             for note in notes_data.get("notes", []):
-                # Add both permalink and title as possible identifiers
                 if "permalink" in note:
                     identifiers.append(note["permalink"])
                 if "title" in note:
                     identifiers.append(note["title"])
-            # Add special identifiers
             identifiers.extend(["latest", "recent"])
             return identifiers
     except Exception:
         pass
 
-    # Fallback to hardcoded list
     return ["latest", "recent", "last-meeting", "project-ideas", "todo"]
 
 
-@memory_app.command(
-    name="read",
-    no_args_is_help=True,
-    help="Read a note from your knowledge base.",
-    short_help="Read a note by its identifier",
-)
-@memory_app.command(name="show", hidden=True)  # Alias for read
+@memory_app.command(name="read", help="Read a note by its identifier")
 def read(
     identifier: str = typer.Argument(
         ...,
         help="Note identifier in format 'folder/title' or just 'title' to search in all folders",
         autocompletion=get_note_identifiers,
-        show_default=False,
     ),
     page: int = typer.Option(
-        1,
-        "--page",
-        "-p",
-        min=1,
-        help="Page number for pagination",
-        show_default=True,
+        1, "--page", "-p", min=1, help="Page number for pagination"
     ),
     page_size: int = typer.Option(
-        10,
-        "--page-size",
-        "-s",
-        min=1,
-        max=100,
-        help="Number of items per page",
-        show_default=True,
+        10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
     project: Optional[str] = typer.Option(
         None,
@@ -356,40 +236,18 @@ def read(
         "-P",
         help="Specific project to use",
         autocompletion=get_memory_projects,
-        show_default=False,
     ),
     raw: bool = typer.Option(
-        False,
-        "--raw",
-        "-r",
-        help="Display raw markdown without rich formatting",
-        show_default=True,
+        False, "--raw", "-r", help="Display raw markdown without rich formatting"
     ),
     output_file: Optional[Path] = typer.Option(
         None,
         "--output",
         "-o",
         help="Save note content to a file instead of displaying it",
-        show_default=False,
     ),
 ):
-    """
-    Read a note from your knowledge base.
-
-    Examples:
-
-    Read a note by identifier:
-      skogcli memory read "My Note"
-
-    Read a note from a specific project:
-      skogcli memory read "My Note" --project my-project
-
-    Display raw markdown:
-      skogcli memory read "My Note" --raw
-
-    Save note content to a file:
-      skogcli memory read "My Note" --output note.md
-    """
+    """Read a note from your knowledge base."""
     cmd = [
         "tool",
         "read-note",
@@ -406,22 +264,17 @@ def read(
 
     if result.returncode == 0:
         if raw:
-            # Display raw markdown
             if output_file:
                 output_file.write_text(result.stdout)
             else:
                 typer.echo(result.stdout)
         else:
             try:
-                # Try to parse the JSON output for better formatting
                 data = json.loads(result.stdout)
-
-                # Extract the content if available
                 if "content" in data:
                     content = data["content"]
                     console.print(Markdown(content))
 
-                    # Print metadata
                     console.print("\n[bold cyan]Metadata:[/bold cyan]")
                     if "title" in data:
                         console.print(f"[bold]Title:[/bold] {data['title']}")
@@ -436,72 +289,32 @@ def read(
                             f"[bold]Updated:[/bold] {data['updated_at'].split('.')[0]}"
                         )
                 else:
-                    # If no content field, just render the whole output as markdown
                     console.print(Markdown(result.stdout))
             except (json.JSONDecodeError, KeyError):
-                # Fallback to rendering the whole output as markdown
                 console.print(Markdown(result.stdout))
-        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
 
-@memory_app.command(
-    name="search",
-    no_args_is_help=True,
-    help="Search across your knowledge base for specific content.",
-    short_help="Search notes by content or metadata",
-)
-@memory_app.command(name="find", hidden=True)  # Alias for search
+@memory_app.command(name="search", help="Search notes by content or metadata")
 def search(
-    query: str = typer.Argument(
-        ...,
-        help="Search query (supports simple text or regex with --regex flag)",
-        show_default=False,
-    ),
+    query: str = typer.Argument(..., help="Search query"),
     permalink: bool = typer.Option(
-        False,
-        "--permalink/--no-permalink",
-        help="Search only in permalink values",
-        show_default=True,
+        False, "--permalink", help="Search only in permalink values"
     ),
-    title: bool = typer.Option(
-        False,
-        "--title/--no-title",
-        help="Search only in title values",
-        show_default=True,
-    ),
+    title: bool = typer.Option(False, "--title", help="Search only in title values"),
     after_date: Optional[str] = typer.Option(
-        None,
-        "--after-date",
-        "-a",
-        help="Filter results after this date (e.g., '2d', '1 week', '2023-01-01')",
-        show_default=False,
+        None, "--after-date", "-a", help="Filter results after this date"
     ),
     before_date: Optional[str] = typer.Option(
-        None,
-        "--before-date",
-        "-b",
-        help="Filter results before this date",
-        show_default=False,
+        None, "--before-date", "-b", help="Filter results before this date"
     ),
     page: int = typer.Option(
-        1,
-        "--page",
-        "-p",
-        min=1,
-        help="Page number for pagination",
-        show_default=True,
+        1, "--page", "-p", min=1, help="Page number for pagination"
     ),
     page_size: int = typer.Option(
-        10,
-        "--page-size",
-        "-s",
-        min=1,
-        max=100,
-        help="Number of items per page",
-        show_default=True,
+        10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
     project: Optional[str] = typer.Option(
         None,
@@ -509,36 +322,12 @@ def search(
         "-P",
         help="Specific project to search in",
         autocompletion=get_memory_projects,
-        show_default=False,
     ),
     output_format: str = typer.Option(
-        "table",
-        "--format",
-        "-f",
-        help="Output format (table, json, markdown)",
-        show_default=True,
+        "table", "--format", "-f", help="Output format (table, json, markdown)"
     ),
 ):
-    """
-    Search across your knowledge base for specific content.
-
-    Examples:
-
-    Basic search:
-      skogcli memory search "project ideas"
-
-    Search only titles:
-      skogcli memory search "meeting" --title
-
-    Search with date filter:
-      skogcli memory search "important" --after-date "1 week"
-
-    Search with regex:
-      skogcli memory search "regex:project.*ideas"
-
-    Display results in JSON:
-      skogcli memory search "project ideas" --format json
-    """
+    """Search across your knowledge base for specific content."""
     cmd = [
         "tool",
         "search-notes",
@@ -565,28 +354,20 @@ def search(
 
     if result.returncode == 0:
         if output_format == "json":
-            # Display raw JSON output
             typer.echo(result.stdout)
         elif output_format == "markdown":
-            # Render the output as markdown
             console.print(Markdown(result.stdout))
         else:
             try:
-                # Try to parse the JSON output for better formatting
                 data = json.loads(result.stdout)
-
-                # Create a table for the results
                 from rich.table import Table
 
                 table = Table(title=f"Search Results: '{query}'")
-
-                # Add columns
                 table.add_column("Type", style="cyan")
                 table.add_column("Title", style="green")
                 table.add_column("Created At", style="yellow")
                 table.add_column("Path", style="blue")
 
-                # Add rows
                 for item in data.get("results", []):
                     table.add_row(
                         item.get("type", ""),
@@ -599,10 +380,8 @@ def search(
                         item.get("file_path", ""),
                     )
 
-                # Print the table
                 console.print(table)
 
-                # Show metadata
                 results = data.get("results", [])
                 total_results = len(results)
                 current_page = data.get("page", 1) or data.get("current_page", 1)
@@ -617,20 +396,13 @@ def search(
                 console.print(f"Page {current_page} of {total_pages}")
 
             except (json.JSONDecodeError, KeyError):
-                # Fallback to rendering the whole output as markdown
                 console.print(Markdown(result.stdout))
-        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
 
-@memory_app.command(
-    name="list",
-    help="List recent activity across your knowledge base.",
-    short_help="List recent notes and activity",
-)
-@memory_app.command(name="ls", hidden=True)  # Short alias
+@memory_app.command(name="list", help="List recent notes and activity")
 def list_notes(
     type: Optional[str] = typer.Option(
         None,
@@ -638,7 +410,6 @@ def list_notes(
         "-t",
         help="Filter by activity type",
         autocompletion=get_activity_types,
-        show_default=False,
     ),
     folder: Optional[str] = typer.Option(
         None,
@@ -646,16 +417,9 @@ def list_notes(
         "-f",
         help="Filter by folder",
         autocompletion=get_memory_folders,
-        show_default=False,
     ),
     depth: int = typer.Option(
-        1,
-        "--depth",
-        "-d",
-        min=0,
-        max=5,
-        help="Depth of related entities to show",
-        show_default=True,
+        1, "--depth", "-d", min=0, max=5, help="Depth of related entities to show"
     ),
     timeframe: str = typer.Option(
         "7d",
@@ -663,24 +427,12 @@ def list_notes(
         "-T",
         help="Time range to show (e.g., '7d', '2w', '1m')",
         autocompletion=get_timeframe_options,
-        show_default=True,
     ),
     page: int = typer.Option(
-        1,
-        "--page",
-        "-p",
-        min=1,
-        help="Page number for pagination",
-        show_default=True,
+        1, "--page", "-p", min=1, help="Page number for pagination"
     ),
     page_size: int = typer.Option(
-        10,
-        "--page-size",
-        "-s",
-        min=1,
-        max=100,
-        help="Number of items per page",
-        show_default=True,
+        10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
     max_related: int = typer.Option(
         5,
@@ -688,7 +440,6 @@ def list_notes(
         "-m",
         min=0,
         help="Maximum number of related items to show per result",
-        show_default=True,
     ),
     project: Optional[str] = typer.Option(
         None,
@@ -696,33 +447,12 @@ def list_notes(
         "-P",
         help="Specific project to list from",
         autocompletion=get_memory_projects,
-        show_default=False,
     ),
     output_format: str = typer.Option(
-        "table",
-        "--format",
-        "-f",
-        help="Output format (table, json, csv, markdown)",
-        show_default=True,
+        "table", "--format", "-f", help="Output format (table, json, csv, markdown)"
     ),
 ):
-    """
-    List recent activity across your knowledge base.
-
-    Examples:
-
-    List recent activity (default 7 days):
-      skogcli memory list
-
-    List specific type:
-      skogcli memory list --type entity
-
-    Custom timeframe:
-      skogcli memory list --timeframe 30d
-
-    Display results in JSON:
-      skogcli memory list --format json
-    """
+    """List recent activity across your knowledge base."""
     cmd = [
         "tool",
         "recent-activity",
@@ -750,28 +480,20 @@ def list_notes(
 
     if result.returncode == 0:
         if output_format == "json":
-            # Display raw JSON output
             typer.echo(result.stdout)
         elif output_format == "markdown":
-            # Render the output as markdown
             console.print(Markdown(result.stdout))
         else:
             try:
-                # Try to parse the JSON output for better formatting
                 data = json.loads(result.stdout)
-
-                # Create a table for the results
                 from rich.table import Table
 
                 table = Table(title=f"Recent Activity ({timeframe})")
-
-                # Add columns
                 table.add_column("Type", style="cyan")
                 table.add_column("Title", style="green")
                 table.add_column("Created At", style="yellow")
                 table.add_column("Path", style="blue")
 
-                # Add rows
                 results = data.get("primary_results", []) or data.get("results", [])
                 for item in results:
                     table.add_row(
@@ -785,11 +507,8 @@ def list_notes(
                         item.get("file_path", ""),
                     )
 
-                # Print the table
                 console.print(table)
 
-                # Show metadata
-                results = data.get("primary_results", []) or data.get("results", [])
                 total_results = len(results)
                 current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
@@ -803,20 +522,13 @@ def list_notes(
                 console.print(f"Page {current_page} of {total_pages}")
 
             except (json.JSONDecodeError, KeyError):
-                # Fallback to rendering the whole output as markdown
                 console.print(Markdown(result.stdout))
-        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
 
-@memory_app.command(
-    name="sync",
-    # no_args_is_help=True,
-    help="Synchronize your knowledge files with the database.",
-    short_help="Sync notes with the database",
-)
+@memory_app.command(name="sync", help="Sync notes with the database")
 def sync(
     project: Optional[str] = typer.Option(
         None,
@@ -824,47 +536,19 @@ def sync(
         "-p",
         help="Specific project to sync",
         autocompletion=get_memory_projects,
-        show_default=False,
     ),
     force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Force sync even if no changes detected",
-        show_default=True,
+        False, "--force", "-f", help="Force sync even if no changes detected"
     ),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
         "-n",
         help="Show what would be synced without making changes",
-        show_default=True,
     ),
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-v",
-        help="Show detailed output",
-        show_default=True,
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
 ):
-    """
-    Synchronize your knowledge files with the database.
-
-    Examples:
-
-    Sync all projects:
-      skogcli memory sync
-
-    Sync a specific project:
-      skogcli memory sync --project my-project
-
-    Force sync:
-      skogcli memory sync --force
-
-    Dry run:
-      skogcli memory sync --dry-run
-    """
+    """Synchronize your knowledge files with the database."""
     cmd = ["sync"]
     if project:
         cmd = ["--project", project] + cmd
@@ -879,20 +563,13 @@ def sync(
     result = run_basic_memory(cmd)
 
     if result.returncode == 0:
-        # Output the actual return from the original command
         typer.echo(result.stdout)
-        return 0  # Ensure the command returns 0
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
 
 
-@memory_app.command(
-    name="status",
-    help="Show project information and sync status.",
-    short_help="Show project status and statistics",
-)
-@memory_app.command(name="info", hidden=True)  # Alias for status
+@memory_app.command(name="status", help="Show project status and statistics")
 def status(
     project: Optional[str] = typer.Option(
         None,
@@ -900,49 +577,21 @@ def status(
         "-p",
         help="Show status for specific project",
         autocompletion=get_memory_projects,
-        show_default=False,
     ),
     output_format: str = typer.Option(
-        "table",
-        "--format",
-        "-f",
-        help="Output format (table, json, yaml)",
-        show_default=True,
+        "table", "--format", "-f", help="Output format (table, json, yaml)"
     ),
     show_all: bool = typer.Option(
-        False,
-        "--all",
-        "-a",
-        help="Show all projects status (if no project specified)",
-        show_default=True,
+        False, "--all", "-a", help="Show all projects status (if no project specified)"
     ),
     check: bool = typer.Option(
         False,
         "--check",
         "-c",
         help="Only show status code (0: success, 1: warning, 2: error)",
-        show_default=True,
     ),
 ):
-    """
-    Show project information and sync status.
-
-    Examples:
-
-    Show status for all projects:
-      skogcli memory status
-
-    Show status for a specific project:
-      skogcli memory status --project my-project
-
-    Display results in JSON:
-      skogcli memory status --format json
-    Displays information about the current project, including:
-    - Project name and location
-    - Number of notes and entities
-    - Last sync time
-    - Files that need to be synchronized
-    """
+    """Show project information and sync status."""
     cmd = ["project", "info"]
 
     if output_format == "json":
@@ -950,9 +599,7 @@ def status(
     elif output_format == "yaml":
         cmd.append("--yaml")
 
-    # Handle show_all parameter by listing all projects if requested
     if show_all and not project:
-        # First get a list of all projects
         projects_cmd = ["tool", "list-projects", "--format", "json"]
         projects_result = run_basic_memory(projects_cmd)
 
@@ -961,12 +608,10 @@ def status(
                 projects_data = json.loads(projects_result.stdout)
                 project_list = [p["name"] for p in projects_data.get("projects", [])]
 
-                # If we have multiple projects, show status for each
                 if len(project_list) > 1:
                     console.print("[bold]Status for all projects:[/bold]\n")
 
                     for idx, proj in enumerate(project_list):
-                        # Run the command for each project
                         proj_cmd = cmd.copy()
                         proj_cmd = ["--project", proj] + proj_cmd
                         proj_result = run_basic_memory(proj_cmd)
@@ -982,7 +627,6 @@ def status(
 
                     return 0
             except (json.JSONDecodeError, KeyError):
-                # Fall back to single project if parsing fails
                 pass
 
     if project:
@@ -992,44 +636,34 @@ def status(
 
     if result.returncode == 0:
         if check:
-            # Only return status code
-            status_code = 0  # Default success
+            status_code = 0
             try:
-                # Force JSON output for check mode
                 if output_format != "json":
-                    # Re-run with JSON output for reliable parsing
                     json_cmd = cmd.copy()
                     if "--json" not in json_cmd:
                         json_cmd.append("--json")
                     json_result = run_basic_memory(json_cmd)
                     if json_result.returncode != 0:
-                        return 2  # Error
+                        return 2
                     data = json.loads(json_result.stdout)
                 else:
                     data = json.loads(result.stdout)
 
-                # Check for warning conditions
                 if data.get("sync_status", {}).get("needs_sync", False):
-                    status_code = 1  # Warning
-                # Check for error conditions (could add more checks here)
+                    status_code = 1
                 if "error" in data:
-                    status_code = 2  # Error
+                    status_code = 2
             except (json.JSONDecodeError, KeyError):
-                status_code = 2  # Error parsing JSON
+                status_code = 2
 
             return status_code
 
         if output_format in ["json", "yaml"]:
-            # Just print the raw output
             typer.echo(result.stdout)
         else:
             try:
-                # Try to parse the JSON output for better formatting
                 data = json.loads(result.stdout)
 
-                # Create a rich display
-
-                # Project info section
                 project_name = data.get("project_name", "default")
                 project_path = data.get("project_path", "")
 
@@ -1041,14 +675,12 @@ def status(
                     )
                 )
 
-                # Stats section
                 stats = data.get("statistics", {}) or data.get("stats", {})
                 entities = stats.get("total_entities", 0)
                 notes = stats.get("entity_types", {}).get("note", 0)
                 observations = stats.get("total_observations", 0)
                 relations = stats.get("total_relations", 0)
 
-                # Get last sync time from system info if available
                 system_info = data.get("system", {})
                 last_sync = system_info.get("watch_status", {}).get(
                     "last_scan", "Never"
@@ -1065,12 +697,10 @@ def status(
                     )
                 )
 
-                # Sync status - check watch status from system info
                 watch_status = data.get("system", {}).get("watch_status", {})
                 needs_sync = False
                 files_to_sync = []
 
-                # Check if there are recent events that need syncing
                 recent_events = watch_status.get("recent_events", [])
                 if recent_events:
                     needs_sync = True
@@ -1088,104 +718,7 @@ def status(
                     )
 
             except (json.JSONDecodeError, KeyError):
-                # Fallback to raw output if JSON parsing fails
                 console.print(result.stdout)
     else:
         typer.echo(f"Error: {result.stderr}")
         raise typer.Exit(code=1)
-
-
-@memory_app.command(
-    name="recent-activity",
-    no_args_is_help=True,
-    help="List recent activity across your knowledge base (alias for 'list').",
-    short_help="Alias for 'list' command",
-    hidden=True,  # Prevents showing in --help, but still usable
-)
-def recent_activity(
-    type: Optional[str] = typer.Option(
-        None,
-        "--type",
-        "-t",
-        help="Filter by activity type",
-        autocompletion=get_activity_types,
-        show_default=False,
-    ),
-    depth: int = typer.Option(
-        1,
-        "--depth",
-        "-d",
-        min=0,
-        max=5,
-        help="Depth of related entities to show",
-        show_default=True,
-    ),
-    timeframe: str = typer.Option(
-        "7d",
-        "--timeframe",
-        "-T",
-        help="Time range to show (e.g., '7d', '2w', '1m')",
-        autocompletion=get_timeframe_options,
-        show_default=True,
-    ),
-    page: int = typer.Option(
-        1,
-        "--page",
-        "-p",
-        min=1,
-        help="Page number for pagination",
-        show_default=True,
-    ),
-    page_size: int = typer.Option(
-        10,
-        "--page-size",
-        "-s",
-        min=1,
-        max=100,
-        help="Number of items per page",
-        show_default=True,
-    ),
-    max_related: int = typer.Option(
-        5,
-        "--max-related",
-        "-m",
-        min=0,
-        help="Maximum number of related items to show per result",
-        show_default=True,
-    ),
-    project: Optional[str] = typer.Option(
-        None,
-        "--project",
-        "-P",
-        help="Specific project to list from",
-        autocompletion=get_memory_projects,
-        show_default=False,
-    ),
-    output_format: str = typer.Option(
-        "table",
-        "--format",
-        "-f",
-        help="Output format (table, json, csv, markdown)",
-        show_default=True,
-    ),
-    show_all: bool = typer.Option(
-        False,
-        "--all",
-        "-a",
-        help="Show all items (ignores pagination)",
-        show_default=True,
-    ),
-):
-    """List recent activity (alias for 'list' command)."""
-    # Call the list_notes function with all the same arguments
-    list_notes(
-        type=type,
-        folder=None,  # recent-activity doesn't have a folder parameter
-        depth=depth,
-        timeframe=timeframe,
-        page=page,
-        page_size=page_size,
-        max_related=max_related,
-        project=project,
-        output_format=output_format,
-    )

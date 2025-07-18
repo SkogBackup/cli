@@ -35,6 +35,48 @@
       }
     }
   },
+  "cli": {
+    "last-updated": "1970-01-01T00:00:00Z",
+    "version": "0",
+    "storage_dir": "/home/skogix/skogai/config/"
+  },
+  "memory": {
+    "page_size": 10,
+    "default_project": null
+  },
+  "ui": {
+    "theme": "default",
+    "verbose": false
+  },
+  "_meta": {
+    "version": 1,
+    "last_updated": 1748305682.7457244
+  },
+  "script": {
+    "templates_dir": "/home/skogix/skogai/config/templates",
+    "user_scripts_dir": "/home/skogix/skogai/config/scripts",
+    "metadata_dir": "/home/skogix/skogai/config"
+  },
+  "chat": {
+    "history_enabled": true,
+    "max_history_items": 100,
+    "history": [],
+    "message_id_counter": true,
+    "thread_id_counter": true,
+    "message": {
+      "storage_dir": "/home/skogix/skogai/settings/",
+      "format_pretty": true,
+      "default_sender": "User",
+      "default_recipient": "Assistant"
+    }
+  },
+  "meta": {
+    "version": 1,
+    "last_updated": 1752839163.7835019
+  },
+  "module": {
+    "history": []
+  },
   "$": {
     "json": {
       "@": {
@@ -51,8 +93,12 @@
         "list": [],
         "action": "$.json.@",
         "parent": "$.$self",
-        "child": "$parent.$"
-      }
+        "child": "$parent.$",
+        "null": "$.json.$.string"
+      },
+      "$id": "$.json.int*$.json.int",
+      "id": "$.json.int*$.json.int",
+      "eid": "$.json.int*$.json.int"
     },
     "$": "to define or reference something",
     "|": "the act of choosing something | {$id1|$id2}->[$id1]",
@@ -85,6 +131,7 @@
       "value": "$value",
       "eid": "$eid"
     },
+    "skogmessage": "$eid*$name*$datetime*$content",
     "message": {
       "eid": "$eid",
       "from": "$name",
@@ -93,6 +140,7 @@
       "created_at": "$datetime",
       "parent": "$eid"
     },
+    "datetime": "[@date]",
     "skogchat": {
       "messages": "$message.$list"
     },
@@ -102,11 +150,29 @@
     },
     "list": "the ordering of something",
     "eid": "$entity.id*$entity.gen",
+    "int": 0,
+    "content": "",
+    "date-time": "[@date]",
     "entity": {
       "eid": "$eid",
       "gen": "$id",
       "id": "$id",
       "name": "$name"
+    },
+    "claude": {
+      "whois": "skogai agent. write something here claude you slacker",
+      "context": "claudes context categorization using skogai notation",
+      "context:git": "claude:context:git container",
+      "test": "$ claude.hello",
+      "hello": "[@hello:Claude]"
+    },
+    "skog": {
+      "name": "$.json.string"
     }
+  },
+  "example": "[@hello]",
+  "claude": {
+    "hello": "[@hello:Claude]",
+    "test": "$ claude.hello"
   }
 }
