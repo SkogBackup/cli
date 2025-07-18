@@ -88,10 +88,14 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     if "settings" not in settings:
         settings["settings"] = {}
         
-    if (
-        "meta" not in settings["settings"]
-        or "version" not in settings["settings"]["meta"]
-    ):
+    # Check both meta and _meta for version info
+    has_version = False
+    if "meta" in settings["settings"] and "version" in settings["settings"]["meta"]:
+        has_version = True
+    elif "_meta" in settings["settings"] and "version" in settings["settings"]["_meta"]:
+        has_version = True
+    
+    if not has_version:
         # This is an old config without versioning
         console.print("[yellow]Migrating configuration to the latest version...[/]")
 
