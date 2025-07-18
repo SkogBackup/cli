@@ -111,14 +111,7 @@ def get_global_scripts_dir() -> Path:
 
 def get_user_scripts_dir() -> Path:
     """Get the user scripts directory, creating it if it doesn't exist."""
-    # Check for SKOGAI scripts directory first
-    skogai_scripts_dir = os.getenv("SKOGAI_SCRIPTS_DIR")
-    if skogai_scripts_dir:
-        scripts_dir = Path(skogai_scripts_dir)
-        scripts_dir.mkdir(parents=True, exist_ok=True)
-        return scripts_dir
-    
-    # Check config setting
+    # Check config setting first
     from .settings import get_setting
     scripts_dir_setting = get_setting("script.user_scripts_dir")
     if scripts_dir_setting:
@@ -126,22 +119,19 @@ def get_user_scripts_dir() -> Path:
         scripts_dir.mkdir(parents=True, exist_ok=True)
         return scripts_dir
     
-    # Fallback to scripts directory under config
-    from .settings import get_config_dir
-    scripts_dir = get_config_dir() / "scripts"
-    scripts_dir.mkdir(parents=True, exist_ok=True)
-    return scripts_dir
+    # Check for SKOGAI scripts directory
+    skogai_scripts_dir = os.getenv("SKOGAI_SCRIPTS_DIR")
+    if skogai_scripts_dir:
+        scripts_dir = Path(skogai_scripts_dir)
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+        return scripts_dir
+    
+    # Crash and burn
+    raise RuntimeError("No user scripts directory configured. Set 'script.user_scripts_dir' config or SKOGAI_SCRIPTS_DIR environment variable.")
 
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
-    # Check for SKOGAI metadata directory first
-    skogai_metadata_dir = os.getenv("SKOGAI_SCRIPT_METADATA_DIR")
-    if skogai_metadata_dir:
-        metadata_dir = Path(skogai_metadata_dir)
-        metadata_dir.mkdir(parents=True, exist_ok=True)
-        return metadata_dir / "script_metadata.json"
-    
-    # Check config setting
+    # Check config setting first
     from .settings import get_setting
     metadata_dir_setting = get_setting("script.metadata_dir")
     if metadata_dir_setting:
@@ -149,10 +139,15 @@ def get_metadata_file() -> Path:
         metadata_dir.mkdir(parents=True, exist_ok=True)
         return metadata_dir / "script_metadata.json"
     
-    # Fallback to metadata file in config directory
-    from .settings import get_config_dir
-    metadata_dir = get_config_dir()
-    return metadata_dir / "script_metadata.json"
+    # Check for SKOGAI metadata directory
+    skogai_metadata_dir = os.getenv("SKOGAI_SCRIPT_METADATA_DIR")
+    if skogai_metadata_dir:
+        metadata_dir = Path(skogai_metadata_dir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        return metadata_dir / "script_metadata.json"
+    
+    # Crash and burn
+    raise RuntimeError("No script metadata directory configured. Set 'script.metadata_dir' config or SKOGAI_SCRIPT_METADATA_DIR environment variable.")
 
 def load_metadata() -> Dict[str, Any]:
     """Load script metadata from the metadata file."""

@@ -1,1 +1,1 @@
-[$ message,$ eid, $ id, $ message.created-at]
+[$ message,$ claude.hello,[@fizz:15]]

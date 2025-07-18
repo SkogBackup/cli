@@ -44,7 +44,7 @@ def get_memory_folders() -> List[str]:
         if result.returncode == 0:
             folders_data = json.loads(result.stdout)
             return [folder["name"] for folder in folders_data.get("folders", [])]
-    except (json.JSONDecodeError, subprocess.SubprocessError):
+    except (json.JSONDecodeError, subprocess.SubprocessError, Exception):
         pass
 
     return ["notes", "meetings", "projects", "ideas", "research", "journal"]
@@ -57,7 +57,7 @@ def get_memory_projects() -> List[str]:
         if result.returncode == 0:
             projects_data = json.loads(result.stdout)
             return [project["name"] for project in projects_data.get("projects", [])]
-    except (json.JSONDecodeError, subprocess.SubprocessError):
+    except (json.JSONDecodeError, subprocess.SubprocessError, Exception):
         pass
 
     projects = ["default"]
@@ -93,6 +93,19 @@ def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
 def memory_callback():
     """Knowledge management powered by basic-memory."""
     pass
+
+@memory_app.command(name="bm", help="Direct passthrough to basic-memory command")
+def basic_memory_passthrough(
+    args: List[str] = typer.Argument(..., help="Arguments to pass to basic-memory")
+):
+    """Direct passthrough to basic-memory command."""
+    result = run_basic_memory(args)
+    if result.stdout:
+        typer.echo(result.stdout)
+    if result.stderr:
+        typer.echo(result.stderr, err=True)
+    if result.returncode != 0:
+        raise typer.Exit(code=result.returncode)
 
 
 @memory_app.command(name="write", help="Create or update a note in your knowledge base.")
