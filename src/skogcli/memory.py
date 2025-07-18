@@ -29,11 +29,28 @@ def get_activity_types() -> List[str]:
 def get_timeframe_options() -> List[str]:
     """Get a list of common timeframe options for completion."""
     return [
-        "15m", "30m", "1h", "6h", "12h", "24h",
-        "2d", "3d", "1w", "2w", "3w",
-        "1m", "3m", "6m",
-        "1y", "2y",
-        "today", "yesterday", "this-week", "this-month", "this-year", "all",
+        "15m",
+        "30m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "3d",
+        "1w",
+        "2w",
+        "3w",
+        "1m",
+        "3m",
+        "6m",
+        "1y",
+        "2y",
+        "today",
+        "yesterday",
+        "this-week",
+        "this-month",
+        "this-year",
+        "all",
     ]
 
 
@@ -94,6 +111,7 @@ def memory_callback():
     """Knowledge management powered by basic-memory."""
     pass
 
+
 @memory_app.command(name="bm", help="Direct passthrough to basic-memory command")
 def basic_memory_passthrough(
     args: List[str] = typer.Argument(..., help="Arguments to pass to basic-memory")
@@ -108,7 +126,9 @@ def basic_memory_passthrough(
         raise typer.Exit(code=result.returncode)
 
 
-@memory_app.command(name="write", help="Create or update a note in your knowledge base.")
+@memory_app.command(
+    name="write", help="Create or update a note in your knowledge base."
+)
 def write(
     title: str = typer.Argument(..., help="Title of the note"),
     folder: str = typer.Argument(
@@ -178,7 +198,9 @@ def create(
 def get_note_identifiers() -> List[str]:
     """Get a list of note identifiers for completion."""
     try:
-        result = run_basic_memory(["tool", "recent-notes", "--format", "json", "--limit", "20"])
+        result = run_basic_memory(
+            ["tool", "recent-notes", "--format", "json", "--limit", "20"]
+        )
         if result.returncode == 0:
             notes_data = json.loads(result.stdout)
             identifiers = []
@@ -202,7 +224,9 @@ def read(
         help="Note identifier in format 'folder/title' or just 'title' to search in all folders",
         autocompletion=get_note_identifiers,
     ),
-    page: int = typer.Option(1, "--page", "-p", min=1, help="Page number for pagination"),
+    page: int = typer.Option(
+        1, "--page", "-p", min=1, help="Page number for pagination"
+    ),
     page_size: int = typer.Option(
         10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
@@ -217,7 +241,10 @@ def read(
         False, "--raw", "-r", help="Display raw markdown without rich formatting"
     ),
     output_file: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Save note content to a file instead of displaying it"
+        None,
+        "--output",
+        "-o",
+        help="Save note content to a file instead of displaying it",
     ),
 ):
     """Read a note from your knowledge base."""
@@ -254,9 +281,13 @@ def read(
                     if "file_path" in data:
                         console.print(f"[bold]Path:[/bold] {data['file_path']}")
                     if "created_at" in data:
-                        console.print(f"[bold]Created:[/bold] {data['created_at'].split('.')[0]}")
+                        console.print(
+                            f"[bold]Created:[/bold] {data['created_at'].split('.')[0]}"
+                        )
                     if "updated_at" in data:
-                        console.print(f"[bold]Updated:[/bold] {data['updated_at'].split('.')[0]}")
+                        console.print(
+                            f"[bold]Updated:[/bold] {data['updated_at'].split('.')[0]}"
+                        )
                 else:
                     console.print(Markdown(result.stdout))
             except (json.JSONDecodeError, KeyError):
@@ -269,7 +300,9 @@ def read(
 @memory_app.command(name="search", help="Search notes by content or metadata")
 def search(
     query: str = typer.Argument(..., help="Search query"),
-    permalink: bool = typer.Option(False, "--permalink", help="Search only in permalink values"),
+    permalink: bool = typer.Option(
+        False, "--permalink", help="Search only in permalink values"
+    ),
     title: bool = typer.Option(False, "--title", help="Search only in title values"),
     after_date: Optional[str] = typer.Option(
         None, "--after-date", "-a", help="Filter results after this date"
@@ -277,7 +310,9 @@ def search(
     before_date: Optional[str] = typer.Option(
         None, "--before-date", "-b", help="Filter results before this date"
     ),
-    page: int = typer.Option(1, "--page", "-p", min=1, help="Page number for pagination"),
+    page: int = typer.Option(
+        1, "--page", "-p", min=1, help="Page number for pagination"
+    ),
     page_size: int = typer.Option(
         10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
@@ -352,7 +387,9 @@ def search(
                 current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
                 total_pages = (
-                    (total_results + page_size - 1) // page_size if total_results > 0 else 0
+                    (total_results + page_size - 1) // page_size
+                    if total_results > 0
+                    else 0
                 )
 
                 console.print(f"\nTotal results: {total_results}")
@@ -368,10 +405,18 @@ def search(
 @memory_app.command(name="list", help="List recent notes and activity")
 def list_notes(
     type: Optional[str] = typer.Option(
-        None, "--type", "-t", help="Filter by activity type", autocompletion=get_activity_types
+        None,
+        "--type",
+        "-t",
+        help="Filter by activity type",
+        autocompletion=get_activity_types,
     ),
     folder: Optional[str] = typer.Option(
-        None, "--folder", "-f", help="Filter by folder", autocompletion=get_memory_folders
+        None,
+        "--folder",
+        "-f",
+        help="Filter by folder",
+        autocompletion=get_memory_folders,
     ),
     depth: int = typer.Option(
         1, "--depth", "-d", min=0, max=5, help="Depth of related entities to show"
@@ -383,12 +428,18 @@ def list_notes(
         help="Time range to show (e.g., '7d', '2w', '1m')",
         autocompletion=get_timeframe_options,
     ),
-    page: int = typer.Option(1, "--page", "-p", min=1, help="Page number for pagination"),
+    page: int = typer.Option(
+        1, "--page", "-p", min=1, help="Page number for pagination"
+    ),
     page_size: int = typer.Option(
         10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
     max_related: int = typer.Option(
-        5, "--max-related", "-m", min=0, help="Maximum number of related items to show per result"
+        5,
+        "--max-related",
+        "-m",
+        min=0,
+        help="Maximum number of related items to show per result",
     ),
     project: Optional[str] = typer.Option(
         None,
@@ -462,7 +513,9 @@ def list_notes(
                 current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
                 total_pages = (
-                    (total_results + page_size - 1) // page_size if total_results > 0 else 0
+                    (total_results + page_size - 1) // page_size
+                    if total_results > 0
+                    else 0
                 )
 
                 console.print(f"\nTotal results: {total_results}")
@@ -484,9 +537,14 @@ def sync(
         help="Specific project to sync",
         autocompletion=get_memory_projects,
     ),
-    force: bool = typer.Option(False, "--force", "-f", help="Force sync even if no changes detected"),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Force sync even if no changes detected"
+    ),
     dry_run: bool = typer.Option(
-        False, "--dry-run", "-n", help="Show what would be synced without making changes"
+        False,
+        "--dry-run",
+        "-n",
+        help="Show what would be synced without making changes",
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
 ):
@@ -563,7 +621,9 @@ def status(
                                 console.print("\n" + "-" * 50 + "\n")
                             typer.echo(proj_result.stdout)
                         else:
-                            console.print(f"[red]Error getting status for project {proj}[/red]")
+                            console.print(
+                                f"[red]Error getting status for project {proj}[/red]"
+                            )
 
                     return 0
             except (json.JSONDecodeError, KeyError):
@@ -622,7 +682,9 @@ def status(
                 relations = stats.get("total_relations", 0)
 
                 system_info = data.get("system", {})
-                last_sync = system_info.get("watch_status", {}).get("last_scan", "Never")
+                last_sync = system_info.get("watch_status", {}).get(
+                    "last_scan", "Never"
+                )
 
                 console.print(
                     Panel(
@@ -645,11 +707,15 @@ def status(
                     files_to_sync = [event.get("path", "") for event in recent_events]
 
                 if needs_sync:
-                    console.print("[bold yellow]Files needing synchronization:[/bold yellow]")
+                    console.print(
+                        "[bold yellow]Files needing synchronization:[/bold yellow]"
+                    )
                     for file in files_to_sync:
                         console.print(f"  • {file}")
                 else:
-                    console.print("[bold green]All files are synchronized.[/bold green]")
+                    console.print(
+                        "[bold green]All files are synchronized.[/bold green]"
+                    )
 
             except (json.JSONDecodeError, KeyError):
                 console.print(result.stdout)

@@ -1,62 +1,94 @@
-# SkogCLI
+# 🤖 SkogCLI
 
 A demonstration Typer-based CLI tool for the SkogAI project.
 
-## Installation
+## 🚀 Installation
 
 ```bash
-# Install development dependencies
-uv add pytest && uv lock && uv sync
+# 📦 Install dependencies
+make install
 
-# Run the CLI
+# 🛠️ Install development dependencies
+make dev-install
+
+# ▶️ Run the CLI
 uv run skogcli
 ```
 
-## Features
+## ✨ Features
 
-### Commands
+### 🎯 Commands
 
-- `hello`: A simple greeting command
-- `version`: Display the current version
-- `config`: Manage application settings
-- `examples`: Various example commands showcasing Typer features
+- `hello`: 👋 A simple greeting command
+- `version`: 📊 Display the current version
+- `config`: ⚙️ Manage application settings
+- `examples`: 📚 Various example commands showcasing Typer features
 
-### Configuration Management
+### ⚙️ Configuration Management
 
 The `config` command allows you to manage application settings:
 
 ```bash
-# Show current configuration
+# 👁️ Show current configuration
 skogcli config --show
 
-# List available configuration keys and their default values
+# 📋 List available configuration keys and their default values
 skogcli config --list-keys
 
-# Set a configuration value
+# 🔧 Set a configuration value
 skogcli config --set theme --value dark
 
-# Reset configuration to defaults
+# 🔄 Reset configuration to defaults
 skogcli config --reset
 ```
 
-Configuration is stored in `~/.config/skogcli/config.json`.
+📁 Configuration is stored in `~/.config/skogcli/config.json`.
 
-## Development
+## 🛠️ Development
 
-### Running Tests
+### 🎯 Available Make Commands
 
 ```bash
-# Run all tests
+# 📖 View all available commands
+make help
+
+# 🔧 Development workflow
+make dev-install          # 📦 Install development dependencies
+make format              # 🎨 Format code with black
+make lint                # 🔍 Run linting (black + ruff)
+make type-check          # 🔬 Run type checking with mypy
+make security            # 🔒 Run security checks with bandit
+make all-checks          # ✅ Run all code quality checks
+
+# 🧪 Testing
+make test                # 🧪 Run all tests
+make test-cov            # 📊 Run tests with coverage
+make test-fast           # ⚡ Run tests (stop on first failure)
+
+# 🚀 Build & deployment
+make build               # 📦 Build the package
+make clean               # 🧹 Clean build artifacts
+make ci                  # 🤖 Simulate CI pipeline
+
+# 🔍 Pre-commit
+make pre-commit          # 🔧 Run pre-commit hooks
+make check               # ✅ Run pre-commit checks
+```
+
+### 🧪 Running Tests
+
+```bash
+# 🎯 Using make (recommended)
+make test
+make test-cov
+
+# 🔧 Direct uv commands
 uv run pytest tests/
-
-# Run specific test file
 uv run pytest tests/test_config.py
-
-# Run with verbose output
 uv run pytest tests/ -v
 ```
 
-## Best Practices
+## 💡 Best Practices
 
 - Use docstrings for command descriptions
 - Use `help` parameter in Arguments and Options for detailed help
