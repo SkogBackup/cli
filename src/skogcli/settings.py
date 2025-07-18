@@ -88,10 +88,14 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     if "settings" not in settings:
         settings["settings"] = {}
         
-    if (
-        "meta" not in settings["settings"]
-        or "version" not in settings["settings"]["meta"]
-    ):
+    # Check for version in both meta and _meta sections
+    has_version = False
+    if "meta" in settings["settings"] and "version" in settings["settings"]["meta"]:
+        has_version = True
+    elif "_meta" in settings["settings"] and "version" in settings["settings"]["_meta"]:
+        has_version = True
+    
+    if not has_version:
         # This is an old config without versioning
         console.print("[yellow]Migrating configuration to the latest version...[/]")
 
@@ -291,6 +295,26 @@ def save_settings(settings: Dict[str, Any]) -> bool:
 def get_setting(key: str) -> Any:
     """Get a setting value by its key (supports dot notation for nested settings)."""
     settings = load_settings()
+
+    # Handle SkogAI $ syntax - access definitions in the $ section
+    if key == "$":
+        # Return the entire $ section
+        return settings.get("$", {})
+    elif key.startswith("$."):
+        # Access nested keys within $ section
+        dollar_key = key[2:]  # Remove "$." prefix
+        dollar_section = settings.get("$", {})
+        
+        # Handle nested access like $.claude.hello
+        if "." in dollar_key:
+            current = dollar_section
+            for part in dollar_key.split("."):
+                if not isinstance(current, dict) or part not in current:
+                    return None
+                current = current[part]
+            return current
+        else:
+            return dollar_section.get(dollar_key)
 
     # Handle credentials separately
     if key.startswith("credentials."):
