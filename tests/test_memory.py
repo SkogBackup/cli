@@ -130,7 +130,8 @@ class TestMemoryFunctions:
         mock_run.assert_called_once_with(
             ["uvx", "basic-memory", "test", "args"],
             capture_output=True,
-            text=True
+            text=True,
+            check=False
         )
     
     @patch('subprocess.run')
