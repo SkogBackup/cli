@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+.skogai/scripts/context-start.sh "git"
+printf "## Git Status\n"
+printf "Branch: "
+git branch --show-current
+printf "\n"
+git status --porcelain
+printf "\n## Recent commits\n"
+git log --oneline -5
+printf "\n## Git-flow branches\n"
+.skogai/scripts/context-end.sh "git"

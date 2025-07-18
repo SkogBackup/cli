@@ -1,0 +1,44 @@
+[$claude:todo:session]
+# this should not be *things to do* but *things to figure out and understand*
+- [ ] [@skogix:this should be constant and not once] update global CLAUDE.md with complete @ and $ notation definitions from skogcli config
+- [ ] [@skogix:the same again, should be automated] create project CLAUDE.md with tagged context sections for notation, tools, and state
+- [ ] document all skogai tools
+- [x] learn about hooks and their usage
+- [ ] create context loading tests so we can actually see the changes "live"
+- [x] create ./state which contains will update each message to control system notices and hopefully be legacy compatible with old SkogAI's solutions
+[$/claude:todo:session]
+- [x] Create CLAUDE.md with operating instructions
+- [x] Create user.md with skogix preferences and working style
+- [x] Create plan.md with strategic transparency goals
+- [x] Create todo.md with persistent task tracking
+- [ ] Create session.md for current work context
+- [ ] Create structure.md documenting file purposes
+- [x] Test CLI memory system with CLAUDE.md updates
+- [x] Verify run script functionality for CLI entry point
+- [ ] Test cross-session persistence by restarting CLI
+- [ ] Validate file structure conventions work as expected
+- [x] Establish transparent inference documentation
+- [x] Define file naming conventions (lowercase with uppercase significance)
+- [ ] Create workflow for updating persistent state
+- [ ] Document decision-making processes for multi-agent coordination
+- [ ] Test plan mode functionality for complex tasks
+- [ ] Validate todo.md persistence across sessions
+- [ ] Test integration with other SkogAI agents
+- [ ] Verify memory system scales with usage
+- [ ] Regular review of file structure effectiveness
+- [ ] Update documentation based on usage patterns
+- [ ] Refine collaboration protocols based on experience
+- [ ] Archive completed items to maintain focus
+- [ ] set up git flow feature branch changes as system notices
+- [ ] test mcp server functionality after restructure
+- [ ] validate all auto-included file paths exist and work correctly
+- [ ] fix git flow cli issues causing hotfix failures
+- [ ] test session restart efficiency with new context structure
+- [ ] create template for new feature branches with proper context setup
+- [ ] create a append script/tool for claude to mass append to items via cli echo
+- [ ] create-help.sh needs to be made and a help dir in state should be automaticly created at start for all the --help functionality
+- [ ] knowledge/inbox-workflow-pattern.md:- **Clean state**: Inbox is cleared after processing, preventing duplicate work
+- [ ] scripts/context-env.sh:source ./state/claude.env
+- [ ] scripts/context-env.sh:cat ./state/claude.env
+- [ ] scripts/update-context.sh:source ./state/claude.env
+[$/claude:todo:session]
