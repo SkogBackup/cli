@@ -67,7 +67,7 @@ def version():
     import importlib.metadata
     try:
         version = importlib.metadata.version("skogcli")
-        print(f"SkogCLI version {version}")
+        print(f"SkogCLI v{version}")
     except importlib.metadata.PackageNotFoundError:
         print("SkogCLI version: development")
 
@@ -77,5 +77,5 @@ def main():
     app()
 
 
-if __name__ == "__init__":
+if __name__ == "__main__":
     main()
