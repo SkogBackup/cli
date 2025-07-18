@@ -22,10 +22,16 @@ def with_explanation(explanation: str) -> Callable[[F], F]:
         else:
             func.__doc__ = f"{func.__doc__}\n\n{explanation}"
             
+        # Add the explanation as an attribute
+        func.__explanation__ = explanation
+            
         # Preserve the original function's attributes
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return func(*args, **kwargs)
+            
+        # Copy the explanation attribute to the wrapper
+        wrapper.__explanation__ = explanation
             
         return cast(F, wrapper)
     return decorator
