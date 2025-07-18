@@ -4,3 +4,4 @@
  - [ ] Remove write/create redundancy - pick one command
  - [ ] Add missing memory commands or remove from docs
  - [ ] Fix config programming - reset/show-defaults/edit-defaults logic is broken
+ - [ ] Revert default_settings.json corruption - file got mangled during config testing
