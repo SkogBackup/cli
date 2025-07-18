@@ -161,4 +161,4 @@ def process_markdown(markdown_str: str, raw: bool = False) -> Union[str, Markdow
 
 ### includes
 @.skogai/CLAUDE.md
-@tmp/context
+@./tmp/context

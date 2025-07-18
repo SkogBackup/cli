@@ -21,15 +21,15 @@ def assert_command_equals_help(base_command: List[str]):
     no_args_stdout, no_args_stderr, no_args_code = run_command(base_command)
     help_command = base_command + ["--help"]
     help_stdout, help_stderr, help_code = run_command(help_command)
-    
+
     command_str = " ".join(base_command)
-    
+
     # Both commands should exit with the same status code
     assert no_args_code == help_code, f"Return codes differ for {command_str}"
-    
+
     # Both commands should produce the same stdout
     assert no_args_stdout == help_stdout, f"Stdout output differs for {command_str}"
-    
+
     # Both commands should produce the same stderr
     assert no_args_stderr == help_stderr, f"Stderr output differs for {command_str}"
 

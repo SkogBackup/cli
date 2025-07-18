@@ -35,14 +35,14 @@ def get_config_dir() -> Path:
         config_dir = Path(skogai_config_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
-    
+
     # Check config setting
     storage_dir = get_setting("settings.cli.storage_dir")
     if storage_dir:
         config_dir = Path(storage_dir)
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
-    
+
     # Fallback to hardcoded config directory
     config_dir = Path.home() / ".config" / "skogcli"
     config_dir.mkdir(parents=True, exist_ok=True)
@@ -87,14 +87,14 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     # Ensure settings structure exists
     if "settings" not in settings:
         settings["settings"] = {}
-        
+
     # Check for version in both meta and _meta sections
     has_version = False
     if "meta" in settings["settings"] and "version" in settings["settings"]["meta"]:
         has_version = True
     elif "_meta" in settings["settings"] and "version" in settings["settings"]["_meta"]:
         has_version = True
-    
+
     if not has_version:
         # This is an old config without versioning
         console.print("[yellow]Migrating configuration to the latest version...[/]")
@@ -108,23 +108,21 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
         # Add new sections that didn't exist in older versions
         if "module" not in settings["settings"]:
             # Initialize empty module settings
-            settings["settings"]["module"] = {
-                "history": []
-            }
+            settings["settings"]["module"] = {"history": []}
 
         if "credentials" not in settings:
             settings["credentials"] = {}
-    
+
     # Migrate chat history from old location to new location if needed
     if "chat" in settings and "history" in settings["chat"]:
         # Ensure module section exists
         if "module" not in settings["settings"]:
             settings["settings"]["module"] = {}
-        
+
         # Ensure history section exists in module
         if "history" not in settings["settings"]["module"]:
             settings["settings"]["module"]["history"] = []
-            
+
         # Copy history from old location to new location
         settings["settings"]["module"]["history"] = settings["chat"]["history"]
 
@@ -149,7 +147,7 @@ def load_settings() -> Dict[str, Any]:
         settings = load_default_settings()
         settings["settings"]["meta"] = {
             "last_updated": time.time(),
-            "version": CONFIG_VERSION
+            "version": CONFIG_VERSION,
         }
         save_settings(settings)
         return settings
@@ -260,7 +258,7 @@ def save_settings(settings: Dict[str, Any]) -> bool:
     # Update metadata
     if "settings" not in settings:
         settings["settings"] = {}
-    
+
     if "meta" not in settings["settings"]:
         settings["settings"]["meta"] = {"version": CONFIG_VERSION}
 
@@ -304,7 +302,7 @@ def get_setting(key: str) -> Any:
         # Access nested keys within $ section
         dollar_key = key[2:]  # Remove "$." prefix
         dollar_section = settings.get("$", {})
-        
+
         # Handle nested access like $.claude.hello
         if "." in dollar_key:
             current = dollar_section
@@ -331,7 +329,7 @@ def get_setting(key: str) -> Any:
         else:
             # Key is relative to settings.settings
             current = settings.get("settings", {})
-        
+
         for part in parts:
             if part not in current:
                 return None
@@ -385,7 +383,7 @@ def set_setting(key: str, value: Any) -> bool:
             if "settings" not in settings:
                 settings["settings"] = {}
             current = settings["settings"]
-        
+
         for i, part in enumerate(parts[:-1]):
             if part not in current:
                 current[part] = {}
@@ -436,13 +434,15 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     # Ensure module section exists
     if "settings" not in settings:
         settings["settings"] = {}
-    
+
     if "module" not in settings["settings"]:
         # Import default settings from the module
         from .default_settings import DEFAULT_SETTINGS
 
-        settings["settings"]["module"] = cast(Dict[str, Any], DEFAULT_SETTINGS["settings"]["module"]).copy()
-    
+        settings["settings"]["module"] = cast(
+            Dict[str, Any], DEFAULT_SETTINGS["settings"]["module"]
+        ).copy()
+
     # Ensure history section exists
     if "history" not in settings["settings"]["module"]:
         settings["settings"]["module"]["history"] = []
@@ -457,7 +457,9 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     # Trim history if it exceeds the maximum
     max_items = settings["settings"]["module"].get("max_history_items", 100)
     if len(settings["settings"]["module"]["history"]) > max_items:
-        settings["settings"]["module"]["history"] = settings["settings"]["module"]["history"][-max_items:]
+        settings["settings"]["module"]["history"] = settings["settings"]["module"][
+            "history"
+        ][-max_items:]
 
     return save_settings(settings)
 
@@ -473,9 +475,11 @@ def get_chat_history(limit: Optional[int] = None) -> List[Dict[str, Any]]:
     """
     settings = load_settings()
 
-    if ("settings" not in settings or 
-        "module" not in settings["settings"] or 
-        "history" not in settings["settings"]["module"]):
+    if (
+        "settings" not in settings
+        or "module" not in settings["settings"]
+        or "history" not in settings["settings"]["module"]
+    ):
         return []
 
     history = settings["settings"]["module"]["history"]
@@ -1138,8 +1142,6 @@ def list_backups() -> None:
         )
         size = backup.stat().st_size / 1024  # Size in KB
         console.print(f"{i + 1}. {backup.name} ({mtime}, {size:.1f} KB)")
-
-
 
 
 @config_app.command("chat-history")
