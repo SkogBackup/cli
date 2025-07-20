@@ -1,4 +1,6 @@
-# SkogCLI Commands
+# `SkogCLI`
+
+SkogCLI - Command line interface for SkogAI.
 
 **Usage**:
 
@@ -8,16 +10,32 @@ $ SkogCLI [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
+* `--helpall`: Show comprehensive documentation for all commands
 * `--install-completion`: Install completion for the current shell.
 * `--show-completion`: Show completion for the current shell, to copy it or customize the installation.
 * `--help`: Show this message and exit.
 
 **Commands**:
 
+* `version`: Show the version of SkogCLI.
 * `memory`: Knowledge management for SkogAI agents and...
 * `config`: Manage SkogCLI configuration
 * `script`: Script management commands
 * `agent`: Interact with SkogAI agents
+
+## `SkogCLI version`
+
+Show the version of SkogCLI.
+
+**Usage**:
+
+```console
+$ SkogCLI version [OPTIONS]
+```
+
+**Options**:
+
+* `--help`: Show this message and exit.
 
 ## `SkogCLI memory`
 
@@ -31,97 +49,35 @@ $ SkogCLI memory [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
+* `--helpall`: Show comprehensive documentation for memory commands
 * `--help`: Show this message and exit.
 
 **Commands**:
 
-* `new`: Create or update a note in your knowledge...
-* `add`: Create or update a note in your knowledge...
+* `bm`: Direct passthrough to basic-memory command
 * `write`: Create or update a note in your knowledge...
-* `create`: Create or update a note
-* `show`: Read a note from your knowledge base.
 * `read`: Read a note by its identifier
-* `find`: Search across your knowledge base for...
 * `search`: Search notes by content or metadata
-* `ls`: List recent activity across your knowledge...
 * `list`: List recent notes and activity
 * `sync`: Sync notes with the database
-* `info`: Show project information and sync status.
 * `status`: Show project status and statistics
-* `recent-activity`: Alias for &#x27;list&#x27; command
 
-### `SkogCLI memory new`
+### `SkogCLI memory bm`
 
-Create or update a note in your knowledge base.
-
-    Examples:
-
-    Create from argument:
-      skogcli memory create &quot;My Idea&quot; notes --content &quot;# My Idea
-
-This is a great idea.&quot;
-
-    Create from stdin:
-      echo &quot;# My Idea
-
-This is a great idea.&quot; | skogcli memory create &quot;My Idea&quot; notes
-
-    Create with tags:
-      skogcli memory create &quot;Meeting Notes&quot; meetings --tags &quot;work,important,2025&quot;
+Direct passthrough to basic-memory command
 
 **Usage**:
 
 ```console
-$ SkogCLI memory new [OPTIONS] TITLE FOLDER
+$ SkogCLI memory bm [OPTIONS] ARGS...
 ```
 
 **Arguments**:
 
-* `TITLE`: Title of the note  [required]
-* `FOLDER`: Folder to create the note in  [required]
+* `ARGS...`: Arguments to pass to basic-memory  [required]
 
 **Options**:
 
-* `-c, --content TEXT`: Note content (if not provided, read from stdin)
-* `-t, --tag TEXT`: Tags to apply to the note (comma-separated)
-* `-p, --project TEXT`: Specific project to use
-* `--help`: Show this message and exit.
-
-### `SkogCLI memory add`
-
-Create or update a note in your knowledge base.
-
-    Examples:
-
-    Create from argument:
-      skogcli memory create &quot;My Idea&quot; notes --content &quot;# My Idea
-
-This is a great idea.&quot;
-
-    Create from stdin:
-      echo &quot;# My Idea
-
-This is a great idea.&quot; | skogcli memory create &quot;My Idea&quot; notes
-
-    Create with tags:
-      skogcli memory create &quot;Meeting Notes&quot; meetings --tags &quot;work,important,2025&quot;
-
-**Usage**:
-
-```console
-$ SkogCLI memory add [OPTIONS] TITLE FOLDER
-```
-
-**Arguments**:
-
-* `TITLE`: Title of the note  [required]
-* `FOLDER`: Folder to create the note in  [required]
-
-**Options**:
-
-* `-c, --content TEXT`: Note content (if not provided, read from stdin)
-* `-t, --tag TEXT`: Tags to apply to the note (comma-separated)
-* `-p, --project TEXT`: Specific project to use
 * `--help`: Show this message and exit.
 
 ### `SkogCLI memory write`
@@ -146,68 +102,9 @@ $ SkogCLI memory write [OPTIONS] TITLE FOLDER
 * `-p, --project TEXT`: Specific project to use
 * `--help`: Show this message and exit.
 
-### `SkogCLI memory create`
-
-Create or update a note in your knowledge base.
-
-**Usage**:
-
-```console
-$ SkogCLI memory create [OPTIONS] TITLE FOLDER
-```
-
-**Arguments**:
-
-* `TITLE`: Title of the note  [required]
-* `FOLDER`: Folder to create the note in  [required]
-
-**Options**:
-
-* `-c, --content TEXT`: Note content (if not provided, read from stdin)
-* `-t, --tag TEXT`: Tags to apply to the note (comma-separated)
-* `-p, --project TEXT`: Specific project to use
-* `--help`: Show this message and exit.
-
-### `SkogCLI memory show`
-
-Read a note from your knowledge base.
-
-Examples:
-
-Read a note by identifier:
-  skogcli memory read &quot;My Note&quot;
-
-Read a note from a specific project:
-  skogcli memory read &quot;My Note&quot; --project my-project
-
-Display raw markdown:
-  skogcli memory read &quot;My Note&quot; --raw
-
-Save note content to a file:
-  skogcli memory read &quot;My Note&quot; --output note.md
-
-**Usage**:
-
-```console
-$ SkogCLI memory show [OPTIONS] IDENTIFIER
-```
-
-**Arguments**:
-
-* `IDENTIFIER`: Note identifier in format &#x27;folder/title&#x27; or just &#x27;title&#x27; to search in all folders  [required]
-
-**Options**:
-
-* `-p, --page INTEGER RANGE`: Page number for pagination  [default: 1; x&gt;=1]
-* `-s, --page-size INTEGER RANGE`: Number of items per page  [default: 10; 1&lt;=x&lt;=100]
-* `-P, --project TEXT`: Specific project to use
-* `-r, --raw`: Display raw markdown without rich formatting
-* `-o, --output PATH`: Save note content to a file instead of displaying it
-* `--help`: Show this message and exit.
-
 ### `SkogCLI memory read`
 
-Read a note from your knowledge base.
+Read a note by its identifier
 
 **Usage**:
 
@@ -228,52 +125,9 @@ $ SkogCLI memory read [OPTIONS] IDENTIFIER
 * `-o, --output PATH`: Save note content to a file instead of displaying it
 * `--help`: Show this message and exit.
 
-### `SkogCLI memory find`
-
-Search across your knowledge base for specific content.
-
-Examples:
-
-Basic search:
-  skogcli memory search &quot;project ideas&quot;
-
-Search only titles:
-  skogcli memory search &quot;meeting&quot; --title
-
-Search with date filter:
-  skogcli memory search &quot;important&quot; --after-date &quot;1 week&quot;
-
-Search with regex:
-  skogcli memory search &quot;regex:project.*ideas&quot;
-
-Display results in JSON:
-  skogcli memory search &quot;project ideas&quot; --format json
-
-**Usage**:
-
-```console
-$ SkogCLI memory find [OPTIONS] QUERY
-```
-
-**Arguments**:
-
-* `QUERY`: Search query (supports simple text or regex with --regex flag)  [required]
-
-**Options**:
-
-* `--permalink / --no-permalink`: Search only in permalink values  [default: no-permalink]
-* `--title / --no-title`: Search only in title values  [default: no-title]
-* `-a, --after-date TEXT`: Filter results after this date (e.g., &#x27;2d&#x27;, &#x27;1 week&#x27;, &#x27;2023-01-01&#x27;)
-* `-b, --before-date TEXT`: Filter results before this date
-* `-p, --page INTEGER RANGE`: Page number for pagination  [default: 1; x&gt;=1]
-* `-s, --page-size INTEGER RANGE`: Number of items per page  [default: 10; 1&lt;=x&lt;=100]
-* `-P, --project TEXT`: Specific project to search in
-* `-f, --format TEXT`: Output format (table, json, markdown)  [default: table]
-* `--help`: Show this message and exit.
-
 ### `SkogCLI memory search`
 
-Search across your knowledge base for specific content.
+Search notes by content or metadata
 
 **Usage**:
 
@@ -283,13 +137,13 @@ $ SkogCLI memory search [OPTIONS] QUERY
 
 **Arguments**:
 
-* `QUERY`: Search query (supports simple text or regex with --regex flag)  [required]
+* `QUERY`: Search query  [required]
 
 **Options**:
 
-* `--permalink / --no-permalink`: Search only in permalink values  [default: no-permalink]
-* `--title / --no-title`: Search only in title values  [default: no-title]
-* `-a, --after-date TEXT`: Filter results after this date (e.g., &#x27;2d&#x27;, &#x27;1 week&#x27;, &#x27;2023-01-01&#x27;)
+* `--permalink`: Search only in permalink values
+* `--title`: Search only in title values
+* `-a, --after-date TEXT`: Filter results after this date
 * `-b, --before-date TEXT`: Filter results before this date
 * `-p, --page INTEGER RANGE`: Page number for pagination  [default: 1; x&gt;=1]
 * `-s, --page-size INTEGER RANGE`: Number of items per page  [default: 10; 1&lt;=x&lt;=100]
@@ -297,46 +151,9 @@ $ SkogCLI memory search [OPTIONS] QUERY
 * `-f, --format TEXT`: Output format (table, json, markdown)  [default: table]
 * `--help`: Show this message and exit.
 
-### `SkogCLI memory ls`
-
-List recent activity across your knowledge base.
-
-Examples:
-
-List recent activity (default 7 days):
-  skogcli memory list
-
-List specific type:
-  skogcli memory list --type entity
-
-Custom timeframe:
-  skogcli memory list --timeframe 30d
-
-Display results in JSON:
-  skogcli memory list --format json
-
-**Usage**:
-
-```console
-$ SkogCLI memory ls [OPTIONS]
-```
-
-**Options**:
-
-* `-t, --type TEXT`: Filter by activity type
-* `-f, --folder TEXT`: Filter by folder
-* `-d, --depth INTEGER RANGE`: Depth of related entities to show  [default: 1; 0&lt;=x&lt;=5]
-* `-T, --timeframe TEXT`: Time range to show (e.g., &#x27;7d&#x27;, &#x27;2w&#x27;, &#x27;1m&#x27;)  [default: 7d]
-* `-p, --page INTEGER RANGE`: Page number for pagination  [default: 1; x&gt;=1]
-* `-s, --page-size INTEGER RANGE`: Number of items per page  [default: 10; 1&lt;=x&lt;=100]
-* `-m, --max-related INTEGER RANGE`: Maximum number of related items to show per result  [default: 5; x&gt;=0]
-* `-P, --project TEXT`: Specific project to list from
-* `-f, --format TEXT`: Output format (table, json, csv, markdown)  [default: table]
-* `--help`: Show this message and exit.
-
 ### `SkogCLI memory list`
 
-List recent activity across your knowledge base.
+List recent notes and activity
 
 **Usage**:
 
@@ -359,7 +176,7 @@ $ SkogCLI memory list [OPTIONS]
 
 ### `SkogCLI memory sync`
 
-Synchronize your knowledge files with the database.
+Sync notes with the database
 
 **Usage**:
 
@@ -375,43 +192,9 @@ $ SkogCLI memory sync [OPTIONS]
 * `-v, --verbose`: Show detailed output
 * `--help`: Show this message and exit.
 
-### `SkogCLI memory info`
-
-Show project information and sync status.
-
-Examples:
-
-Show status for all projects:
-  skogcli memory status
-
-Show status for a specific project:
-  skogcli memory status --project my-project
-
-Display results in JSON:
-  skogcli memory status --format json
-Displays information about the current project, including:
-- Project name and location
-- Number of notes and entities
-- Last sync time
-- Files that need to be synchronized
-
-**Usage**:
-
-```console
-$ SkogCLI memory info [OPTIONS]
-```
-
-**Options**:
-
-* `-p, --project TEXT`: Show status for specific project
-* `-f, --format TEXT`: Output format (table, json, yaml)  [default: table]
-* `-a, --all`: Show all projects status (if no project specified)
-* `-c, --check`: Only show status code (0: success, 1: warning, 2: error)
-* `--help`: Show this message and exit.
-
 ### `SkogCLI memory status`
 
-Show project information and sync status.
+Show project status and statistics
 
 **Usage**:
 
@@ -427,29 +210,6 @@ $ SkogCLI memory status [OPTIONS]
 * `-c, --check`: Only show status code (0: success, 1: warning, 2: error)
 * `--help`: Show this message and exit.
 
-### `SkogCLI memory recent-activity`
-
-List recent activity across your knowledge base (alias for &#x27;list&#x27;).
-
-**Usage**:
-
-```console
-$ SkogCLI memory recent-activity [OPTIONS]
-```
-
-**Options**:
-
-* `-t, --type TEXT`: Filter by activity type
-* `-d, --depth INTEGER RANGE`: Depth of related entities to show  [default: 1; 0&lt;=x&lt;=5]
-* `-T, --timeframe TEXT`: Time range to show (e.g., &#x27;7d&#x27;, &#x27;2w&#x27;, &#x27;1m&#x27;)  [default: 7d]
-* `-p, --page INTEGER RANGE`: Page number for pagination  [default: 1; x&gt;=1]
-* `-s, --page-size INTEGER RANGE`: Number of items per page  [default: 10; 1&lt;=x&lt;=100]
-* `-m, --max-related INTEGER RANGE`: Maximum number of related items to show per result  [default: 5; x&gt;=0]
-* `-P, --project TEXT`: Specific project to list from
-* `-f, --format TEXT`: Output format (table, json, csv, markdown)  [default: table]
-* `-a, --all`: Show all items (ignores pagination)
-* `--help`: Show this message and exit.
-
 ## `SkogCLI config`
 
 Manage SkogCLI configuration
@@ -462,6 +222,7 @@ $ SkogCLI config [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
+* `--helpall`: Show comprehensive documentation for config commands
 * `--help`: Show this message and exit.
 
 **Commands**:
@@ -477,7 +238,6 @@ $ SkogCLI config [OPTIONS] COMMAND [ARGS]...
 * `backup`: Create a backup of the configuration files.
 * `restore`: Restore configuration from a backup.
 * `list-backups`: List available configuration backups.
-* `factory-reset`: Reset configuration to factory default...
 * `chat-history`: Manage chat history.
 
 ### `SkogCLI config show`
@@ -530,7 +290,7 @@ $ SkogCLI config get [OPTIONS] KEY
 
 **Options**:
 
-* `-r, --raw`: Output raw value without formatting  [default: True]
+* `-r, --raw`: Output raw value without formatting
 * `-j, --json`: Output as formatted JSON
 * `--help`: Show this message and exit.
 
@@ -679,23 +439,6 @@ $ SkogCLI config list-backups [OPTIONS]
 
 * `--help`: Show this message and exit.
 
-### `SkogCLI config factory-reset`
-
-Reset configuration to factory default values.
-
-Reset configuration to factory default values (ignoring custom defaults).
-
-**Usage**:
-
-```console
-$ SkogCLI config factory-reset [OPTIONS]
-```
-
-**Options**:
-
-* `-y, --yes`: Confirm reset without prompting
-* `--help`: Show this message and exit.
-
 ### `SkogCLI config chat-history`
 
 Manage chat history.
@@ -727,6 +470,7 @@ $ SkogCLI script [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
+* `--helpall`: Show comprehensive documentation for script commands
 * `--help`: Show this message and exit.
 
 **Commands**:
@@ -971,7 +715,7 @@ $ SkogCLI script templates [OPTIONS]
 ### `SkogCLI script export`
 
 Export a script to a JSON file that can be shared and imported by others.
-    
+
     The export file contains the script&#x27;s code, metadata, and other information.
     
 
@@ -1075,7 +819,7 @@ $ SkogCLI script generate [OPTIONS] NAME DESCRIPTION
 ### `SkogCLI script import`
 
 Import a script from a JSON export file created by the &#x27;script export&#x27; command.
-    
+
     The export file contains the script&#x27;s code, metadata, and other information.
     
 
@@ -1100,7 +844,7 @@ $ SkogCLI script import [OPTIONS] FILE
 ### `SkogCLI script import-file`
 
 Import an existing script file into the scripts directory.
-    
+
     This command copies a script file from anywhere on your filesystem into the SkogCLI
     scripts directory, making it available as a SkogCLI script.
     
@@ -1163,6 +907,7 @@ $ SkogCLI agent [OPTIONS] COMMAND [ARGS]...
 
 **Options**:
 
+* `--helpall`: Show comprehensive documentation for agent commands
 * `--help`: Show this message and exit.
 
 **Commands**:
@@ -1210,7 +955,7 @@ Send a message to an agent and display the response.
       skogcli agent send &quot;Write a Python function to calculate Fibonacci numbers&quot; --agent coder
 
     Use a specific model:
-      skogcli agent send &quot;Summarize this article&quot; --model gpt-4
+      skogcli agent send &quot;Summarize this article&quot; --model custom-model
     
 
 Send a message to an agent.
@@ -1260,7 +1005,7 @@ Create a new agent with the specified configuration.
       skogcli agent create researcher
 
     Create an agent with a specific model:
-      skogcli agent create coder --model gpt-4
+      skogcli agent create coder --model custom-model
 
     Create an agent with a system prompt:
       skogcli agent create assistant --system &quot;You are a helpful assistant.&quot;
@@ -1295,13 +1040,13 @@ Set a configuration value for an agent.
     Examples:
 
     Set a model for an agent:
-      skogcli agent set model gpt-4 --agent researcher
+      skogcli agent set model custom-model --agent researcher
 
     Set a system prompt:
       skogcli agent set system_prompt &quot;You are a helpful assistant.&quot; --agent assistant
 
     Set a configuration directly:
-      skogcli agent set agent.coder.model gpt-4
+      skogcli agent set agent.coder.model custom-model
     
 
 Set a configuration value for an agent.

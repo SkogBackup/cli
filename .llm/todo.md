@@ -1,0 +1,7 @@
+ - [x] Fix COMMANDS.md - remove non-existent commands, add missing ones
+ - [x] Fix memory list table display - shows empty rows instead of data  
+ - [x] Fix memory search table display - unreadable formatting
+ - [x] Remove write/create redundancy - pick one command
+ - [ ] Add missing memory commands or remove from docs
+ - [ ] Fix config programming - reset/show-defaults/edit-defaults logic is broken
+ - [ ] Revert default_settings.json corruption - file got mangled during config testing
