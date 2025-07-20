@@ -360,29 +360,30 @@ def search(
         else:
             try:
                 data = json.loads(result.stdout)
-                from rich.table import Table
-
-                table = Table(title=f"Search Results: '{query}'")
-                table.add_column("Type", style="cyan")
-                table.add_column("Title", style="green")
-                table.add_column("Created At", style="yellow")
-                table.add_column("Path", style="blue")
-
-                for item in data.get("results", []):
-                    table.add_row(
-                        item.get("type", ""),
-                        item.get("title", ""),
-                        (
-                            item.get("created_at", "").split(".")[0]
-                            if item.get("created_at")
-                            else ""
-                        ),
-                        item.get("file_path", ""),
-                    )
-
-                console.print(table)
-
+                
+                # Handle the search results structure
                 results = data.get("results", [])
+                
+                # Generate markdown output
+                markdown_content = f"# Search Results: '{query}'\n\n"
+                
+                for item in results:
+                    item_type = item.get("type", "")
+                    title = item.get("title", "")
+                    created_at = (
+                        item.get("created_at", "").split(".")[0]
+                        if item.get("created_at")
+                        else ""
+                    )
+                    file_path = item.get("file_path", "")
+                    
+                    markdown_content += f"## {title}\n"
+                    markdown_content += f"- **Type**: {item_type}\n"
+                    markdown_content += f"- **Created**: {created_at}\n"
+                    markdown_content += f"- **Path**: {file_path}\n\n"
+
+                console.print(Markdown(markdown_content))
+
                 total_results = len(results)
                 current_page = data.get("page", 1) or data.get("current_page", 1)
                 page_size = data.get("page_size", 10)
