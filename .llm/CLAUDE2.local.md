@@ -21,13 +21,28 @@ uv run skogcli memory list --format json
 
 **Solution**: Understand that config system has structural issues in the code - document as bugs to fix
 
-### 3. COMMANDS.md Documentation Mismatch
-**Problem**: Documentation lists non-existent commands (`memory new`, `memory add`, `memory show`, etc.)
-**Solution**: Check actual CLI with `--help` before trusting documentation
+### 3. COMMANDS.md Documentation Mismatch (SOLVED ✅)
+**Problem**: Documentation was completely out of sync with actual CLI implementation
+- Listed non-existent commands: `memory new`, `memory add`, `memory show`, `memory find`, `memory ls`, `memory info`, `memory recent-activity`
+- Missing actual commands: `version`, `memory bm` (basic-memory passthrough)
+- Had wrong command descriptions and options
+
+**Root Cause**: Documentation was manually written and never updated when CLI implementation changed
+
+**Solution Strategy**: Generate documentation directly from CLI source of truth
 ```bash
-# Check actual commands
-uv run skogcli memory --help
+# Don't trust existing docs - verify actual commands
+uv run skogcli --help
+uv run skogcli memory --help  
+uv run skogcli config --help
+
+# Use CLI's built-in comprehensive documentation generator
+uv run skogcli --helpall > COMMANDS.md
+
+# This ensures docs always match actual implementation
 ```
+
+**Key Insight**: Always generate docs from code, never manually maintain parallel documentation
 
 ### 4. Memory Command Redundancy
 **Problem**: `memory write` and `memory create` do identical things with slightly different options
