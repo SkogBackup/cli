@@ -56,7 +56,6 @@ $ SkogCLI memory [OPTIONS] COMMAND [ARGS]...
 
 * `bm`: Direct passthrough to basic-memory command
 * `write`: Create or update a note in your knowledge...
-* `create`: Create or update a note
 * `read`: Read a note by its identifier
 * `search`: Search notes by content or metadata
 * `list`: List recent notes and activity
@@ -100,28 +99,6 @@ $ SkogCLI memory write [OPTIONS] TITLE FOLDER
 
 * `-c, --content TEXT`: Note content (if not provided, read from stdin)
 * `-t, --tags TEXT`: Tags to apply to the note (comma-separated)
-* `-p, --project TEXT`: Specific project to use
-* `--help`: Show this message and exit.
-
-### `SkogCLI memory create`
-
-Create or update a note
-
-**Usage**:
-
-```console
-$ SkogCLI memory create [OPTIONS] TITLE FOLDER
-```
-
-**Arguments**:
-
-* `TITLE`: Title of the note  [required]
-* `FOLDER`: Folder to create the note in  [required]
-
-**Options**:
-
-* `-c, --content TEXT`: Note content (if not provided, read from stdin)
-* `-t, --tag TEXT`: Tags to apply to the note (comma-separated)
 * `-p, --project TEXT`: Specific project to use
 * `--help`: Show this message and exit.
 

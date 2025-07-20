@@ -170,31 +170,6 @@ def write(
         raise typer.Exit(code=1)
 
 
-@memory_app.command(name="create", help="Create or update a note")
-def create(
-    title: str = typer.Argument(..., help="Title of the note"),
-    folder: str = typer.Argument(
-        ..., help="Folder to create the note in", autocompletion=get_memory_folders
-    ),
-    content: Optional[str] = typer.Option(
-        None, "--content", "-c", help="Note content (if not provided, read from stdin)"
-    ),
-    tags: Optional[str] = typer.Option(
-        None, "--tag", "-t", help="Tags to apply to the note (comma-separated)"
-    ),
-    project: Optional[str] = typer.Option(
-        None,
-        "--project",
-        "-p",
-        help="Specific project to use",
-        autocompletion=get_memory_projects,
-    ),
-):
-    """Create or update a note in your knowledge base."""
-    # Delegate to write command
-    write(title=title, folder=folder, content=content, tags=tags, project=project)
-
-
 def get_note_identifiers() -> List[str]:
     """Get a list of note identifiers for completion."""
     try:
@@ -360,13 +335,13 @@ def search(
         else:
             try:
                 data = json.loads(result.stdout)
-                
+
                 # Handle the search results structure
                 results = data.get("results", [])
-                
+
                 # Generate markdown output
                 markdown_content = f"# Search Results: '{query}'\n\n"
-                
+
                 for item in results:
                     item_type = item.get("type", "")
                     title = item.get("title", "")
@@ -376,7 +351,7 @@ def search(
                         else ""
                     )
                     file_path = item.get("file_path", "")
-                    
+
                     markdown_content += f"## {title}\n"
                     markdown_content += f"- **Type**: {item_type}\n"
                     markdown_content += f"- **Created**: {created_at}\n"
@@ -487,7 +462,7 @@ def list_notes(
         else:
             try:
                 data = json.loads(result.stdout)
-                
+
                 # Handle the nested structure of recent-activity results
                 raw_results = data.get("results", [])
                 results = []
@@ -498,10 +473,10 @@ def list_notes(
                     else:
                         # Fallback for other structures
                         results.append(item)
-                
+
                 # Generate markdown output
                 markdown_content = f"# Recent Activity ({timeframe})\n\n"
-                
+
                 for item in results:
                     item_type = item.get("type", "")
                     title = item.get("title", "")
@@ -511,7 +486,7 @@ def list_notes(
                         else ""
                     )
                     file_path = item.get("file_path", "")
-                    
+
                     markdown_content += f"## {title}\n"
                     markdown_content += f"- **Type**: {item_type}\n"
                     markdown_content += f"- **Created**: {created_at}\n"
