@@ -1,3 +1,4 @@
+[$claude:context:tdd]
 This outlines the development practices and principles we require you to follow. Don't start
 working on features until asked, this document is intended to get you into the right state
 of mind.
@@ -83,3 +84,4 @@ Whenever I interrupt you to correct what you are doing. Please update this docum
 ## File location
 This file is always located at $PROJECT_ROOT/.skogai/.claude/commands/tdd.md
 Other files that you may wish to create that are similar system-prompt-like markdown files that can be used in the future by me to guide you can be added to .claude/commands - just name them appropriately.
+[$/claude:context:tdd]
