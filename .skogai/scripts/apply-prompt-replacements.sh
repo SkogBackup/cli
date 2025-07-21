@@ -4,16 +4,9 @@ REPLACEMENTS_FILE="/home/skogix/.skogai/docs/claude-code/prompt-replacements.con
 
 TARGET_FILE="/home/skogix/.claude/local/node_modules/@anthropic-ai/claude-code/cli.js"
 
-echo "Applying replacements to $TARGET_FILE"
-
-# Handle backup logic
-if [ ! -f "$TARGET_FILE.backup" ]; then
-  echo "Creating backup: $TARGET_FILE.backup"
-  cp "$TARGET_FILE" "$TARGET_FILE.backup"
-else
-  echo "Backup exists, restoring original from backup"
-  cp "$TARGET_FILE.backup" "$TARGET_FILE"
-fi
+cd /home/skogix/.claude/local
+rm -rf ./node_modules
+npm install @anthropic-ai/claude-code
 
 # Apply each replacement (alternating lines: search, replace, search, replace...)
 line_count=0
@@ -23,10 +16,11 @@ while read -r line; do
     search="$line"
   else
     replace="$line"
-    sed -i "s/$search/$replace/g" "$TARGET_FILE"
-    echo "  Applied: '$search' -> '$replace'"
+    sed -i "s^$search^$replace^g" "$TARGET_FILE" 2>&1
+    # sed -i "s|$search|$replace|g" "$TARGET_FILE" 2>&1
+    # sed -i "s*$search*$replace*g" "$TARGET_FILE" 2>&1
+    # sed -i "s$$search$$replace$$g" "$TARGET_FILE" 2>&1
+    grep -F "$replace" "$TARGET_FILE"
   fi
   ((line_count++))
 done <"$REPLACEMENTS_FILE"
-
-echo "Replacements applied. Backup saved as $TARGET_FILE.backup"
