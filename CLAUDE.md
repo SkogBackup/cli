@@ -100,6 +100,7 @@ empty calls to a command should always return help - use the no_args_is_help=Tru
 - Verify exit codes and stdout content in assertions
 - Tests MUST be written BEFORE any implementation code
 - All tests should verify behavior described in documentation
+- Use `SKOGAI_TEST_*` environment variables as testing namespace to avoid conflicts with production config
 
 # Memory Module Implementation
 
@@ -161,6 +162,9 @@ def process_markdown(markdown_str: str, raw: bool = False) -> Union[str, Markdow
 
 ### includes
 @.skogai/CLAUDE.md
+@/home/skogix/.claude/CLAUDE.md
 @./tmp/context
 @README.md
-@COMMANDS.md
+@.skogai/docs/CLAUDE-CERTAINTY.md
+@.skogai/docs/CLAUDE-PLACEHOLDER.md
+@.skogai/.claude/commands/tdd.md

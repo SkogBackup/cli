@@ -81,7 +81,7 @@ all-checks: lint type-check security ## Run all checks
 
 test: ## Run tests
 	@echo "$(GREEN)Running tests...$(NC)"
-	uv run pytest tests/ -v
+	./tests/run_tests.sh -v
 
 test-cov: ## Run tests with coverage
 	@echo "$(GREEN)Running tests with coverage...$(NC)"
