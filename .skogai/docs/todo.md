@@ -44,3 +44,7 @@
 - [ ] agrc commands -> ./scripts is soon doable showing all tools at all moments
 - [ ] ./todo should pop .skogai/docs/todo.list. ./todo add "newitem" and ./todo done should be simple additions as well
 
+- [ ] ./todo should pop ./docs/todo.list. ./todo add "newitem" and ./todo done should be simple additions as well
+- [ ] teach claude how "git add" works and why "git add ." is incredibly stupid
+- [ ] ./todo should pop ./docs/todo.list. ./todo add "newitem" and ./todo done should be simple additions as well
+- [ ] add git-flow releases and routines for git-flow feature diff
