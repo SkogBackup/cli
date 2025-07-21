@@ -238,6 +238,11 @@ def read(
     result = run_basic_memory(cmd)
 
     if result.returncode == 0:
+        # Check if basic-memory returned a "Note Not Found" message
+        if "Note Not Found" in result.stdout:
+            typer.echo(f"Error: Note '{identifier}' not found")
+            raise typer.Exit(code=1)
+            
         if raw:
             if output_file:
                 output_file.write_text(result.stdout)

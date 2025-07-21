@@ -1,0 +1,70 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__skogai-think__think",
+      "Bash(./.skogai/update)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(git flow feature:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(.skogai/update)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(rm:*)",
+      "Bash(uv run:*)",
+      "Bash(make:*)",
+      "Bash(git push:*)",
+      "mcp__skogai-think__think",
+      "Bash(ls:*)",
+      "Bash(./scripts/update)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/skogparse:*)",
+      "Bash(skogcli config get:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(git flow feature:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(./scripts/update-context)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".skogai/scripts/update"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".skogai/scripts/update"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"stop\""
+          }
+        ]
+      }
+    ]
+  }
+}
