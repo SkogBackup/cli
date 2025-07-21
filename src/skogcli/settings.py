@@ -43,10 +43,11 @@ def get_config_dir() -> Path:
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
 
-    # Fallback to hardcoded config directory
-    config_dir = Path.home() / ".config" / "skogcli"
-    config_dir.mkdir(parents=True, exist_ok=True)
-    return config_dir
+    # No .config fallback - raise error instead
+    raise ValueError(
+        "No configuration directory specified. Set SKOGAI_CONFIG_DIR environment variable "
+        "or ensure cli.storage_dir setting is configured in default_settings.json"
+    )
 
 
 def get_backup_dir() -> Path:
@@ -292,6 +293,28 @@ def save_settings(settings: Dict[str, Any]) -> bool:
 
 def get_setting(key: str) -> Any:
     """Get a setting value by its key (supports dot notation for nested settings)."""
+    # Check for environment variable override first
+    env_key = f"SKOGAI_{key.upper().replace('.', '_')}"
+    env_value = os.getenv(env_key)
+    if env_value is not None:
+        # Try to parse as different types
+        if env_value.lower() in ("true", "yes", "1"):
+            return True
+        elif env_value.lower() in ("false", "no", "0"):
+            return False
+        elif env_value.lower() in ("null", "none"):
+            return None
+        try:
+            # Try as int
+            return int(env_value)
+        except ValueError:
+            try:
+                # Try as float
+                return float(env_value)
+            except ValueError:
+                # Return as string
+                return env_value
+    
     settings = load_settings()
 
     # Handle SkogAI $ syntax - access definitions in the $ section

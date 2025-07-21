@@ -66,7 +66,10 @@ def load_default_settings() -> Dict[str, Any]:
             # If there's any error loading the file, fall back to built-in defaults
             return DEFAULT_SETTINGS.copy()
     else:
-        return DEFAULT_SETTINGS.copy()
+        raise FileNotFoundError(
+            f"Default settings file not found: {default_file}. "
+            "The default_settings.json file is required for configuration."
+        )
 
 
 def save_default_settings(settings: Dict[str, Any]) -> bool:

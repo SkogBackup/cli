@@ -46,7 +46,7 @@ empty calls to a command should always return help - use the no_args_is_help=Tru
 - Use --show to display current configuration
 - Use --set and --value for modifying configuration
 - Include a --reset option to restore defaults
-- Store configuration in a standard location (e.g., ~/.config/skogcli/config.json)
+- Store configuration using environment variables and src/data/default_settings.json
 
 # Testing with pytest
 - Run tests with `uv run pytest tests/`

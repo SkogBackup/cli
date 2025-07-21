@@ -17,7 +17,7 @@ class TestConfig:
         self.original_home = os.environ.get("HOME")
         self.test_home = Path("/tmp/skogcli_test_home")
         self.test_home.mkdir(parents=True, exist_ok=True)
-        self.test_config_dir = self.test_home / ".config" / "skogcli"
+        self.test_config_dir = Path(__file__).parent.parent / "src" / "skogcli" / "data"
         self.test_config_dir.mkdir(parents=True, exist_ok=True)
         self.test_config_file = self.test_config_dir / "config.json"
 
