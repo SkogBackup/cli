@@ -296,7 +296,7 @@ def get_setting(key: str) -> Any:
     # Check for test environment variable override first (highest priority)
     test_env_key = f"SKOGAI_TEST_{key.upper().replace('.', '_')}"
     env_value = os.getenv(test_env_key)
-    
+
     if env_value is None:
         # Check for regular environment variable override
         env_key = f"SKOGAI_{key.upper().replace('.', '_')}"
