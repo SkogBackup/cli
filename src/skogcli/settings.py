@@ -293,9 +293,14 @@ def save_settings(settings: Dict[str, Any]) -> bool:
 
 def get_setting(key: str) -> Any:
     """Get a setting value by its key (supports dot notation for nested settings)."""
-    # Check for environment variable override first
-    env_key = f"SKOGAI_{key.upper().replace('.', '_')}"
-    env_value = os.getenv(env_key)
+    # Check for test environment variable override first (highest priority)
+    test_env_key = f"SKOGAI_TEST_{key.upper().replace('.', '_')}"
+    env_value = os.getenv(test_env_key)
+    
+    if env_value is None:
+        # Check for regular environment variable override
+        env_key = f"SKOGAI_{key.upper().replace('.', '_')}"
+        env_value = os.getenv(env_key)
     if env_value is not None:
         # Try to parse as different types
         if env_value.lower() in ("true", "yes", "1"):
@@ -314,7 +319,7 @@ def get_setting(key: str) -> Any:
             except ValueError:
                 # Return as string
                 return env_value
-    
+
     settings = load_settings()
 
     # Handle SkogAI $ syntax - access definitions in the $ section

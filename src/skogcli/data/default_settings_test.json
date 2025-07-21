@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "script": {
+      "user_scripts_dir": "/tmp/skogcli_test_default_scripts",
+      "metadata_dir": "/tmp/skogcli_test_default_metadata",
+      "templates_dir": "/tmp/skogcli_test_default_templates"
+    }
+  }
+}
