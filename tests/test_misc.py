@@ -63,31 +63,9 @@ class TestScriptFunctions:
         self.test_metadata_dir = self.test_home / "metadata"
         self.test_metadata_dir.mkdir(parents=True, exist_ok=True)
 
-        # Set config values for testing (using first priority)
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.user_scripts_dir",
-                str(self.test_scripts_dir),
-            ],
-            check=True,
-        )
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.metadata_dir",
-                str(self.test_metadata_dir),
-            ],
-            check=True,
-        )
+        # Set environment variables for testing (highest priority)
+        os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = str(self.test_scripts_dir)
+        os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = str(self.test_metadata_dir)
 
         # Create a test script
         self.test_script = self.test_scripts_dir / "test_script.py"
@@ -228,61 +206,25 @@ class TestScriptCommands:
         self.test_metadata_dir = self.test_home / "metadata"
         self.test_metadata_dir.mkdir(parents=True, exist_ok=True)
 
-        # Set config values for testing
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.user_scripts_dir",
-                str(self.test_scripts_dir),
-            ],
-            check=True,
-        )
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.metadata_dir",
-                str(self.test_metadata_dir),
-            ],
-            check=True,
-        )
+        # Set environment variables for testing (highest priority)
+        self.original_skogai_test_scripts_dir = os.environ.get("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
+        self.original_skogai_test_metadata_dir = os.environ.get("SKOGAI_TEST_SCRIPT_METADATA_DIR")
+        
+        os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = str(self.test_scripts_dir)
+        os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = str(self.test_metadata_dir)
 
     def teardown_method(self):
         """Clean up after each test."""
-        import subprocess
-
-        # Reset config values
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.user_scripts_dir",
-                "/home/skogix/skogai/config/scripts",
-            ],
-            check=True,
-        )
-        subprocess.run(
-            [
-                "uv",
-                "run",
-                "skogcli",
-                "config",
-                "set",
-                "script.metadata_dir",
-                "/home/skogix/skogai/config",
-            ],
-            check=True,
-        )
+        # Restore environment variables
+        if self.original_skogai_test_scripts_dir:
+            os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = self.original_skogai_test_scripts_dir
+        elif "SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR" in os.environ:
+            del os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"]
+            
+        if self.original_skogai_test_metadata_dir:
+            os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = self.original_skogai_test_metadata_dir
+        elif "SKOGAI_TEST_SCRIPT_METADATA_DIR" in os.environ:
+            del os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"]
 
         if self.original_home:
             os.environ["HOME"] = self.original_home
