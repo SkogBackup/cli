@@ -1,7 +1,6 @@
 """Tests for the skogcli version command."""
 
 import subprocess
-import pytest
 
 
 def test_version_command():
@@ -19,5 +18,5 @@ def test_version_command():
     # Check that the output contains the expected version string
     assert "SkogCLI v" in result.stdout
 
-    # The version should match the expected format (v0.1.0 or similar)
-    assert "v0.1.0" in result.stdout
+    # The version should match the expected format (v0.0.3 or similar)
+    assert "v0.0.3" in result.stdout

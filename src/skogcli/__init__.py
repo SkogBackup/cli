@@ -60,7 +60,6 @@ def callback(
     """SkogCLI - Command line interface for SkogAI."""
     if helpall:
         import subprocess
-        import sys
 
         # Generate the documentation for all commands
         subprocess.run(

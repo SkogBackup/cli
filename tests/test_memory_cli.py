@@ -1,6 +1,5 @@
 """Tests for the SkogCLI memory subcommand's CLI interface."""
 
-import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock
 import json
@@ -409,7 +408,6 @@ class TestMemoryIntegration:
 
     def test_memory_command_without_basic_memory(self):
         """Test memory command when basic-memory is not in PATH."""
-        original_path = os.environ["PATH"]
         with patch.dict(os.environ, {"PATH": "/tmp/nonexistent"}):
             result = runner.invoke(app, ["memory", "status"])
 

@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 from rich.console import Console
 from rich.syntax import Syntax
-from .decorators import with_explanation
 from .default_settings import (
     load_default_settings,
     save_default_settings,
@@ -546,8 +545,7 @@ def config_callback() -> None:
     pass
 
 
-@config_app.command("show")
-@with_explanation("Display the current configuration.")
+@config_app.command("show", help="show configuration")
 def show() -> None:
     """Display the current configuration."""
     settings = load_settings()
@@ -556,8 +554,7 @@ def show() -> None:
     console.print(syntax)
 
 
-@config_app.command("list")
-@with_explanation("List all available configuration keys.")
+@config_app.command("list", help="list configuration")
 def list_keys() -> None:
     """List all available configuration keys."""
     settings = load_settings()
@@ -579,8 +576,7 @@ def list_keys() -> None:
         console.print(f"  {key}")
 
 
-@config_app.command("get")
-@with_explanation("Get the value of a specific configuration key.")
+@config_app.command("get", help="get configuration")
 def get(
     key: str = typer.Argument(
         ...,
@@ -619,8 +615,7 @@ def get(
         console.print(f"{key} = {value}")
 
 
-@config_app.command("set")
-@with_explanation("Set the value of a specific configuration key.")
+@config_app.command("set", help="set configuration")
 def set(
     key: str = typer.Argument(
         ...,
@@ -686,8 +681,7 @@ def set(
     return 0  # Ensure the command returns 0
 
 
-@config_app.command("reset")
-@with_explanation("Reset configuration to default values.")
+@config_app.command("reset", help="reset configuration")
 def reset(
     confirm: bool = typer.Option(
         False, "--yes", "-y", help="Confirm reset without prompting"
@@ -708,8 +702,7 @@ def reset(
         console.print("[bold red]Error:[/] Failed to reset configuration.")
 
 
-@config_app.command("show-defaults")
-@with_explanation("Display the default configuration.")
+@config_app.command("show-defaults", help="show-defaults configuration")
 def show_defaults() -> None:
     """Display the default configuration."""
     settings = load_default_settings()
@@ -718,8 +711,7 @@ def show_defaults() -> None:
     console.print(syntax)
 
 
-@config_app.command("edit-defaults")
-@with_explanation("Edit the default configuration.")
+@config_app.command("edit-defaults", help="edit-defaults configuration")
 def edit_defaults(
     key: Optional[str] = typer.Argument(
         None,
@@ -1000,8 +992,7 @@ def edit_defaults(
             console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@config_app.command("edit")
-@with_explanation("Open the configuration file in your default editor.")
+@config_app.command("edit", help="edit configuration")
 def edit(
     sensitive: bool = typer.Option(
         False, "--sensitive", "-s", help="Edit sensitive configuration"
@@ -1054,8 +1045,7 @@ def edit(
         console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@config_app.command("backup")
-@with_explanation("Create a backup of the configuration files.")
+@config_app.command("backup", help="backup configuration")
 def backup() -> None:
     """Create a backup of the configuration files."""
     config_file = get_config_file()
@@ -1080,8 +1070,7 @@ def backup() -> None:
         console.print("[yellow]No configuration files to backup.[/]")
 
 
-@config_app.command("restore")
-@with_explanation("Restore configuration from a backup.")
+@config_app.command("restore", help="restore configuration")
 def restore(
     backup_file: Optional[Path] = typer.Argument(
         None,
@@ -1146,8 +1135,7 @@ def restore(
         console.print(f"[bold red]Error:[/] Failed to restore: {str(e)}")
 
 
-@config_app.command("list-backups")
-@with_explanation("List available configuration backups.")
+@config_app.command("list-backups", help="list-backups configuration")
 def list_backups() -> None:
     """List available configuration backups."""
     backup_dir = get_backup_dir()
@@ -1172,8 +1160,7 @@ def list_backups() -> None:
         console.print(f"{i + 1}. {backup.name} ({mtime}, {size:.1f} KB)")
 
 
-@config_app.command("chat-history")
-@with_explanation("Manage chat history.")
+@config_app.command("chat-history", help="chat-history configuration")
 def chat_history(
     clear: bool = typer.Option(False, "--clear", help="Clear chat history"),
     limit: int = typer.Option(

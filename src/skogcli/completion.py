@@ -1,7 +1,6 @@
 """Shell completion functionality for SkogCLI."""
 
 import typer
-from typing import List, Callable
 
 
 def register_completion_callbacks(app: typer.Typer) -> None:

@@ -110,7 +110,6 @@ clean: ## Clean build artifacts and cache
 	find . -name "*.pyc" -delete
 
 check: pre-commit ## Run pre-commit checks
-	@echo "$(GREEN)Pre-commit checks completed!$(NC)"
 
 ci: all-checks test ## Simulate CI pipeline
 	@echo "$(GREEN)CI pipeline simulation completed!$(NC)"
