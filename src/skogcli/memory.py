@@ -242,7 +242,7 @@ def read(
         if "Note Not Found" in result.stdout:
             typer.echo(f"Error: Note '{identifier}' not found")
             raise typer.Exit(code=1)
-            
+
         if raw:
             if output_file:
                 output_file.write_text(result.stdout)
