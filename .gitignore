@@ -32,3 +32,4 @@ Thumbs.db
 skogcli2/.kilocode/mcp.json
 tmp/context
 tmp/skogparse
+.serena/cache/python/document_symbols_cache_v23-06-25.pkl
