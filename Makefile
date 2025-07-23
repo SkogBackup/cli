@@ -38,8 +38,9 @@ dev-install: ## Install development dependencies
 	@echo "$(GREEN)Installing development dependencies...$(NC)"
 	uv sync --group dev
 
-pre-commit: format lint type-check ## Run all code quality checks
-	@echo "$(GREEN)Pre-commit checks completed!$(NC)"
+pre-commit: ## Run pre-commit hooks
+	@echo "$(GREEN)Running pre-commit hooks...$(NC)"
+	uv run pre-commit run --all-files
 
 format: ## Format code
 	@echo "$(GREEN)Formatting code...$(NC)"

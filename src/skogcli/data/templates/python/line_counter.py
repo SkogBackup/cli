@@ -132,7 +132,7 @@ def print_summary(results: Dict[str, Tuple[int, int, int]]) -> None:
     total_code = total_lines - total_blank - total_comments
 
     # Print summary
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Total files: {total_files}")
     print(f"  Total lines: {total_lines}")
     print(f"  Code lines: {total_code}")
@@ -140,7 +140,7 @@ def print_summary(results: Dict[str, Tuple[int, int, int]]) -> None:
     print(f"  Comment lines: {total_comments}")
 
     if total_lines > 0:
-        print(f"\nPercentages:")
+        print("\nPercentages:")
         print(f"  Code: {total_code / total_lines * 100:.1f}%")
         print(f"  Comments: {total_comments / total_lines * 100:.1f}%")
         print(f"  Blank: {total_blank / total_lines * 100:.1f}%")

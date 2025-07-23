@@ -4,9 +4,8 @@ import typer
 import json
 import os
 import stat
-import shutil
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
@@ -248,15 +247,8 @@ def send(
     )
 
     # Use provided system prompt or fall back to agent config or default
-    system_to_use = (
-        system_prompt
-        or agent_config.get("system_prompt")
-        or get_setting("agent.default_system_prompt")
-        or ""
-    )
 
     import subprocess
-    from shlex import split
 
     # Get the script path for the agent
     scripts_dir = get_scripts_dir()

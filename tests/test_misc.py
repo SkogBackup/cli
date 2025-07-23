@@ -1,13 +1,11 @@
 """Tests for skogcli script functionality."""
 
-import pytest
 import subprocess
 import os
 import shutil
 import json
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import patch, MagicMock
 from skogcli.script import (
     get_user_scripts_dir,
     get_metadata_file,
@@ -45,7 +43,6 @@ class TestScriptFunctions:
 
     def setup_method(self):
         """Set up test environment before each test."""
-        import subprocess
 
         self.original_home = os.environ.get("HOME")
         self.original_skogai_scripts_dir = os.environ.get("SKOGAI_SCRIPTS_DIR")
@@ -216,7 +213,6 @@ class TestScriptCommands:
 
     def setup_method(self):
         """Set up test environment before each test."""
-        import subprocess
 
         self.original_home = os.environ.get("HOME")
         self.test_home = Path("/tmp/skogcli_misc_cmd_test_home")

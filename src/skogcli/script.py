@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from rich.console import Console
 from rich.table import Table
-from rich import print as rprint
 from .decorators import with_explanation
-from .settings import get_setting, set_setting
 
 console = Console()
 
@@ -511,7 +509,7 @@ def create_script(
             # Try to use basic template
             if "basic" in available_templates:
                 template = "basic"
-                console.print(f"[yellow]Using 'basic' template instead.[/]")
+                console.print("[yellow]Using 'basic' template instead.[/]")
                 template_content = get_template_content("basic", type.lower())
             else:
                 console.print("[bold red]Error:[/] No suitable template found.")
@@ -1030,7 +1028,6 @@ def batch_process(
 
         elif command == "search" and pattern is not None:
             # Search for pattern in the script
-            import re
 
             try:
                 with open(script_path, "r") as f:
@@ -1074,7 +1071,6 @@ def batch_process(
 
         elif command == "transform" and pattern is not None and replacement is not None:
             # Transform script content using regex
-            import re
 
             try:
                 with open(script_path, "r") as f:
@@ -1866,7 +1862,7 @@ def import_script(
         with open(file, "r") as f:
             export_data = json.load(f)
     except json.JSONDecodeError:
-        console.print(f"[bold red]Error:[/] Invalid export file format.")
+        console.print("[bold red]Error:[/] Invalid export file format.")
         return
 
     # Validate export data

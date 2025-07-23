@@ -1,7 +1,6 @@
 """Tests for the skogcli version command."""
 
 import subprocess
-import pytest
 
 
 def test_version_command():

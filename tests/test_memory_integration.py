@@ -4,7 +4,6 @@ import pytest
 import subprocess
 import tempfile
 import shutil
-import json
 import os
 from pathlib import Path
 from typer.testing import CliRunner

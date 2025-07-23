@@ -1,9 +1,6 @@
 """Tests for the skogcli decorators."""
 
-import pytest
-import subprocess
 import typer
-from functools import wraps
 from skogcli.decorators import with_explanation
 
 

@@ -1,8 +1,6 @@
 """Tests for skogcli config functionality."""
 
-import json
 import subprocess
-import pytest
 from pathlib import Path
 import os
 import shutil
