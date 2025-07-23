@@ -52,10 +52,14 @@ class TestScriptFunctions:
         self.original_skogai_templates_dir = os.environ.get("SKOGAI_TEMPLATES_DIR")
         self.original_skogai_config_dir = os.environ.get("SKOGAI_CONFIG_DIR")
         self.original_skogai_metadata_dir = os.environ.get("SKOGAI_SCRIPT_METADATA_DIR")
-        
+
         # Store original test environment variables
-        self.original_skogai_test_scripts_dir = os.environ.get("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
-        self.original_skogai_test_metadata_dir = os.environ.get("SKOGAI_TEST_SCRIPT_METADATA_DIR")
+        self.original_skogai_test_scripts_dir = os.environ.get(
+            "SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"
+        )
+        self.original_skogai_test_metadata_dir = os.environ.get(
+            "SKOGAI_TEST_SCRIPT_METADATA_DIR"
+        )
 
         self.test_home = Path("/tmp/skogcli_misc_test_home")
         self.test_home.mkdir(parents=True, exist_ok=True)
