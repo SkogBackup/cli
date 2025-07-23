@@ -38,9 +38,8 @@ dev-install: ## Install development dependencies
 	@echo "$(GREEN)Installing development dependencies...$(NC)"
 	uv sync --group dev
 
-pre-commit: ## Run pre-commit hooks
-	@echo "$(GREEN)Running pre-commit hooks...$(NC)"
-	uv run pre-commit run --all-files
+pre-commit: format lint type-check ## Run all code quality checks
+	@echo "$(GREEN)Pre-commit checks completed!$(NC)"
 
 format: ## Format code
 	@echo "$(GREEN)Formatting code...$(NC)"
@@ -110,7 +109,6 @@ clean: ## Clean build artifacts and cache
 	find . -name "*.pyc" -delete
 
 check: pre-commit ## Run pre-commit checks
-	@echo "$(GREEN)Pre-commit checks completed!$(NC)"
 
 ci: all-checks test ## Simulate CI pipeline
 	@echo "$(GREEN)CI pipeline simulation completed!$(NC)"
