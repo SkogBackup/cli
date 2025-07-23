@@ -52,6 +52,10 @@ class TestScriptFunctions:
         self.original_skogai_templates_dir = os.environ.get("SKOGAI_TEMPLATES_DIR")
         self.original_skogai_config_dir = os.environ.get("SKOGAI_CONFIG_DIR")
         self.original_skogai_metadata_dir = os.environ.get("SKOGAI_SCRIPT_METADATA_DIR")
+        
+        # Store original test environment variables
+        self.original_skogai_test_scripts_dir = os.environ.get("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
+        self.original_skogai_test_metadata_dir = os.environ.get("SKOGAI_TEST_SCRIPT_METADATA_DIR")
 
         self.test_home = Path("/tmp/skogcli_misc_test_home")
         self.test_home.mkdir(parents=True, exist_ok=True)
@@ -141,6 +145,21 @@ class TestScriptFunctions:
         elif "SKOGAI_SCRIPT_METADATA_DIR" in os.environ:
             del os.environ["SKOGAI_SCRIPT_METADATA_DIR"]
 
+        # Restore test environment variables
+        if self.original_skogai_test_scripts_dir:
+            os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = (
+                self.original_skogai_test_scripts_dir
+            )
+        elif "SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR" in os.environ:
+            del os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"]
+
+        if self.original_skogai_test_metadata_dir:
+            os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = (
+                self.original_skogai_test_metadata_dir
+            )
+        elif "SKOGAI_TEST_SCRIPT_METADATA_DIR" in os.environ:
+            del os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"]
+
         shutil.rmtree(self.test_home, ignore_errors=True)
 
     def test_get_user_scripts_dir(self):
@@ -207,9 +226,13 @@ class TestScriptCommands:
         self.test_metadata_dir.mkdir(parents=True, exist_ok=True)
 
         # Set environment variables for testing (highest priority)
-        self.original_skogai_test_scripts_dir = os.environ.get("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
-        self.original_skogai_test_metadata_dir = os.environ.get("SKOGAI_TEST_SCRIPT_METADATA_DIR")
-        
+        self.original_skogai_test_scripts_dir = os.environ.get(
+            "SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"
+        )
+        self.original_skogai_test_metadata_dir = os.environ.get(
+            "SKOGAI_TEST_SCRIPT_METADATA_DIR"
+        )
+
         os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = str(self.test_scripts_dir)
         os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = str(self.test_metadata_dir)
 
@@ -217,12 +240,16 @@ class TestScriptCommands:
         """Clean up after each test."""
         # Restore environment variables
         if self.original_skogai_test_scripts_dir:
-            os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = self.original_skogai_test_scripts_dir
+            os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"] = (
+                self.original_skogai_test_scripts_dir
+            )
         elif "SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR" in os.environ:
             del os.environ["SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR"]
-            
+
         if self.original_skogai_test_metadata_dir:
-            os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = self.original_skogai_test_metadata_dir
+            os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"] = (
+                self.original_skogai_test_metadata_dir
+            )
         elif "SKOGAI_TEST_SCRIPT_METADATA_DIR" in os.environ:
             del os.environ["SKOGAI_TEST_SCRIPT_METADATA_DIR"]
 
