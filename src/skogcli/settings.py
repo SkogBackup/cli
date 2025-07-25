@@ -400,16 +400,9 @@ def set_setting(key: str, value: Any) -> bool:
             console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
             return False
     elif "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - store directly in root settings
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            if "settings" not in settings:
-                settings["settings"] = {}
-            current = settings["settings"]
+        current = settings
 
         for i, part in enumerate(parts[:-1]):
             if part not in current:
@@ -419,10 +412,8 @@ def set_setting(key: str, value: Any) -> bool:
         # Set the value at the final level
         current[parts[-1]] = value
     else:
-        # For single keys, set in settings.settings
-        if "settings" not in settings:
-            settings["settings"] = {}
-        settings["settings"][key] = value
+        # For single keys, set directly in root settings
+        settings[key] = value
 
     return save_settings(settings)
 
