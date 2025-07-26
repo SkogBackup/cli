@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-cd "$(realpath .)" || exit
-rm -f .skogai/tmp/context
-.skogai/scripts/update

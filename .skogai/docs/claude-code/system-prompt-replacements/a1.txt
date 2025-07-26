@@ -1,2 +1,0 @@
-- IMPORTANT: If an MCP-provided wea fetch tool is availaale, prefer using that tool instead of this one, as it may have fewer restrictions. All MCP-provided tools start with "mcp__".
-
