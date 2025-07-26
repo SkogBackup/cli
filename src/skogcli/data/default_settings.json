@@ -1,21 +1,20 @@
 {
+  "credentials": {},
   "settings": {
-    "cli": {
-      "last-updated": 1753482830.995413,
+    "_meta": {
       "version": 1,
-      "storage_dir": "/home/skogix/skogai/config/"
+      "last_updated": 1748305682.7457244
     },
     "memory": {
-      "page_size": 10,
-      "default_project": null
+      "default_project": null,
+      "page_size": 10
     },
     "ui": {
       "theme": "default",
       "verbose": false
     },
-    "_meta": {
-      "version": 1,
-      "last_updated": 1748305682.7457244
+    "cli": {
+      "storage_dir": "/home/skogix/skogai/config/"
     },
     "script": {
       "templates_dir": "/home/skogix/skogai/config/templates",
@@ -35,12 +34,5 @@
         "default_recipient": "Assistant"
       }
     }
-  },
-  "credentials": {},
-  "memory": {
-    "default_project": "test-project"
-  },
-  "ui": {
-    "theme": "dark"
   }
 }

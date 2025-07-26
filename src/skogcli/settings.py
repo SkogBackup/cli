@@ -348,24 +348,30 @@ def get_setting(key: str) -> Any:
         return sensitive_settings.get(credential_key)
 
     if "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - read directly from root settings (matches set_setting)
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            current = settings.get("settings", {})
+        current = settings
 
         for part in parts:
             if part not in current:
+                # Fallback: try reading from nested settings.* structure for backward compatibility
+                if parts[0] not in ["settings", "credentials"]:
+                    fallback_current = settings.get("settings", {})
+                    for fallback_part in parts:
+                        if fallback_part not in fallback_current:
+                            return None
+                        fallback_current = fallback_current[fallback_part]
+                    return fallback_current
                 return None
             current = current[part]
         return current
 
-    # For single keys, check both root and settings.settings
-    if key in settings:
-        return settings[key]
+    # For single keys, read directly from root settings (matches set_setting)
+    value = settings.get(key)
+    if value is not None:
+        return value
+
+    # Fallback: try reading from nested settings.* structure for backward compatibility
     return settings.get("settings", {}).get(key)
 
 
@@ -428,14 +434,20 @@ def reset_settings() -> bool:
     create_backup(get_config_file())
     create_backup(get_sensitive_config_file())
 
-    # Reset to defaults
-    settings = load_default_settings()
-    if "settings" not in settings:
-        settings["settings"] = {}
-    if "meta" not in settings["settings"]:
-        settings["settings"]["meta"] = {}
-    settings["settings"]["meta"]["last_updated"] = time.time()
-    return save_settings(settings)
+    # Reset to defaults - build clean structure from scratch
+    from .default_settings import DEFAULT_SETTINGS
+
+    clean_settings: Dict[str, Any] = DEFAULT_SETTINGS.copy()
+    clean_settings["credentials"] = {}
+
+    # Update metadata
+    if "_meta" not in clean_settings["settings"]:
+        clean_settings["settings"]["_meta"] = {}
+    cast(Dict[str, Any], clean_settings["settings"]["_meta"])[
+        "last_updated"
+    ] = time.time()
+
+    return save_settings(clean_settings)
 
 
 def add_chat_history_item(item: Dict[str, Any]) -> bool:

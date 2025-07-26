@@ -18,8 +18,8 @@ DEFAULT_SETTINGS = {
             "last-updated": "1970-01-01T00:00:00Z",
             "version": "0",
         },
-        "memory": {"page_size": 10, "default_project": "default"},
-        "ui": {"theme": "light"},
+        "memory": {"page_size": 10, "default_project": None},
+        "ui": {"theme": "default", "verbose": False},
     }
 }
 

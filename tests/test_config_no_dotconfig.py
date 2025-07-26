@@ -25,6 +25,13 @@ class TestConfigNoDotConfig:
 
     def setup_method(self):
         """Set up test environment before each test."""
+        # Store and clean SKOGAI environment variables that might affect config
+        self.original_skogai_vars = {}
+        for key in list(os.environ.keys()):
+            if key.startswith("SKOGAI_") and ("UI" in key or "THEME" in key):
+                self.original_skogai_vars[key] = os.environ[key]
+                del os.environ[key]  # Remove to ensure clean test environment
+
         # Create temporary directories for testing
         self.test_temp_dir = Path(tempfile.mkdtemp())
         self.test_src_data_dir = self.test_temp_dir / "src" / "skogcli" / "data"
@@ -48,6 +55,10 @@ class TestConfigNoDotConfig:
 
     def teardown_method(self):
         """Clean up after each test."""
+        # Restore original SKOGAI environment variables
+        for key, value in self.original_skogai_vars.items():
+            os.environ[key] = value
+
         shutil.rmtree(self.test_temp_dir, ignore_errors=True)
 
     def test_config_dir_should_not_use_dotconfig_fallback(self):
