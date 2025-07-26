@@ -559,24 +559,33 @@ def show() -> None:
 
 @config_app.command("list", help="list configuration")
 def list_keys() -> None:
-    """List all available configuration keys."""
+    """List all available configuration keys with their current values."""
     settings = load_settings()
 
-    def extract_keys(data: Dict[str, Any], prefix: str = "") -> List[str]:
-        keys = []
+    def extract_key_value_pairs(
+        data: Dict[str, Any], prefix: str = ""
+    ) -> List[tuple[str, Any]]:
+        pairs = []
         for key, value in data.items():
             full_key = f"{prefix}{key}" if prefix else key
             if isinstance(value, dict):
-                keys.extend(extract_keys(value, f"{full_key}."))
+                pairs.extend(extract_key_value_pairs(value, f"{full_key}."))
             else:
-                keys.append(full_key)
-        return keys
+                pairs.append((full_key, value))
+        return pairs
 
-    all_keys = extract_keys(settings)
+    all_pairs = extract_key_value_pairs(settings)
 
-    console.print("[bold]Available configuration keys:[/]")
-    for key in sorted(all_keys):
-        console.print(f"  {key}")
+    console.print("[bold]Configuration settings:[/]")
+    for key, value in sorted(all_pairs):
+        # Format the value for display
+        if isinstance(value, str):
+            displayed_value = f'"{value}"'
+        elif value is None:
+            displayed_value = "null"
+        else:
+            displayed_value = str(value)
+        console.print(f"  {key} = {displayed_value}")
 
 
 @config_app.command("get", help="get configuration")

@@ -59,7 +59,7 @@ class TestConfig:
         assert "ui" in result.stdout
 
     def test_config_list(self):
-        """Test that config list displays the configuration keys."""
+        """Test that config list displays the configuration keys and values."""
         # Run the command
         result = subprocess.run(
             ["uv", "run", "skogcli", "config", "list"],
@@ -70,10 +70,12 @@ class TestConfig:
         # Check that the command succeeded
         assert result.returncode == 0
 
-        # Check that the output contains expected keys
-        assert "Available configuration keys" in result.stdout
+        # Check that the output contains expected keys with values
+        assert "Configuration settings" in result.stdout
         assert "memory.page_size" in result.stdout
         assert "ui.theme" in result.stdout
+        # Check that values are shown (should contain = signs)
+        assert " = " in result.stdout
 
     def test_config_get(self):
         """Test that config get retrieves a specific setting."""
