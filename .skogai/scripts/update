@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-printf "[@%s]" "claude:context" >tmp/context
-.skogai/scripts/context-readme.sh >>tmp/context
-.skogai/scripts/context-git.sh >>tmp/context
-.skogai/scripts/context-user.sh >>tmp/context
-.skogai/scripts/context-workspace.sh >>tmp/context
-.skogai/scripts/context-definitions.sh >>tmp/context
-printf "[@/%s]" "claude:context" >>tmp/context

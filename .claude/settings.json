@@ -32,39 +32,5 @@
     ],
     "deny": []
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".skogai/scripts/update"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".skogai/scripts/update"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"stop\""
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }

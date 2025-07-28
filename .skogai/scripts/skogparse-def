@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-printf "[@%s:\"%s\"]" "def" "$1" >tmp/skogparse
-cat tmp/skogparse | skogparse --execute

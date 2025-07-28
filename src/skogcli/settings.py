@@ -348,24 +348,30 @@ def get_setting(key: str) -> Any:
         return sensitive_settings.get(credential_key)
 
     if "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - read directly from root settings (matches set_setting)
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            current = settings.get("settings", {})
+        current = settings
 
         for part in parts:
             if part not in current:
+                # Fallback: try reading from nested settings.* structure for backward compatibility
+                if parts[0] not in ["settings", "credentials"]:
+                    fallback_current = settings.get("settings", {})
+                    for fallback_part in parts:
+                        if fallback_part not in fallback_current:
+                            return None
+                        fallback_current = fallback_current[fallback_part]
+                    return fallback_current
                 return None
             current = current[part]
         return current
 
-    # For single keys, check both root and settings.settings
-    if key in settings:
-        return settings[key]
+    # For single keys, read directly from root settings (matches set_setting)
+    value = settings.get(key)
+    if value is not None:
+        return value
+
+    # Fallback: try reading from nested settings.* structure for backward compatibility
     return settings.get("settings", {}).get(key)
 
 
@@ -400,16 +406,9 @@ def set_setting(key: str, value: Any) -> bool:
             console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
             return False
     elif "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - store directly in root settings
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            if "settings" not in settings:
-                settings["settings"] = {}
-            current = settings["settings"]
+        current = settings
 
         for i, part in enumerate(parts[:-1]):
             if part not in current:
@@ -419,10 +418,8 @@ def set_setting(key: str, value: Any) -> bool:
         # Set the value at the final level
         current[parts[-1]] = value
     else:
-        # For single keys, set in settings.settings
-        if "settings" not in settings:
-            settings["settings"] = {}
-        settings["settings"][key] = value
+        # For single keys, set directly in root settings
+        settings[key] = value
 
     return save_settings(settings)
 
@@ -437,14 +434,20 @@ def reset_settings() -> bool:
     create_backup(get_config_file())
     create_backup(get_sensitive_config_file())
 
-    # Reset to defaults
-    settings = load_default_settings()
-    if "settings" not in settings:
-        settings["settings"] = {}
-    if "meta" not in settings["settings"]:
-        settings["settings"]["meta"] = {}
-    settings["settings"]["meta"]["last_updated"] = time.time()
-    return save_settings(settings)
+    # Reset to defaults - build clean structure from scratch
+    from .default_settings import DEFAULT_SETTINGS
+
+    clean_settings: Dict[str, Any] = DEFAULT_SETTINGS.copy()
+    clean_settings["credentials"] = {}
+
+    # Update metadata
+    if "_meta" not in clean_settings["settings"]:
+        clean_settings["settings"]["_meta"] = {}
+    cast(Dict[str, Any], clean_settings["settings"]["_meta"])[
+        "last_updated"
+    ] = time.time()
+
+    return save_settings(clean_settings)
 
 
 def add_chat_history_item(item: Dict[str, Any]) -> bool:
@@ -556,24 +559,33 @@ def show() -> None:
 
 @config_app.command("list", help="list configuration")
 def list_keys() -> None:
-    """List all available configuration keys."""
+    """List all available configuration keys with their current values."""
     settings = load_settings()
 
-    def extract_keys(data: Dict[str, Any], prefix: str = "") -> List[str]:
-        keys = []
+    def extract_key_value_pairs(
+        data: Dict[str, Any], prefix: str = ""
+    ) -> List[tuple[str, Any]]:
+        pairs = []
         for key, value in data.items():
             full_key = f"{prefix}{key}" if prefix else key
             if isinstance(value, dict):
-                keys.extend(extract_keys(value, f"{full_key}."))
+                pairs.extend(extract_key_value_pairs(value, f"{full_key}."))
             else:
-                keys.append(full_key)
-        return keys
+                pairs.append((full_key, value))
+        return pairs
 
-    all_keys = extract_keys(settings)
+    all_pairs = extract_key_value_pairs(settings)
 
-    console.print("[bold]Available configuration keys:[/]")
-    for key in sorted(all_keys):
-        console.print(f"  {key}")
+    console.print("[bold]Configuration settings:[/]")
+    for key, value in sorted(all_pairs):
+        # Format the value for display
+        if isinstance(value, str):
+            displayed_value = f'"{value}"'
+        elif value is None:
+            displayed_value = "null"
+        else:
+            displayed_value = str(value)
+        console.print(f"  {key} = {displayed_value}")
 
 
 @config_app.command("get", help="get configuration")
