@@ -113,7 +113,14 @@ def get_global_scripts_dir() -> Path:
 
 def get_user_scripts_dir() -> Path:
     """Get the user scripts directory, creating it if it doesn't exist."""
-    # Check config setting first
+    # Check test environment variable first (highest priority for testing)
+    test_scripts_dir = os.getenv("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
+    if test_scripts_dir:
+        scripts_dir = Path(test_scripts_dir)
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+        return scripts_dir
+
+    # Check config setting second
     from .settings import get_setting
 
     scripts_dir_setting = get_setting("script.user_scripts_dir")
@@ -137,7 +144,14 @@ def get_user_scripts_dir() -> Path:
 
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
-    # Check config setting first
+    # Check test environment variable first (highest priority for testing)
+    test_metadata_dir = os.getenv("SKOGAI_TEST_SCRIPT_METADATA_DIR")
+    if test_metadata_dir:
+        metadata_dir = Path(test_metadata_dir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        return metadata_dir / "script_metadata.json"
+
+    # Check config setting second
     from .settings import get_setting
 
     metadata_dir_setting = get_setting("script.metadata_dir")
