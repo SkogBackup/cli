@@ -558,7 +558,11 @@ def show() -> None:
 
 
 @config_app.command("list", help="list configuration")
-def list_keys() -> None:
+def list_keys(
+    env_only: bool = typer.Option(
+        False, "--env-only", help="Show only environment variables (*.env.* keys)"
+    )
+) -> None:
     """List all available configuration keys with their current values."""
     settings = load_settings()
 
@@ -576,7 +580,13 @@ def list_keys() -> None:
 
     all_pairs = extract_key_value_pairs(settings)
 
-    console.print("[bold]Configuration settings:[/]")
+    if env_only:
+        # Filter to only show environment variables (*.env.* pattern)
+        env_pairs = [(key, value) for key, value in all_pairs if ".env." in key]
+        all_pairs = env_pairs
+
+    title = "Environment variables:" if env_only else "Configuration settings:"
+    console.print(f"[bold]{title}[/]")
     for key, value in sorted(all_pairs):
         # Format the value for display
         if isinstance(value, str):
@@ -1220,3 +1230,86 @@ def chat_history(
             console.print(f"  Metadata: {json.dumps(item['metadata'], indent=2)}")
 
         console.print("")
+
+
+@config_app.command("export-env", help="export environment variables from config")
+def export_env(
+    namespace: Optional[str] = typer.Option(
+        None,
+        "--namespace",
+        "-n",
+        help="Export only variables from specific namespace (e.g., 'claude', 'agent')",
+    ),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Write to file instead of stdout"
+    ),
+) -> None:
+    """Export environment variables from configuration.
+
+    This command generates bash export statements for all *.env.* keys in the configuration.
+
+    Examples:
+        skogcli config export-env                    # Export all env vars
+        skogcli config export-env -n claude          # Export only claude.env.* vars
+        skogcli config export-env -o /tmp/env.sh     # Write to file
+    """
+    settings = load_settings()
+
+    def extract_env_pairs(
+        data: Dict[str, Any], prefix: str = ""
+    ) -> List[tuple[str, Any]]:
+        pairs = []
+        for key, value in data.items():
+            full_key = f"{prefix}{key}" if prefix else key
+            if isinstance(value, dict):
+                pairs.extend(extract_env_pairs(value, f"{full_key}."))
+            else:
+                # Only include keys that match *.env.* pattern
+                if ".env." in full_key and value is not None:
+                    pairs.append((full_key, value))
+        return pairs
+
+    all_env_pairs = extract_env_pairs(settings)
+
+    # Filter by namespace if specified
+    if namespace:
+        filtered_pairs = [
+            (key, value)
+            for key, value in all_env_pairs
+            if key.startswith(f"{namespace}.env.")
+        ]
+        all_env_pairs = filtered_pairs
+
+    if not all_env_pairs:
+        msg = "No environment variables found"
+        if namespace:
+            msg += f" in namespace '{namespace}'"
+        console.print(f"[yellow]{msg}.[/]")
+        return
+
+    # Generate export statements
+    export_lines = []
+    for key, value in sorted(all_env_pairs):
+        # Extract the environment variable name from the key
+        # e.g., "claude.env.MYENV" -> "MYENV"
+        parts = key.split(".env.")
+        if len(parts) == 2:
+            env_name = parts[1]
+            # Escape value for shell safety
+            escaped_value = str(value).replace('"', '\\"')
+            export_line = f'export {env_name}="{escaped_value}"'
+            export_lines.append(export_line)
+
+    # Output to file or stdout
+    if output:
+        try:
+            output_path = Path(output)
+            output_path.write_text("\n".join(export_lines) + "\n")
+            console.print(f"[green]Environment variables exported to:[/] {output_path}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to write to {output}: {str(e)}")
+            return
+    else:
+        # Print to stdout
+        for line in export_lines:
+            print(line)
