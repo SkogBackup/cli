@@ -18,8 +18,8 @@ DEFAULT_SETTINGS = {
             "last-updated": "1970-01-01T00:00:00Z",
             "version": "0",
         },
-        "memory": {"page_size": 10, "default_project": "default"},
-        "ui": {"theme": "light"},
+        "memory": {"page_size": 10, "default_project": None},
+        "ui": {"theme": "default", "verbose": False},
     }
 }
 
@@ -82,7 +82,12 @@ def save_default_settings(settings: Dict[str, Any]) -> bool:
     default_file = get_default_settings_file()
 
     # Update metadata
-    settings["settings"]["cli"] = {"version": CONFIG_VERSION}
+    if "settings" not in settings:
+        settings["settings"] = {}
+    if "cli" not in settings["settings"]:
+        settings["settings"]["cli"] = {}
+
+    settings["settings"]["cli"]["version"] = CONFIG_VERSION
     settings["settings"]["cli"]["last-updated"] = time.time()
 
     try:

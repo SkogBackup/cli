@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 from rich.console import Console
 from rich.syntax import Syntax
-from .decorators import with_explanation
 from .default_settings import (
     load_default_settings,
     save_default_settings,
@@ -349,24 +348,30 @@ def get_setting(key: str) -> Any:
         return sensitive_settings.get(credential_key)
 
     if "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - read directly from root settings (matches set_setting)
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            current = settings.get("settings", {})
+        current = settings
 
         for part in parts:
             if part not in current:
+                # Fallback: try reading from nested settings.* structure for backward compatibility
+                if parts[0] not in ["settings", "credentials"]:
+                    fallback_current = settings.get("settings", {})
+                    for fallback_part in parts:
+                        if fallback_part not in fallback_current:
+                            return None
+                        fallback_current = fallback_current[fallback_part]
+                    return fallback_current
                 return None
             current = current[part]
         return current
 
-    # For single keys, check both root and settings.settings
-    if key in settings:
-        return settings[key]
+    # For single keys, read directly from root settings (matches set_setting)
+    value = settings.get(key)
+    if value is not None:
+        return value
+
+    # Fallback: try reading from nested settings.* structure for backward compatibility
     return settings.get("settings", {}).get(key)
 
 
@@ -401,16 +406,9 @@ def set_setting(key: str, value: Any) -> bool:
             console.print(f"[bold red]Error:[/] Failed to save credential: {str(e)}")
             return False
     elif "." in key:
-        # Handle nested keys - start from settings.settings for most keys
+        # Handle nested keys - store directly in root settings
         parts = key.split(".")
-        if parts[0] in ["settings", "credentials"]:
-            # Key already includes the top-level section
-            current = settings
-        else:
-            # Key is relative to settings.settings
-            if "settings" not in settings:
-                settings["settings"] = {}
-            current = settings["settings"]
+        current = settings
 
         for i, part in enumerate(parts[:-1]):
             if part not in current:
@@ -420,10 +418,8 @@ def set_setting(key: str, value: Any) -> bool:
         # Set the value at the final level
         current[parts[-1]] = value
     else:
-        # For single keys, set in settings.settings
-        if "settings" not in settings:
-            settings["settings"] = {}
-        settings["settings"][key] = value
+        # For single keys, set directly in root settings
+        settings[key] = value
 
     return save_settings(settings)
 
@@ -438,14 +434,20 @@ def reset_settings() -> bool:
     create_backup(get_config_file())
     create_backup(get_sensitive_config_file())
 
-    # Reset to defaults
-    settings = load_default_settings()
-    if "settings" not in settings:
-        settings["settings"] = {}
-    if "meta" not in settings["settings"]:
-        settings["settings"]["meta"] = {}
-    settings["settings"]["meta"]["last_updated"] = time.time()
-    return save_settings(settings)
+    # Reset to defaults - build clean structure from scratch
+    from .default_settings import DEFAULT_SETTINGS
+
+    clean_settings: Dict[str, Any] = DEFAULT_SETTINGS.copy()
+    clean_settings["credentials"] = {}
+
+    # Update metadata
+    if "_meta" not in clean_settings["settings"]:
+        clean_settings["settings"]["_meta"] = {}
+    cast(Dict[str, Any], clean_settings["settings"]["_meta"])[
+        "last_updated"
+    ] = time.time()
+
+    return save_settings(clean_settings)
 
 
 def add_chat_history_item(item: Dict[str, Any]) -> bool:
@@ -546,8 +548,7 @@ def config_callback() -> None:
     pass
 
 
-@config_app.command("show")
-@with_explanation("Display the current configuration.")
+@config_app.command("show", help="show configuration")
 def show() -> None:
     """Display the current configuration."""
     settings = load_settings()
@@ -556,31 +557,48 @@ def show() -> None:
     console.print(syntax)
 
 
-@config_app.command("list")
-@with_explanation("List all available configuration keys.")
-def list_keys() -> None:
-    """List all available configuration keys."""
+@config_app.command("list", help="list configuration")
+def list_keys(
+    env_only: bool = typer.Option(
+        False, "--env-only", help="Show only environment variables (*.env.* keys)"
+    )
+) -> None:
+    """List all available configuration keys with their current values."""
     settings = load_settings()
 
-    def extract_keys(data: Dict[str, Any], prefix: str = "") -> List[str]:
-        keys = []
+    def extract_key_value_pairs(
+        data: Dict[str, Any], prefix: str = ""
+    ) -> List[tuple[str, Any]]:
+        pairs = []
         for key, value in data.items():
             full_key = f"{prefix}{key}" if prefix else key
             if isinstance(value, dict):
-                keys.extend(extract_keys(value, f"{full_key}."))
+                pairs.extend(extract_key_value_pairs(value, f"{full_key}."))
             else:
-                keys.append(full_key)
-        return keys
+                pairs.append((full_key, value))
+        return pairs
 
-    all_keys = extract_keys(settings)
+    all_pairs = extract_key_value_pairs(settings)
 
-    console.print("[bold]Available configuration keys:[/]")
-    for key in sorted(all_keys):
-        console.print(f"  {key}")
+    if env_only:
+        # Filter to only show environment variables (*.env.* pattern)
+        env_pairs = [(key, value) for key, value in all_pairs if ".env." in key]
+        all_pairs = env_pairs
+
+    title = "Environment variables:" if env_only else "Configuration settings:"
+    console.print(f"[bold]{title}[/]")
+    for key, value in sorted(all_pairs):
+        # Format the value for display
+        if isinstance(value, str):
+            displayed_value = f'"{value}"'
+        elif value is None:
+            displayed_value = "null"
+        else:
+            displayed_value = str(value)
+        console.print(f"  {key} = {displayed_value}")
 
 
-@config_app.command("get")
-@with_explanation("Get the value of a specific configuration key.")
+@config_app.command("get", help="get configuration")
 def get(
     key: str = typer.Argument(
         ...,
@@ -619,8 +637,7 @@ def get(
         console.print(f"{key} = {value}")
 
 
-@config_app.command("set")
-@with_explanation("Set the value of a specific configuration key.")
+@config_app.command("set", help="set configuration")
 def set(
     key: str = typer.Argument(
         ...,
@@ -686,8 +703,7 @@ def set(
     return 0  # Ensure the command returns 0
 
 
-@config_app.command("reset")
-@with_explanation("Reset configuration to default values.")
+@config_app.command("reset", help="reset configuration")
 def reset(
     confirm: bool = typer.Option(
         False, "--yes", "-y", help="Confirm reset without prompting"
@@ -708,8 +724,7 @@ def reset(
         console.print("[bold red]Error:[/] Failed to reset configuration.")
 
 
-@config_app.command("show-defaults")
-@with_explanation("Display the default configuration.")
+@config_app.command("show-defaults", help="show-defaults configuration")
 def show_defaults() -> None:
     """Display the default configuration."""
     settings = load_default_settings()
@@ -718,8 +733,7 @@ def show_defaults() -> None:
     console.print(syntax)
 
 
-@config_app.command("edit-defaults")
-@with_explanation("Edit the default configuration.")
+@config_app.command("edit-defaults", help="edit-defaults configuration")
 def edit_defaults(
     key: Optional[str] = typer.Argument(
         None,
@@ -1000,8 +1014,7 @@ def edit_defaults(
             console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@config_app.command("edit")
-@with_explanation("Open the configuration file in your default editor.")
+@config_app.command("edit", help="edit configuration")
 def edit(
     sensitive: bool = typer.Option(
         False, "--sensitive", "-s", help="Edit sensitive configuration"
@@ -1054,8 +1067,7 @@ def edit(
         console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@config_app.command("backup")
-@with_explanation("Create a backup of the configuration files.")
+@config_app.command("backup", help="backup configuration")
 def backup() -> None:
     """Create a backup of the configuration files."""
     config_file = get_config_file()
@@ -1080,8 +1092,7 @@ def backup() -> None:
         console.print("[yellow]No configuration files to backup.[/]")
 
 
-@config_app.command("restore")
-@with_explanation("Restore configuration from a backup.")
+@config_app.command("restore", help="restore configuration")
 def restore(
     backup_file: Optional[Path] = typer.Argument(
         None,
@@ -1146,8 +1157,7 @@ def restore(
         console.print(f"[bold red]Error:[/] Failed to restore: {str(e)}")
 
 
-@config_app.command("list-backups")
-@with_explanation("List available configuration backups.")
+@config_app.command("list-backups", help="list-backups configuration")
 def list_backups() -> None:
     """List available configuration backups."""
     backup_dir = get_backup_dir()
@@ -1172,8 +1182,7 @@ def list_backups() -> None:
         console.print(f"{i + 1}. {backup.name} ({mtime}, {size:.1f} KB)")
 
 
-@config_app.command("chat-history")
-@with_explanation("Manage chat history.")
+@config_app.command("chat-history", help="chat-history configuration")
 def chat_history(
     clear: bool = typer.Option(False, "--clear", help="Clear chat history"),
     limit: int = typer.Option(
@@ -1221,3 +1230,101 @@ def chat_history(
             console.print(f"  Metadata: {json.dumps(item['metadata'], indent=2)}")
 
         console.print("")
+
+
+@config_app.command("export-env", help="export environment variables from config")
+def export_env(
+    namespace: Optional[str] = typer.Option(
+        None,
+        "--namespace",
+        "-n",
+        help="Export only variables from specific namespace (e.g., 'claude', 'agent')",
+    ),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Write to file instead of stdout"
+    ),
+) -> None:
+    """Export environment variables from configuration.
+
+    This command generates bash export statements for all *.env.* keys in the configuration.
+
+    Examples:
+        skogcli config export-env                    # Export all env vars
+        skogcli config export-env -n claude          # Export only claude.env.* vars
+        skogcli config export-env -o /tmp/env.sh     # Write to file
+    """
+    settings = load_settings()
+
+    def extract_env_pairs(
+        data: Dict[str, Any], prefix: str = ""
+    ) -> List[tuple[str, Any]]:
+        pairs = []
+        for key, value in data.items():
+            full_key = f"{prefix}{key}" if prefix else key
+            if isinstance(value, dict):
+                pairs.extend(extract_env_pairs(value, f"{full_key}."))
+            else:
+                # Only include keys that match *.env.* pattern
+                if ".env." in full_key and value is not None:
+                    pairs.append((full_key, value))
+        return pairs
+
+    all_env_pairs = extract_env_pairs(settings)
+
+    # Filter by namespace if specified
+    if namespace:
+        # Support comma-separated namespaces with precedence (later overrides earlier)
+        namespaces = [ns.strip() for ns in namespace.split(",")]
+        env_dict = {}  # Use dict to handle precedence automatically
+
+        for ns in namespaces:
+            filtered_pairs = [
+                (key, value)
+                for key, value in all_env_pairs
+                if key.startswith(f"{ns}.env.")
+            ]
+            # Add/override variables from this namespace
+            for key, value in filtered_pairs:
+                parts = key.split(".env.")
+                if len(parts) == 2:
+                    env_name = parts[1]
+                    env_dict[env_name] = value
+
+        # Convert back to pairs format for consistency
+        all_env_pairs = [
+            (f"*.env.{env_name}", value) for env_name, value in env_dict.items()
+        ]
+
+    if not all_env_pairs:
+        msg = "No environment variables found"
+        if namespace:
+            msg += f" in namespace '{namespace}'"
+        console.print(f"[yellow]{msg}.[/]")
+        return
+
+    # Generate export statements
+    export_lines = []
+    for key, value in sorted(all_env_pairs):
+        # Extract the environment variable name from the key
+        # e.g., "claude.env.MYENV" -> "MYENV"
+        parts = key.split(".env.")
+        if len(parts) == 2:
+            env_name = parts[1]
+            # Escape value for shell safety
+            escaped_value = str(value).replace('"', '\\"')
+            export_line = f'export {env_name}="{escaped_value}"'
+            export_lines.append(export_line)
+
+    # Output to file or stdout
+    if output:
+        try:
+            output_path = Path(output)
+            output_path.write_text("\n".join(export_lines) + "\n")
+            console.print(f"[green]Environment variables exported to:[/] {output_path}")
+        except Exception as e:
+            console.print(f"[bold red]Error:[/] Failed to write to {output}: {str(e)}")
+            return
+    else:
+        # Print to stdout
+        for line in export_lines:
+            print(line)

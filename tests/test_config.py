@@ -1,8 +1,6 @@
 """Tests for skogcli config functionality."""
 
-import json
 import subprocess
-import pytest
 from pathlib import Path
 import os
 import shutil
@@ -13,8 +11,15 @@ class TestConfig:
 
     def setup_method(self):
         """Set up test environment before each test."""
-        # Create a temporary config directory for testing
+        # Store original environment variables that might affect config
         self.original_home = os.environ.get("HOME")
+        self.original_skogai_vars = {}
+        for key in list(os.environ.keys()):
+            if key.startswith("SKOGAI_") and ("UI" in key or "THEME" in key):
+                self.original_skogai_vars[key] = os.environ[key]
+                del os.environ[key]  # Remove to ensure clean test environment
+
+        # Create a temporary config directory for testing
         self.test_home = Path("/tmp/skogcli_test_home")
         self.test_home.mkdir(parents=True, exist_ok=True)
         self.test_config_dir = Path(__file__).parent.parent / "src" / "skogcli" / "data"
@@ -29,6 +34,10 @@ class TestConfig:
         # Restore the original HOME environment variable
         if self.original_home:
             os.environ["HOME"] = self.original_home
+
+        # Restore original SKOGAI environment variables
+        for key, value in self.original_skogai_vars.items():
+            os.environ[key] = value
 
         # Clean up the test directory
         shutil.rmtree(self.test_home, ignore_errors=True)
@@ -50,7 +59,7 @@ class TestConfig:
         assert "ui" in result.stdout
 
     def test_config_list(self):
-        """Test that config list displays the configuration keys."""
+        """Test that config list displays the configuration keys and values."""
         # Run the command
         result = subprocess.run(
             ["uv", "run", "skogcli", "config", "list"],
@@ -61,10 +70,12 @@ class TestConfig:
         # Check that the command succeeded
         assert result.returncode == 0
 
-        # Check that the output contains expected keys
-        assert "Available configuration keys" in result.stdout
+        # Check that the output contains expected keys with values
+        assert "Configuration settings" in result.stdout
         assert "memory.page_size" in result.stdout
         assert "ui.theme" in result.stdout
+        # Check that values are shown (should contain = signs)
+        assert " = " in result.stdout
 
     def test_config_get(self):
         """Test that config get retrieves a specific setting."""

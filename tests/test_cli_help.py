@@ -1,6 +1,5 @@
 """Tests for skogcli help functionality."""
 
-import pytest
 from typer.testing import CliRunner
 from skogcli import app
 

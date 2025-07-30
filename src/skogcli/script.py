@@ -12,9 +12,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from rich.console import Console
 from rich.table import Table
-from rich import print as rprint
-from .decorators import with_explanation
-from .settings import get_setting, set_setting
 
 console = Console()
 
@@ -116,7 +113,14 @@ def get_global_scripts_dir() -> Path:
 
 def get_user_scripts_dir() -> Path:
     """Get the user scripts directory, creating it if it doesn't exist."""
-    # Check config setting first
+    # Check test environment variable first (highest priority for testing)
+    test_scripts_dir = os.getenv("SKOGAI_TEST_SCRIPT_USER_SCRIPTS_DIR")
+    if test_scripts_dir:
+        scripts_dir = Path(test_scripts_dir)
+        scripts_dir.mkdir(parents=True, exist_ok=True)
+        return scripts_dir
+
+    # Check config setting second
     from .settings import get_setting
 
     scripts_dir_setting = get_setting("script.user_scripts_dir")
@@ -140,7 +144,14 @@ def get_user_scripts_dir() -> Path:
 
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
-    # Check config setting first
+    # Check test environment variable first (highest priority for testing)
+    test_metadata_dir = os.getenv("SKOGAI_TEST_SCRIPT_METADATA_DIR")
+    if test_metadata_dir:
+        metadata_dir = Path(test_metadata_dir)
+        metadata_dir.mkdir(parents=True, exist_ok=True)
+        return metadata_dir / "script_metadata.json"
+
+    # Check config setting second
     from .settings import get_setting
 
     metadata_dir_setting = get_setting("script.metadata_dir")
@@ -283,8 +294,7 @@ def script_callback():
     pass
 
 
-@script_app.command("list")
-@with_explanation("List all available custom scripts.")
+@script_app.command("list", help="List all available custom scripts")
 def list_scripts(
     global_scripts: bool = typer.Option(
         True, "--global/--no-global", help="Include global scripts"
@@ -357,8 +367,7 @@ def list_scripts(
             )
 
 
-@script_app.command("run")
-@with_explanation("Run a custom script.")
+@script_app.command("run", help="Run a custom script")
 def run_script(
     name: str = typer.Argument(
         ..., help="Name of the script to run", autocompletion=lambda: get_script_names()
@@ -433,8 +442,7 @@ def run_script(
             console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("create")
-@with_explanation("Create a new custom script.")
+@script_app.command("create", help="Create a new custom script")
 def create_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     type: str = typer.Option(
@@ -459,8 +467,8 @@ def create_script(
     edit: bool = typer.Option(
         True, "--edit/--no-edit", help="Open the script in an editor after creation"
     ),
-    editor: Optional[str] = typer.Option(
-        None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"
+    editor: str = typer.Option(
+        "vi", "--editor", "-e", help="Specify which editor to use"
     ),
 ):
     """Create a new custom script."""
@@ -511,7 +519,7 @@ def create_script(
             # Try to use basic template
             if "basic" in available_templates:
                 template = "basic"
-                console.print(f"[yellow]Using 'basic' template instead.[/]")
+                console.print("[yellow]Using 'basic' template instead.[/]")
                 template_content = get_template_content("basic", type.lower())
             else:
                 console.print("[bold red]Error:[/] No suitable template found.")
@@ -543,7 +551,7 @@ def create_script(
     # Open in editor if requested
     if edit:
         # Get the editor from the environment or use the provided one
-        editor_cmd = editor or os.environ.get("EDITOR", "nano")
+        editor_cmd = os.environ.get("EDITOR", editor)
         try:
             exit_code = subprocess.call([editor_cmd, str(script_path)])
             if exit_code == 0:
@@ -560,8 +568,7 @@ def create_script(
             console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("edit")
-@with_explanation("Edit an existing custom script.")
+@script_app.command("edit", help="Edit an existing custom script")
 def edit_script(
     name: str = typer.Argument(
         ...,
@@ -571,8 +578,8 @@ def edit_script(
     global_script: bool = typer.Option(
         True, "--global/--no-global", help="Include global scripts"
     ),
-    editor: Optional[str] = typer.Option(
-        None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"
+    editor: str = typer.Option(
+        "vi", "--editor", "-e", help="Specify which editor to use"
     ),
 ):
     """Edit an existing custom script."""
@@ -592,7 +599,7 @@ def edit_script(
         return
 
     # Get the editor from the environment or use the provided one
-    editor_cmd = editor or os.environ.get("EDITOR", "nano")
+    editor_cmd = os.environ.get("EDITOR", editor)
 
     # Open in editor
     try:
@@ -613,8 +620,7 @@ def edit_script(
         console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("remove")
-@with_explanation("Remove a custom script.")
+@script_app.command("remove", help="Remove a custom script")
 def remove_script(
     name: str = typer.Argument(
         ...,
@@ -674,8 +680,7 @@ def remove_script(
         console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("info")
-@with_explanation("Show detailed information about a script.")
+@script_app.command("info", help="Show detailed information about a script")
 def script_info(
     name: str = typer.Argument(
         ..., help="Name of the script", autocompletion=lambda: get_script_names()
@@ -721,8 +726,7 @@ def script_info(
         console.print("\n[yellow]No metadata available for this script.[/]")
 
 
-@script_app.command("code")
-@with_explanation("View or update script code without using an editor.")
+@script_app.command("code", help="View or update script code without using an editor")
 def script_code(
     name: str = typer.Argument(
         ..., help="Name of the script", autocompletion=lambda: get_script_names()
@@ -777,7 +781,7 @@ def script_code(
         if output_file is not None:
             try:
                 with open(output_file, "w") as f:
-                    f.write(content)
+                    f.write(content or "")
                 console.print(f"[green]Content written to:[/] {output_file}")
                 return
             except Exception as e:
@@ -798,7 +802,7 @@ def script_code(
         # Write the new content
         try:
             with open(script_path, "w") as f:
-                f.write(content)
+                f.write(content or "")
 
             # Make sure the script is executable
             script_path.chmod(script_path.stat().st_mode | 0o755)
@@ -838,8 +842,7 @@ def script_code(
             console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
 
 
-@script_app.command("batch")
-@with_explanation("Process multiple scripts with a single command.")
+@script_app.command("batch", help="Process multiple scripts with a single command")
 def batch_process(
     script_list: Path = typer.Argument(
         ..., help="Path to a file containing a list of scripts to process, one per line"
@@ -1030,7 +1033,6 @@ def batch_process(
 
         elif command == "search" and pattern is not None:
             # Search for pattern in the script
-            import re
 
             try:
                 with open(script_path, "r") as f:
@@ -1074,7 +1076,6 @@ def batch_process(
 
         elif command == "transform" and pattern is not None and replacement is not None:
             # Transform script content using regex
-            import re
 
             try:
                 with open(script_path, "r") as f:
@@ -1163,8 +1164,7 @@ def batch_process(
     console.print("\n[green]Batch processing complete.[/]")
 
 
-@script_app.command("update-metadata")
-@with_explanation("Update metadata for a script.")
+@script_app.command("update-metadata", help="Update metadata for a script")
 def update_metadata(
     name: str = typer.Argument(
         ..., help="Name of the script", autocompletion=lambda: get_script_names()
@@ -1197,8 +1197,7 @@ def update_metadata(
     console.print(f"[green]Updated metadata for script:[/] {name}")
 
 
-@script_app.command("templates")
-@with_explanation("List available script templates.")
+@script_app.command("templates", help="List available script templates")
 def list_templates():
     """List available script templates."""
     console.print("[bold]Available script templates:[/]")
@@ -1217,8 +1216,9 @@ def list_templates():
             console.print(f"  • {template_name}")
 
 
-@script_app.command("export")
-@with_explanation("Export a script to a JSON file to share with others.")
+@script_app.command(
+    "export", help="Export a script to a JSON file to share with others"
+)
 def export_script(
     name: str = typer.Argument(
         ...,
@@ -1276,8 +1276,9 @@ def export_script(
     console.print(f"[green]Exported script to:[/] {output_file}")
 
 
-@script_app.command("transform")
-@with_explanation("Transform script content using regular expressions.")
+@script_app.command(
+    "transform", help="Transform script content using regular expressions"
+)
 def transform_script(
     name: str = typer.Argument(
         ...,
@@ -1384,8 +1385,7 @@ def transform_script(
         console.print(f"[bold red]Error:[/] Failed to transform script: {str(e)}")
 
 
-@script_app.command("search")
-@with_explanation("Search for text in scripts.")
+@script_app.command("search", help="Search for text in scripts")
 def search_scripts(
     pattern: str = typer.Argument(..., help="Text or regular expression to search for"),
     regex: bool = typer.Option(
@@ -1522,8 +1522,9 @@ def search_scripts(
             )
 
 
-@script_app.command("generate")
-@with_explanation("Generate a script from a description using AI or templates.")
+@script_app.command(
+    "generate", help="Generate a script from a description using AI or templates"
+)
 def generate_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     description: str = typer.Argument(
@@ -1542,8 +1543,8 @@ def generate_script(
     edit: bool = typer.Option(
         True, "--edit/--no-edit", help="Open the script in an editor after creation"
     ),
-    editor: Optional[str] = typer.Option(
-        None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"
+    editor: str = typer.Option(
+        "vi", "--editor", "-e", help="Specify which editor to use"
     ),
     model: str = typer.Option(
         "gpt-3.5-turbo", "--model", "-m", help="AI model to use for generation"
@@ -1780,14 +1781,14 @@ Return ONLY the code with no additional text or explanations.
         )
 
     # Add shebang line if it's not already there
-    if type.lower() == "python" and not generated_code.startswith("#!/"):
-        generated_code = "#!/usr/bin/env python3\n" + generated_code
-    elif type.lower() == "shell" and not generated_code.startswith("#!/"):
-        generated_code = "#!/bin/bash\n" + generated_code
+    if type.lower() == "python" and not (generated_code or "").startswith("#!/"):
+        generated_code = "#!/usr/bin/env python3\n" + (generated_code or "")
+    elif type.lower() == "shell" and not (generated_code or "").startswith("#!/"):
+        generated_code = "#!/bin/bash\n" + (generated_code or "")
 
     # Write the generated code to the file
     with open(script_path, "w") as f:
-        f.write(generated_code)
+        f.write(generated_code or "")
 
     # Make the script executable
     script_path.chmod(script_path.stat().st_mode | 0o755)
@@ -1822,7 +1823,7 @@ Return ONLY the code with no additional text or explanations.
     # Open in editor if requested
     if edit:
         # Get the editor from the environment or use the provided one
-        editor_cmd = editor or os.environ.get("EDITOR", "nano")
+        editor_cmd = os.environ.get("EDITOR", editor)
         try:
             exit_code = subprocess.call([editor_cmd, str(script_path)])
             if exit_code == 0:
@@ -1839,8 +1840,7 @@ Return ONLY the code with no additional text or explanations.
             console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("import")
-@with_explanation("Import a script from an export file.")
+@script_app.command("import", help="Import a script from an export file")
 def import_script(
     file: Path = typer.Argument(
         ..., help="Path to the JSON export file created by 'script export'"
@@ -1866,7 +1866,7 @@ def import_script(
         with open(file, "r") as f:
             export_data = json.load(f)
     except json.JSONDecodeError:
-        console.print(f"[bold red]Error:[/] Invalid export file format.")
+        console.print("[bold red]Error:[/] Invalid export file format.")
         return
 
     # Validate export data
@@ -1924,8 +1924,9 @@ def import_script(
     console.print(f"[green]Imported {location} script:[/] {name}")
 
 
-@script_app.command("import-file")
-@with_explanation("Import an existing script file into the scripts directory.")
+@script_app.command(
+    "import-file", help="Import an existing script file into the scripts directory"
+)
 def import_file(
     file: Path = typer.Argument(..., help="Path to the existing script file to add"),
     name: Optional[str] = typer.Option(
@@ -1940,9 +1941,7 @@ def import_file(
     edit: bool = typer.Option(
         False, "--edit", "-e", help="Open the script in an editor after adding"
     ),
-    editor: Optional[str] = typer.Option(
-        None, "--editor", help="Specify which editor to use (defaults to $EDITOR)"
-    ),
+    editor: str = typer.Option("vi", "--editor", help="Specify which editor to use"),
 ):
     """Import an existing script file into the scripts directory.
 
@@ -2015,7 +2014,7 @@ def import_file(
         # Open in editor if requested
         if edit:
             # Get the editor from the environment or use the provided one
-            editor_cmd = editor or os.environ.get("EDITOR", "nano")
+            editor_cmd = os.environ.get("EDITOR", editor)
             try:
                 exit_code = subprocess.call([editor_cmd, str(dest_path)])
                 if exit_code == 0:
@@ -2034,8 +2033,7 @@ def import_file(
         console.print(f"[bold red]Error:[/] {str(e)}")
 
 
-@script_app.command("copy")
-@with_explanation("Copy a script to create a new one.")
+@script_app.command("copy", help="Copy a script to create a new one")
 def copy_script(
     source: str = typer.Argument(
         ..., help="Name of the source script", autocompletion=lambda: get_script_names()
@@ -2052,8 +2050,8 @@ def copy_script(
     edit: bool = typer.Option(
         True, "--edit/--no-edit", help="Open the new script in an editor"
     ),
-    editor: Optional[str] = typer.Option(
-        None, "--editor", "-e", help="Specify which editor to use (defaults to $EDITOR)"
+    editor: str = typer.Option(
+        "vi", "--editor", "-e", help="Specify which editor to use"
     ),
 ):
     """Copy a script to create a new one."""
@@ -2118,7 +2116,7 @@ def copy_script(
         # Open in editor if requested
         if edit:
             # Get the editor from the environment or use the provided one
-            editor_cmd = editor or os.environ.get("EDITOR", "nano")
+            editor_cmd = os.environ.get("EDITOR", editor)
             try:
                 exit_code = subprocess.call([editor_cmd, str(dest_path)])
                 if exit_code == 0:

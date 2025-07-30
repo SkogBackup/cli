@@ -1,6 +1,5 @@
 """Functional tests for SkogCLI memory commands - test actual workflows."""
 
-import pytest
 import uuid
 from typer.testing import CliRunner
 from skogcli import app

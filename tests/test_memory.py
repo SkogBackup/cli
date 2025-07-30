@@ -4,8 +4,6 @@ import pytest
 import subprocess
 from unittest.mock import patch, MagicMock
 import json
-import sys
-from pathlib import Path
 import typer
 from skogcli.memory import get_memory_folders, get_memory_projects, run_basic_memory
 

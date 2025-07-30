@@ -4,13 +4,11 @@ import typer
 import json
 import os
 import stat
-import shutil
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
-from .decorators import with_explanation
 from .settings import get_setting, set_setting, get_config_keys
 
 # Create a Typer app for the agent commands
@@ -112,8 +110,9 @@ def get_agent_names() -> List[str]:
     return ["default", "assistant", "researcher", "coder"]
 
 
-@agent_app.command("migrate-scripts")
-@with_explanation("Migrate all agents to use script files.")
+@agent_app.command(
+    "migrate-scripts", help="create script files for all existing agents"
+)
 def migrate_scripts():
     """
     Create script files for all existing agents.
@@ -198,8 +197,7 @@ def agent_callback(ctx: typer.Context):
                     raise typer.Exit(1)
 
 
-@agent_app.command("send")
-@with_explanation("Send a message to an agent.")
+@agent_app.command("send", help="send a message to an agent and display the response")
 def send(
     message: str = typer.Argument(..., help="Message to send to the agent"),
     agent_name: str = typer.Option(
@@ -248,15 +246,8 @@ def send(
     )
 
     # Use provided system prompt or fall back to agent config or default
-    system_to_use = (
-        system_prompt
-        or agent_config.get("system_prompt")
-        or get_setting("agent.default_system_prompt")
-        or ""
-    )
 
     import subprocess
-    from shlex import split
 
     # Get the script path for the agent
     scripts_dir = get_scripts_dir()
@@ -310,8 +301,7 @@ def send(
         )
 
 
-@agent_app.command("list")
-@with_explanation("List available agents.")
+@agent_app.command("list", help="list all available agents and their configurations")
 def list_agents():
     """List all available agents and their configurations."""
     # Get agent configuration
@@ -335,8 +325,7 @@ def list_agents():
             console.print(f"    Description: {agent_config['description']}")
 
 
-@agent_app.command("create")
-@with_explanation("Create a new agent.")
+@agent_app.command("create", help="create a new agent with the specified configuration")
 def create_agent(
     name: str = typer.Argument(..., help="Name for the new agent"),
     model: str = typer.Option(
@@ -408,8 +397,7 @@ def create_agent(
     console.print(f"Script created at: ./scripts/{name}.sh")
 
 
-@agent_app.command("set")
-@with_explanation("Set a configuration value for an agent.")
+@agent_app.command("set", help="set a configuration value for an agent")
 def set_agent_config(
     key: str = typer.Argument(..., help="Configuration key"),
     value: str = typer.Argument(..., help="Value to set"),
@@ -505,8 +493,7 @@ def set_agent_config(
     console.print(f'[green]Set[/] {full_key} = "{value}"')
 
 
-@agent_app.command("get")
-@with_explanation("Get a configuration value for an agent.")
+@agent_app.command("get", help="get a configuration value for an agent")
 def get_agent_config(
     key: str = typer.Argument(
         ..., help="Configuration key", autocompletion=get_agent_config_keys
@@ -580,8 +567,7 @@ def get_agent_config(
         console.print(f"[bold]{full_key}[/] = {value}")
 
 
-@agent_app.command("read")
-@with_explanation("Read information about an agent.")
+@agent_app.command("read", help="read information about an agent")
 def read_agent(
     name: str = typer.Argument(
         None, help="Name of the agent to read", autocompletion=get_agent_names
@@ -645,8 +631,7 @@ def read_agent(
         )
 
 
-@agent_app.command("edit-script")
-@with_explanation("Edit the script for an agent.")
+@agent_app.command("edit-script", help="open the agent's script in your default editor")
 def edit_agent_script(
     name: str = typer.Argument(
         ...,
@@ -696,8 +681,7 @@ def edit_agent_script(
         console.print(f"[bold red]Error:[/] Failed to open editor: {str(e)}")
 
 
-@agent_app.command("delete")
-@with_explanation("Delete an agent.")
+@agent_app.command("delete", help="delete an agent and its configuration")
 def delete_agent(
     name: str = typer.Argument(
         ..., help="Name of the agent to delete", autocompletion=get_agent_names
