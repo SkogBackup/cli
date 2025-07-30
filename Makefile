@@ -1,5 +1,5 @@
 # Makefile for skogcli project
-.PHONY: help install dev-install pre-commit format lint type-check security all-checks test test-cov test-fast build clean check ci
+.PHONY: help install dev-install pre-commit format lint type-check security all-checks test test-integration test-all test-cov test-fast build clean check ci
 
 # Default target
 .DEFAULT_GOAL := help
@@ -79,17 +79,26 @@ security: ## Run security checks
 all-checks: lint type-check security ## Run all checks
 	@echo "$(GREEN)All checks completed!$(NC)"
 
-test: ## Run tests
+test: ## Run tests (unit and functional, excluding integration)
 	@echo "$(GREEN)Running tests...$(NC)"
 	./tests/run_tests.sh -v
 
-test-cov: ## Run tests with coverage
-	@echo "$(GREEN)Running tests with coverage...$(NC)"
-	uv run pytest tests/ --cov=skogcli --cov-report=html --cov-report=term-missing
+test-integration: ## Run integration tests (slow, requires basic-memory)
+	@echo "$(GREEN)Running integration tests...$(NC)"
+	./tests/run_integration_tests.sh -v
 
-test-fast: ## Run fast tests (stop on first failure)
+test-all: ## Run all tests (unit, functional, and integration)
+	@echo "$(GREEN)Running all tests...$(NC)"
+	./tests/run_tests.sh -v
+	./tests/run_integration_tests.sh -v
+
+test-cov: ## Run tests with coverage (excluding integration)
+	@echo "$(GREEN)Running tests with coverage...$(NC)"
+	uv run pytest tests/ --ignore=tests/integration --cov=skogcli --cov-report=html --cov-report=term-missing
+
+test-fast: ## Run fast tests (stop on first failure, excluding integration)
 	@echo "$(GREEN)Running fast tests...$(NC)"
-	uv run pytest tests/ -x
+	uv run pytest tests/ --ignore=tests/integration -x
 
 build: ## Build the package
 	@echo "$(GREEN)Building package...$(NC)"

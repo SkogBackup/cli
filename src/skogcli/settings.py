@@ -1273,12 +1273,27 @@ def export_env(
 
     # Filter by namespace if specified
     if namespace:
-        filtered_pairs = [
-            (key, value)
-            for key, value in all_env_pairs
-            if key.startswith(f"{namespace}.env.")
+        # Support comma-separated namespaces with precedence (later overrides earlier)
+        namespaces = [ns.strip() for ns in namespace.split(",")]
+        env_dict = {}  # Use dict to handle precedence automatically
+
+        for ns in namespaces:
+            filtered_pairs = [
+                (key, value)
+                for key, value in all_env_pairs
+                if key.startswith(f"{ns}.env.")
+            ]
+            # Add/override variables from this namespace
+            for key, value in filtered_pairs:
+                parts = key.split(".env.")
+                if len(parts) == 2:
+                    env_name = parts[1]
+                    env_dict[env_name] = value
+
+        # Convert back to pairs format for consistency
+        all_env_pairs = [
+            (f"*.env.{env_name}", value) for env_name, value in env_dict.items()
         ]
-        all_env_pairs = filtered_pairs
 
     if not all_env_pairs:
         msg = "No environment variables found"
