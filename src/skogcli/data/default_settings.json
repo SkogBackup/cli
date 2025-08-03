@@ -117,20 +117,5 @@
       }
     }
   },
-  "credentials": {},
-  "skogai.env.SKOGAI_PWD": "$(realpath .)",
-  "skogai.env.GOOSE": "/home/skogix/skogai/.goose",
-  "skogai.env.AMY": "/home/skogix/skogai/.amy",
-  "skogai.env.CLAUDE": "/home/skogix/skogai/.claude",
-  "skogai.env.DOT": "/home/skogix/skogai/.dot",
-  "skogai.env.SKOGAI_GOOSE": "/home/skogix/skogai/.goose",
-  "skogai.env.SKOGAI_DOT": "/home/skogix/skogai/.dot",
-  "skogai.env.SKOGAI_CLAUDE": "/home/skogix/skogai/.claude",
-  "skogai.env.SKOGAI_AMY": "/home/skogix/skogai/.amy",
-  "skogai.env.SKOGAI_SCRIPTS_GLOBAL_DIR": "/home/skogix/skogai/scripts/global",
-  "skogai.env.SKOGAI_TEMPLATES_DIR": "/home/skogix/skogai/templates",
-  "skogai.env.SKOGAI_SCRIPT_METADATA_DIR": "/home/skogix/skogai/config",
-  "skogai.env.SKOGAI_DOT_FOLDER_ARGCFILE": "/home/skogix/skogix/Argcfile.sh",
-  "skogai.env.SKOGAI_DOCS_OUTPUT": "/home/skogix/skogai/docs/curated",
-  "skogai.env.SKOGAI_DOCS": "/home/skogix/skogix/docs/"
+  "credentials": {}
 }
