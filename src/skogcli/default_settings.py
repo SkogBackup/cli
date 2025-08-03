@@ -1,27 +1,15 @@
 """Default settings for SkogCLI.
 
-This module contains the default settings that are used when initializing
-a new configuration or when resetting to defaults.
+This module provides utilities for loading default settings from the JSON file.
+The single source of truth for defaults is src/skogcli/data/default_settings.json.
 """
 
 import json
-import time
 from pathlib import Path
 from typing import Dict, Any
 
 # Configuration version - increment when making breaking changes
 CONFIG_VERSION = 1
-
-DEFAULT_SETTINGS = {
-    "settings": {
-        "cli": {
-            "last-updated": "1970-01-01T00:00:00Z",
-            "version": "0",
-        },
-        "memory": {"page_size": 10, "default_project": None},
-        "ui": {"theme": "default", "verbose": False},
-    }
-}
 
 
 def get_default_settings_file() -> Path:
@@ -36,59 +24,48 @@ def ensure_data_dir() -> None:
 
 
 def load_default_settings() -> Dict[str, Any]:
-    """Load default settings from file or return the built-in defaults."""
+    """Load default settings from JSON file.
+
+    Returns:
+        Dict containing the default settings from default_settings.json
+
+    Raises:
+        FileNotFoundError: If the default settings file doesn't exist
+        ValueError: If the JSON file is invalid or empty
+    """
     default_file = get_default_settings_file()
 
-    if default_file.exists():
-        try:
-            with open(default_file, "r") as f:
-                settings = json.load(f)
-
-            # Ensure all required sections exist by merging with built-in defaults
-            result = DEFAULT_SETTINGS.copy()
-
-            # Deep merge the loaded settings with built-in defaults
-            def deep_merge(source, destination):
-                for key, value in source.items():
-                    if (
-                        isinstance(value, dict)
-                        and key in destination
-                        and isinstance(destination[key], dict)
-                    ):
-                        deep_merge(value, destination[key])
-                    else:
-                        destination[key] = value
-                return destination
-
-            deep_merge(settings, result)
-            return result
-        except Exception:
-            # If there's any error loading the file, fall back to built-in defaults
-            return DEFAULT_SETTINGS.copy()
-    else:
+    if not default_file.exists():
         raise FileNotFoundError(
             f"Default settings file not found: {default_file}. "
             "The default_settings.json file is required for configuration."
         )
 
+    try:
+        with open(default_file, "r") as f:
+            settings = json.load(f)
+
+        if not settings:
+            raise ValueError(f"Default settings file is empty: {default_file}")
+
+        return settings
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in default settings file {default_file}: {e}")
+    except Exception as e:
+        raise ValueError(f"Failed to load default settings file {default_file}: {e}")
+
 
 def save_default_settings(settings: Dict[str, Any]) -> bool:
     """Save default settings to file.
+
+    Args:
+        settings: Settings dictionary to save as defaults
 
     Returns:
         bool: True if successful, False otherwise
     """
     ensure_data_dir()
     default_file = get_default_settings_file()
-
-    # Update metadata
-    if "settings" not in settings:
-        settings["settings"] = {}
-    if "cli" not in settings["settings"]:
-        settings["settings"]["cli"] = {}
-
-    settings["settings"]["cli"]["version"] = CONFIG_VERSION
-    settings["settings"]["cli"]["last-updated"] = time.time()
 
     try:
         with open(default_file, "w") as f:

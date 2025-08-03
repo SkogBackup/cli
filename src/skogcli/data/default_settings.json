@@ -1,5 +1,9 @@
 {
-  "claude": {},
+  "claude": {
+    "env": {
+      "CLAUDE_HOME": "$SKOGAI/agents"
+    }
+  },
   "dot": {},
   "amy": {},
   "goose": {},

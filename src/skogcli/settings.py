@@ -434,13 +434,15 @@ def reset_settings() -> bool:
     create_backup(get_config_file())
     create_backup(get_sensitive_config_file())
 
-    # Reset to defaults - build clean structure from scratch
-    from .default_settings import DEFAULT_SETTINGS
+    # Reset to defaults - load from JSON file
+    clean_settings = load_default_settings()
 
-    clean_settings: Dict[str, Any] = DEFAULT_SETTINGS.copy()
+    # Ensure credentials section exists but is empty
     clean_settings["credentials"] = {}
 
     # Update metadata
+    if "settings" not in clean_settings:
+        clean_settings["settings"] = {}
     if "_meta" not in clean_settings["settings"]:
         clean_settings["settings"]["_meta"] = {}
     cast(Dict[str, Any], clean_settings["settings"]["_meta"])[
@@ -466,12 +468,8 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
         settings["settings"] = {}
 
     if "module" not in settings["settings"]:
-        # Import default settings from the module
-        from .default_settings import DEFAULT_SETTINGS
-
-        settings["settings"]["module"] = cast(
-            Dict[str, Any], DEFAULT_SETTINGS["settings"]["module"]
-        ).copy()
+        # Initialize empty module section
+        settings["settings"]["module"] = {}
 
     # Ensure history section exists
     if "history" not in settings["settings"]["module"]:
