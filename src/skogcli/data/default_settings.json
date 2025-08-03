@@ -12,22 +12,12 @@
   "letta": {},
   "$": {
     "json": {
-      "@": {
-        "id": "$.json.int",
-        "gen": "$.json.int",
-        "name": "$.json.string",
-        "actions": "$.json.@.list"
-      },
-      "$type": "|$.json.$",
-      "$": {
-        "self": "$.json.$",
-        "string": "",
-        "int": 0,
-        "list": [],
-        "action": "$.json.@",
-        "parent": "$.$self",
-        "child": "$parent.$"
-      }
+      "string": "",
+      "int": 0,
+      "list": [],
+      "parent": "$ json.self",
+      "self": "$ json",
+      "child": "$ json.$.parent"
     },
     "$": "to define or reference something",
     "|": "the act of choosing something | {$id1|$id2}->[$id1]",
@@ -40,48 +30,29 @@
     "=": "to be something | [$id=$id]",
     "->": "{$id1@$id2}",
     "*": "$*$=$",
-    "id": "$int*$unique",
-    "action": "$eid*$type.value.list*$type.self",
+    "id": "$ int*$ unique",
     "self": "$self | [$id@$id]",
-    "type": {
-      "$type.self": "every base case of a $",
-      "value": "the declaration/implementation of a $",
-      "eid": "$eid"
-    },
     "unique": "a thing which there only exists one of",
     "name": {
       "1": "$unique.$string",
       "2": "$string@$unique",
       "3": "$string{@->}$unique"
     },
-    "skogparse": {
-      "action": "$@",
-      "type": "$type",
-      "value": "$value",
-      "eid": "$eid"
-    },
     "message": {
-      "eid": "$eid",
-      "from": "$name",
-      "to": "$name",
-      "content": "$string",
-      "created_at": "$datetime",
-      "parent": "$eid"
-    },
-    "skogchat": {
-      "messages": "$message.$list"
-    },
-    "thread": {
-      "eid": "$eid",
-      "actors": "$entity*$entity"
+      "eid": "$ eid",
+      "from": "$ name",
+      "to": "$ name",
+      "content": "$ string",
+      "created_at": "$ datetime",
+      "parent": "$ eid"
     },
     "list": "the ordering of something",
-    "eid": "$entity.id*$entity.gen",
+    "eid": "$ entity.id*$ entity.gen",
     "entity": {
-      "eid": "$eid",
-      "gen": "$id",
-      "id": "$id",
-      "name": "$name"
+      "eid": "$ eid",
+      "gen": "$ id",
+      "id": "$ id",
+      "name": "$ name"
     }
   },
   "settings": {
