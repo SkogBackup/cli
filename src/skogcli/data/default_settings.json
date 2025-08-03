@@ -1,7 +1,21 @@
 {
+  "skogai": {
+    "env": {
+      "SKOGAI_CONTEXT_FOLDER": "/home/skogix/skogix",
+      "SKOGAI_AGENTS": "$SKOGAI/agents",
+      "SKOGAI_WORKTREES": "$SKOGAI/worktrees/",
+      "SKOGAI_ARGC_GIT": "/home/skogix/skogix/Argcfile.sh",
+      "UV_LINK_MODE": "copy",
+      "CLAUDE_HOME": "$SKOGAI_AGENTS/claude",
+      "CLAUDE_HOME_PRIVATE": "$SKOGAI/.claude"
+    }
+  },
   "claude": {
     "env": {
-      "CLAUDE_HOME": "$SKOGAI/agents"
+      "CLAUDE_HOME": "$SKOGAI/agents",
+      "CLAUDE_CONTEXT_UPDATE": "$SKOGAI_PWD/update",
+      "CLAUDE_ARGC_GIT": "/home/skogix/skogix/Argcfile.sh",
+      "PAGER": "cat"
     }
   },
   "dot": {},
