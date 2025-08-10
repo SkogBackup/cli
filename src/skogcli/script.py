@@ -8,7 +8,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import typer
 from rich.console import Console
@@ -143,7 +143,6 @@ def get_user_scripts_dir() -> Path:
     )
 
 
-
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
     # Check test environment variable first (highest priority for testing)
@@ -173,7 +172,6 @@ def get_metadata_file() -> Path:
     raise RuntimeError(
         "No script metadata directory configured. Set 'script.metadata_dir' config or SKOGAI_SCRIPT_METADATA_DIR environment variable."
     )
-
 
 
 def load_metadata() -> dict[str, Any]:

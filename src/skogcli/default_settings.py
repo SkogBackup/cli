@@ -6,7 +6,7 @@ The single source of truth for defaults is src/skogcli/data/default_settings.jso
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 # Configuration version - increment when making breaking changes
 CONFIG_VERSION = 1

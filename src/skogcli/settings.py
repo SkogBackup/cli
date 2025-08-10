@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 from rich.console import Console
 from rich.syntax import Syntax
+import typer
 from .default_settings import (
     CONFIG_VERSION,
     get_default_settings_file,
