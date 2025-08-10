@@ -35,7 +35,7 @@
     },
     "$": "to define or reference something",
     "|": "the act of choosing something | {$id1|$id2}->[$id1]",
-    "_": "existance?... to be anything/everything and nothing/nobody | {$id1_$id2} | ...hard one",
+    "_": "anything/everything and nothing/nobody | {$id1_$id2} | hard one",
     "[_]": "similarity",
     "{_}": "difference",
     "@": "the intent to act or do something | {$id@$id}",
