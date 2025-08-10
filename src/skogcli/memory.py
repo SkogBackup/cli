@@ -1,7 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import typer
 from rich.console import Console
