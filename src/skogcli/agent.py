@@ -8,6 +8,7 @@ from typing import Optional, List
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+import typer
 from .settings import get_setting, set_setting, get_config_keys
 
 # Create a Typer app for the agent commands
