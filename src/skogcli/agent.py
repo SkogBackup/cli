@@ -1,6 +1,5 @@
 """Agent commands for SkogCLI."""
 
-import typer
 import json
 import os
 import stat
@@ -95,13 +94,13 @@ def create_agent_script(agent_name: str, command: str) -> Path:
     return script_path
 
 
-def get_agent_config_keys() -> List[str]:
+def get_agent_config_keys() -> list[str]:
     """Get a list of agent configuration keys for completion."""
     all_keys = get_config_keys()
     return [key for key in all_keys if key.startswith("agent.")]
 
 
-def get_agent_names() -> List[str]:
+def get_agent_names() -> list[str]:
     """Get a list of configured agent names for completion."""
     # Try to get agent names from configuration
     agents = get_setting("agent.agents") or []
@@ -207,10 +206,10 @@ def send(
         help="Name of the agent to send the message to",
         autocompletion=get_agent_names,
     ),
-    model: Optional[str] = typer.Option(
+    model: str | None = typer.Option(
         None, "--model", "-m", help="Model to use for this interaction"
     ),
-    system_prompt: Optional[str] = typer.Option(
+    system_prompt: str | None = typer.Option(
         None, "--system", "-s", help="System prompt to use for this interaction"
     ),
     raw: bool = typer.Option(
@@ -331,13 +330,13 @@ def create_agent(
     model: str = typer.Option(
         None, "--model", "-m", help="Model to use for this agent"
     ),
-    system_prompt: Optional[str] = typer.Option(
+    system_prompt: str | None = typer.Option(
         None, "--system", "-s", help="System prompt for this agent"
     ),
-    description: Optional[str] = typer.Option(
+    description: str | None = typer.Option(
         None, "--description", "-d", help="Description of this agent"
     ),
-    command_template: Optional[str] = typer.Option(
+    command_template: str | None = typer.Option(
         None,
         "--command",
         "-c",
@@ -401,7 +400,7 @@ def create_agent(
 def set_agent_config(
     key: str = typer.Argument(..., help="Configuration key"),
     value: str = typer.Argument(..., help="Value to set"),
-    agent_name: Optional[str] = typer.Option(
+    agent_name: str | None = typer.Option(
         None,
         "--agent",
         "-a",
@@ -498,7 +497,7 @@ def get_agent_config(
     key: str = typer.Argument(
         ..., help="Configuration key", autocompletion=get_agent_config_keys
     ),
-    agent_name: Optional[str] = typer.Option(
+    agent_name: str | None = typer.Option(
         None,
         "--agent",
         "-a",

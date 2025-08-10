@@ -4,8 +4,9 @@ API client script for SkogCLI.
 """
 import json
 import sys
-import requests
 from urllib.parse import urljoin
+
+import requests
 
 BASE_URL = "https://api.example.com"  # Replace with your API base URL
 

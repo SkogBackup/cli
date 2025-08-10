@@ -1,7 +1,6 @@
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional, List
 
 import typer
 from rich.console import Console
@@ -54,7 +53,7 @@ def get_timeframe_options() -> List[str]:
     ]
 
 
-def get_memory_folders() -> List[str]:
+def get_memory_folders() -> list[str]:
     """Get a list of memory folders for completion."""
     try:
         result = run_basic_memory(["tool", "list-folders", "--format", "json"])
@@ -67,7 +66,7 @@ def get_memory_folders() -> List[str]:
     return ["notes", "meetings", "projects", "ideas", "research", "journal"]
 
 
-def get_memory_projects() -> List[str]:
+def get_memory_projects() -> list[str]:
     """Get a list of memory projects for completion."""
     try:
         result = run_basic_memory(["tool", "list-projects", "--format", "json"])
@@ -134,13 +133,13 @@ def write(
     folder: str = typer.Argument(
         ..., help="Folder to create the note in", autocompletion=get_memory_folders
     ),
-    content: Optional[str] = typer.Option(
+    content: str | None = typer.Option(
         None, "--content", "-c", help="Note content (if not provided, read from stdin)"
     ),
-    tags: Optional[str] = typer.Option(
+    tags: str | None = typer.Option(
         None, "--tags", "-t", help="Tags to apply to the note (comma-separated)"
     ),
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-p",
@@ -205,7 +204,7 @@ def read(
     page_size: int = typer.Option(
         10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-P",
@@ -215,7 +214,7 @@ def read(
     raw: bool = typer.Option(
         False, "--raw", "-r", help="Display raw markdown without rich formatting"
     ),
-    output_file: Optional[Path] = typer.Option(
+    output_file: Path | None = typer.Option(
         None,
         "--output",
         "-o",
@@ -296,7 +295,7 @@ def search(
     page_size: int = typer.Option(
         10, "--page-size", "-s", min=1, max=100, help="Number of items per page"
     ),
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-P",
@@ -385,14 +384,14 @@ def search(
 
 @memory_app.command(name="list", help="List recent notes and activity")
 def list_notes(
-    type: Optional[str] = typer.Option(
+    type: str | None = typer.Option(
         None,
         "--type",
         "-t",
         help="Filter by activity type",
         autocompletion=get_activity_types,
     ),
-    folder: Optional[str] = typer.Option(
+    folder: str | None = typer.Option(
         None,
         "--folder",
         "-f",
@@ -422,7 +421,7 @@ def list_notes(
         min=0,
         help="Maximum number of related items to show per result",
     ),
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-P",
@@ -520,7 +519,7 @@ def list_notes(
 
 @memory_app.command(name="sync", help="Sync notes with the database")
 def sync(
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-p",
@@ -561,7 +560,7 @@ def sync(
 
 @memory_app.command(name="status", help="Show project status and statistics")
 def status(
-    project: Optional[str] = typer.Option(
+    project: str | None = typer.Option(
         None,
         "--project",
         "-p",

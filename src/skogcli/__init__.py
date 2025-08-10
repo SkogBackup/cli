@@ -1,8 +1,9 @@
-from typer import Typer, Context, Option, Exit
-from .memory import memory_app
-from .settings import config_app
-from .script import script_app
+from typer import Context, Exit, Option, Typer
+
 from .agent import agent_app
+from .memory import memory_app
+from .script import script_app
+from .settings import config_app
 
 """SkogCLI - A demonstration Typer-based CLI tool for the SkogAI project."""
 

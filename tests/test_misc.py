@@ -3,12 +3,13 @@
 import subprocess
 import os
 import shutil
-import json
-from pathlib import Path
+import subprocess
 from datetime import datetime
 from skogcli.script import (
-    get_user_scripts_dir,
     get_metadata_file,
+    get_script_names,
+    get_script_templates,
+    get_user_scripts_dir,
     load_metadata,
     save_metadata,
     get_script_names,
@@ -190,7 +191,7 @@ class TestScriptFunctions:
         save_metadata(new_metadata)
 
         # Read the file directly to verify
-        with open(self.test_metadata_file, "r") as f:
+        with open(self.test_metadata_file) as f:
             saved_data = json.load(f)
 
         assert saved_data == new_metadata

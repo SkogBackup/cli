@@ -6,7 +6,7 @@ The single source of truth for defaults is src/skogcli/data/default_settings.jso
 
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 # Configuration version - increment when making breaking changes
 CONFIG_VERSION = 1
@@ -55,7 +55,7 @@ def load_default_settings() -> Dict[str, Any]:
         raise ValueError(f"Failed to load default settings file {default_file}: {e}")
 
 
-def save_default_settings(settings: Dict[str, Any]) -> bool:
+def save_default_settings(settings: dict[str, Any]) -> bool:
     """Save default settings to file.
 
     Args:
