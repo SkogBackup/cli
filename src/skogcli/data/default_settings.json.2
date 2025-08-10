@@ -1,0 +1,110 @@
+{
+  "skogai": {
+    "env": {
+      "SKOGAI_CONTEXT_FOLDER": "/home/skogix/skogix",
+      "SKOGAI_AGENTS": "$SKOGAI/agents",
+      "SKOGAI_WORKTREES": "$SKOGAI/worktrees/",
+      "SKOGAI_ARGC_GIT": "/home/skogix/skogix/Argcfile.sh",
+      "UV_LINK_MODE": "copy",
+      "CLAUDE_HOME": "$SKOGAI_AGENTS/claude",
+      "CLAUDE_HOME_PRIVATE": "$SKOGAI/.claude"
+    }
+  },
+  "claude": {
+    "env": {
+      "CLAUDE_HOME": "$SKOGAI/agents",
+      "CLAUDE_CONTEXT_UPDATE": "$SKOGAI_PWD/update",
+      "CLAUDE_ARGC_GIT": "/home/skogix/skogix/Argcfile.sh",
+      "PAGER": "cat"
+    }
+  },
+  "dot": {},
+  "amy": {},
+  "goose": {},
+  "librarian": {},
+  "blacksmith": {},
+  "letta": {},
+  "$": {
+    "json": {
+      "string": "",
+      "int": 0,
+      "list": [],
+      "parent": "$ json.self",
+      "self": "$ json",
+      "child": "$ json.$.parent"
+    },
+    "$": "to define or reference something",
+    "|": "the act of choosing something | {$id1|$id2}->[$id1]",
+    "_": "existance?... to be anything/everything and nothing/nobody | {$id1_$id2} | ...hard one",
+    "[_]": "similarity",
+    "{_}": "difference",
+    "@": "the intent to act or do something | {$id@$id}",
+    ".": "to belong or have something via [$$]",
+    ":": "to follow or continue something via [$@]",
+    "=": "to be something | [$id=$id]",
+    "->": "{$id1@$id2}",
+    "*": "$*$=$",
+    "id": "$ int*$ unique",
+    "self": "$self | [$id@$id]",
+    "unique": "a thing which there only exists one of",
+    "name": {
+      "1": "$unique.$string",
+      "2": "$string@$unique",
+      "3": "$string{@->}$unique"
+    },
+    "message": {
+      "eid": "$ eid",
+      "from": "$ name",
+      "to": "$ name",
+      "content": "$ string",
+      "created_at": "$ datetime",
+      "parent": "$ eid"
+    },
+    "list": "the ordering of something",
+    "eid": "$ entity.id*$ entity.gen",
+    "entity": {
+      "eid": "$ eid",
+      "gen": "$ id",
+      "id": "$ id",
+      "name": "$ name"
+    }
+  },
+  "settings": {
+    "cli": {
+      "last-updated": 1753519117.9098947,
+      "version": 1,
+      "storage_dir": "/home/skogix/skogai/config/"
+    },
+    "memory": {
+      "page_size": 10,
+      "default_project": null
+    },
+    "ui": {
+      "theme": "default",
+      "verbose": false
+    },
+    "_meta": {
+      "version": 1,
+      "last_updated": 1748305682.7457244
+    },
+    "script": {
+      "templates_dir": "/home/skogix/skogai/config/templates",
+      "user_scripts_dir": "/home/skogix/skogai/scripts",
+      "metadata_dir": "/home/skogix/skogai/config"
+    },
+    "chat": {
+      "history_enabled": true,
+      "max_history_items": 100,
+      "history": [],
+      "message_id_counter": 1,
+      "thread_id_counter": 1,
+      "message": {
+        "storage_dir": "/home/skogix/skogai/settings/",
+        "format_pretty": true,
+        "default_sender": "User",
+        "default_recipient": "Assistant"
+      }
+    }
+  },
+  "credentials": {}
+}

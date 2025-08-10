@@ -19,7 +19,6 @@ dependencies = [
 ]
 
 [project.scripts]
-s = "skogcli:main"
 skog = "skogcli:main"
 skogcli = "skogcli:main"
 
