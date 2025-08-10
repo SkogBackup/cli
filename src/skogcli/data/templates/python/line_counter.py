@@ -5,7 +5,6 @@ Line counting script for files and directories.
 import os
 import sys
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
 
 
 def count_lines_in_file(file_path: Path) -> Tuple[int, int, int]:

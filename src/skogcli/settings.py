@@ -4,12 +4,13 @@ import json
 import os
 import shutil
 import time
-import typer
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
 from rich.console import Console
 from rich.syntax import Syntax
 from .default_settings import (
+    CONFIG_VERSION,
+    get_default_settings_file,
     load_default_settings,
     save_default_settings,
     get_default_settings_file,
@@ -82,7 +83,7 @@ def create_backup(config_file: Path) -> Optional[Path]:
         return None
 
 
-def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
+def migrate_config(settings: dict[str, Any]) -> dict[str, Any]:
     """Migrate configuration from older versions to the current version."""
     # Ensure settings structure exists
     if "settings" not in settings:
@@ -138,7 +139,7 @@ def migrate_config(settings: Dict[str, Any]) -> Dict[str, Any]:
     return settings
 
 
-def load_settings() -> Dict[str, Any]:
+def load_settings() -> dict[str, Any]:
     """Load settings from the config file, or create default settings if the file doesn't exist."""
     config_file = get_config_file()
 
@@ -153,7 +154,7 @@ def load_settings() -> Dict[str, Any]:
         return settings
 
     try:
-        with open(config_file, "r") as f:
+        with open(config_file) as f:
             settings = json.load(f)
 
         # Migrate configuration if needed
@@ -190,7 +191,7 @@ def load_settings() -> Dict[str, Any]:
         return load_default_settings()
 
 
-def load_sensitive_settings() -> Dict[str, Any]:
+def load_sensitive_settings() -> dict[str, Any]:
     """Load sensitive settings like API keys from a separate file."""
     sensitive_file = get_sensitive_config_file()
 
@@ -207,7 +208,7 @@ def load_sensitive_settings() -> Dict[str, Any]:
         return {}
 
 
-def restore_from_latest_backup() -> Optional[Dict[str, Any]]:
+def restore_from_latest_backup() -> dict[str, Any] | None:
     """Attempt to restore configuration from the most recent backup."""
     backup_dir = get_backup_dir()
     if not backup_dir.exists():
@@ -229,7 +230,7 @@ def restore_from_latest_backup() -> Optional[Dict[str, Any]]:
         return None
 
 
-def get_config_keys() -> List[str]:
+def get_config_keys() -> list[str]:
     """Get a list of all configuration keys for completion."""
     settings = load_settings()
 
@@ -247,7 +248,7 @@ def get_config_keys() -> List[str]:
     return cast(List[str], extract_keys(settings))
 
 
-def save_settings(settings: Dict[str, Any]) -> bool:
+def save_settings(settings: dict[str, Any]) -> bool:
     """Save settings to the config file.
 
     Returns:
@@ -452,7 +453,7 @@ def reset_settings() -> bool:
     return save_settings(clean_settings)
 
 
-def add_chat_history_item(item: Dict[str, Any]) -> bool:
+def add_chat_history_item(item: dict[str, Any]) -> bool:
     """Add an item to the chat history.
 
     Args:
@@ -492,7 +493,7 @@ def add_chat_history_item(item: Dict[str, Any]) -> bool:
     return save_settings(settings)
 
 
-def get_chat_history(limit: Optional[int] = None) -> List[Dict[str, Any]]:
+def get_chat_history(limit: int | None = None) -> list[dict[str, Any]]:
     """Get the chat history.
 
     Args:
@@ -733,12 +734,12 @@ def show_defaults() -> None:
 
 @config_app.command("edit-defaults", help="edit-defaults configuration")
 def edit_defaults(
-    key: Optional[str] = typer.Argument(
+    key: str | None = typer.Argument(
         None,
         help="Configuration key to edit (if not specified, opens the entire file)",
         autocompletion=lambda: get_config_keys(),
     ),
-    value: Optional[str] = typer.Argument(
+    value: str | None = typer.Argument(
         None, help="Value to set (if not specified with key, opens the file in editor)"
     ),
 ):
@@ -995,7 +996,7 @@ def edit_defaults(
 
                 # Validate the edited file
                 try:
-                    with open(default_file, "r") as f:
+                    with open(default_file) as f:
                         json.load(f)
                 except json.JSONDecodeError as e:
                     console.print(
@@ -1050,7 +1051,7 @@ def edit(
 
             # Validate the edited file
             try:
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     json.load(f)
             except json.JSONDecodeError as e:
                 console.print(
@@ -1092,7 +1093,7 @@ def backup() -> None:
 
 @config_app.command("restore", help="restore configuration")
 def restore(
-    backup_file: Optional[Path] = typer.Argument(
+    backup_file: Path | None = typer.Argument(
         None,
         help="Path to the backup file (if not specified, uses the most recent backup)",
     ),
@@ -1145,7 +1146,7 @@ def restore(
 
         # Validate the restored file
         try:
-            with open(target_file, "r") as f:
+            with open(target_file) as f:
                 json.load(f)
         except json.JSONDecodeError:
             console.print(

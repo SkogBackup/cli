@@ -1,15 +1,16 @@
 """Script management commands for SkogCLI."""
 
-import os
-import sys
+import importlib.util
 import json
+import os
 import shutil
 import subprocess
-import importlib.util
-import typer
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
+
+import typer
 from rich.console import Console
 from rich.table import Table
 
@@ -142,6 +143,7 @@ def get_user_scripts_dir() -> Path:
     )
 
 
+
 def get_metadata_file() -> Path:
     """Get the path to the script metadata file."""
     # Check test environment variable first (highest priority for testing)
@@ -173,7 +175,8 @@ def get_metadata_file() -> Path:
     )
 
 
-def load_metadata() -> Dict[str, Any]:
+
+def load_metadata() -> dict[str, Any]:
     """Load script metadata from the metadata file."""
     metadata_file = get_metadata_file()
 
@@ -181,7 +184,7 @@ def load_metadata() -> Dict[str, Any]:
         return {}
 
     try:
-        with open(metadata_file, "r") as f:
+        with open(metadata_file) as f:
             return json.load(f)
     except json.JSONDecodeError:
         console.print("[bold red]Error:[/] Metadata file is corrupted.")
@@ -737,7 +740,7 @@ def script_code(
         "-c",
         help="New content for the script (if not provided, displays current content)",
     ),
-    input_file: Optional[Path] = typer.Option(
+    input_file: Path | None = typer.Option(
         None, "--file", "-f", help="Read new content from this file"
     ),
     output_file: Optional[Path] = typer.Option(
@@ -769,7 +772,7 @@ def script_code(
                 return
 
             try:
-                with open(input_file, "r") as f:
+                with open(input_file) as f:
                     content = f.read()
             except Exception as e:
                 console.print(
@@ -819,7 +822,7 @@ def script_code(
     else:
         # Display the current content
         try:
-            with open(script_path, "r") as f:
+            with open(script_path) as f:
                 content = f.read()
 
             # If output file is specified, write to that instead of displaying
@@ -917,7 +920,7 @@ def batch_process(
         if command == "code":
             # Display the script content
             try:
-                with open(script_path, "r") as f:
+                with open(script_path) as f:
                     content = f.read()
 
                 # If output directory is specified, write to a file there
@@ -1035,7 +1038,7 @@ def batch_process(
             # Search for pattern in the script
 
             try:
-                with open(script_path, "r") as f:
+                with open(script_path) as f:
                     content = f.read()
 
                 # Search for matches
@@ -1078,7 +1081,7 @@ def batch_process(
             # Transform script content using regex
 
             try:
-                with open(script_path, "r") as f:
+                with open(script_path) as f:
                     content = f.read()
 
                 # Apply the transformation
@@ -1251,7 +1254,7 @@ def export_script(
         output_file = Path(f"{name}_export{script_path.suffix}")
 
     # Read script content
-    with open(script_path, "r") as f:
+    with open(script_path) as f:
         script_content = f.read()
 
     # Get metadata if requested
@@ -1316,7 +1319,7 @@ def transform_script(
 
     # Read the script content
     try:
-        with open(script_path, "r") as f:
+        with open(script_path) as f:
             content = f.read()
     except Exception as e:
         console.print(f"[bold red]Error:[/] Failed to read script: {str(e)}")
@@ -1440,7 +1443,7 @@ def search_scripts(
             continue
 
         try:
-            with open(script_path, "r") as f:
+            with open(script_path) as f:
                 content = f.read()
 
             # Search for matches
@@ -1733,7 +1736,7 @@ Return ONLY the code with no additional text or explanations.
         }
 
         # Count keyword matches for each template
-        matches = {template: 0 for template in keywords}
+        matches = dict.fromkeys(keywords, 0)
         for template, words in keywords.items():
             for word in words:
                 if word.lower() in description.lower():
@@ -1863,7 +1866,7 @@ def import_script(
 
     # Read export data
     try:
-        with open(file, "r") as f:
+        with open(file) as f:
             export_data = json.load(f)
     except json.JSONDecodeError:
         console.print("[bold red]Error:[/] Invalid export file format.")
