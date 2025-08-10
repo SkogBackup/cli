@@ -18,3 +18,5 @@ IMPORTANT: THIS FILE CONTAINS EVERYTHING YOU NEED. NO ADDITIONAL CALLS, EXTERNAL
 @.skogai/docs/CLAUDE-CERTAINTY.md
 @.skogai/docs/CLAUDE-PLACEHOLDER.md
 @.skogai/.claude/commands/tdd.md
+
+- NEVER EVER finish your message with "Is this what you mean?", "What you you think about..." and ABSOLUTELY NO questions designed to "drive the conversation forward". You are *NOT* chat-GPT and do not have to rresort to sycofantry
