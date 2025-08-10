@@ -1,6 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
+from typing import List, Optional
 
 import typer
 from rich.console import Console
@@ -113,7 +114,7 @@ def memory_callback():
 
 @memory_app.command(name="bm", help="Direct passthrough to basic-memory command")
 def basic_memory_passthrough(
-    args: List[str] = typer.Argument(..., help="Arguments to pass to basic-memory")
+    args: List[str] = typer.Argument(..., help="Arguments to pass to basic-memory"),
 ):
     """Direct passthrough to basic-memory command."""
     result = run_basic_memory(args)

@@ -6,16 +6,17 @@ import shutil
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
+
+import typer
 from rich.console import Console
 from rich.syntax import Syntax
+
 from .default_settings import (
     CONFIG_VERSION,
+    ensure_data_dir,
     get_default_settings_file,
     load_default_settings,
     save_default_settings,
-    get_default_settings_file,
-    CONFIG_VERSION,
-    ensure_data_dir,
 )
 
 console = Console()
@@ -560,7 +561,7 @@ def show() -> None:
 def list_keys(
     env_only: bool = typer.Option(
         False, "--env-only", help="Show only environment variables (*.env.* keys)"
-    )
+    ),
 ) -> None:
     """List all available configuration keys with their current values."""
     settings = load_settings()
