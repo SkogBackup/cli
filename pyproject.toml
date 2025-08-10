@@ -34,3 +34,8 @@ dev = [
   "pytest-cov>=6.2.1",
   "ruff>=0.12.4",
 ]
+
+[tool.uv.workspace]
+members = [
+    "build/lib/skogcli",
+]
