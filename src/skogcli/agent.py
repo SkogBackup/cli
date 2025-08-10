@@ -4,12 +4,13 @@ import json
 import os
 import stat
 from pathlib import Path
-from typing import Optional, List
+
+import typer
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
-import typer
-from .settings import get_setting, set_setting, get_config_keys
+
+from .settings import get_config_keys, get_setting, set_setting
 
 # Create a Typer app for the agent commands
 agent_app = typer.Typer(help="Interact with SkogAI agents", no_args_is_help=True)

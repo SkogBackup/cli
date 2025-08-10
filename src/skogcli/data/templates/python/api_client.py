@@ -2,6 +2,7 @@
 """
 API client script for SkogCLI.
 """
+
 import json
 import sys
 from urllib.parse import urljoin

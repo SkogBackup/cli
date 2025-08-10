@@ -2,6 +2,7 @@
 """
 Data processing script for SkogCLI.
 """
+
 import csv
 import json
 import sys
