@@ -9,7 +9,7 @@ Test SkogCLI memory commands as users experience them, focusing on CLI interface
 ### `memory bm` - Direct Passthrough
 - test_bm_passthrough(List[str]: args): subprocess_result - Test direct passthrough to basic-memory, verify args passed correctly
 
-### `memory write` - Create/Update Notes  
+### `memory write` - Create/Update Notes
 - test_write_basic(str, str, str: title, folder, content): success_message - Test basic note creation with required args
 - test_write_with_tags(str, str, str, str: title, folder, content, tags): success_message - Test note creation with comma-separated tags
 - test_write_with_project(str, str, str, str: title, folder, content, project): success_message - Test note creation with specific project

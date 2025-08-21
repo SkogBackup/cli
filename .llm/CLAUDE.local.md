@@ -9,14 +9,14 @@
 - 🔄 `test_makefile.py` calls `make test`
 - 🔄 Infinite loop → timeout
 
-**✅ Solution**: 
+**✅ Solution**:
 ```python
 def test_make_test_command(self):
     """Test that 'make test' command is available (without running it to avoid recursion)."""
     # 📁 Check that the Makefile contains the test target
     with open("Makefile", "r") as f:
         makefile_content = f.read()
-    
+
     assert "test:" in makefile_content, "Makefile should contain test target"
     assert "uv run pytest" in makefile_content, "test target should use pytest"
 ```
@@ -34,7 +34,7 @@ dev-install:
 [dependency-groups]
 dev = [
     "bandit>=1.8.6",
-    "coverage[toml]>=7.9.2", 
+    "coverage[toml]>=7.9.2",
     "mypy>=1.17.0",
     "pytest-cov>=6.2.1",
     "ruff>=0.12.4",
@@ -81,7 +81,7 @@ endef
 ### 🧪 Problem 5: Testing External Commands
 **❌ Issue**: Testing make commands is tricky because they're external processes that can have side effects.
 
-**✅ Solution**: 
+**✅ Solution**:
 - 🔍 Test existence and basic functionality
 - 📦 Use `subprocess.run()` with `capture_output=True` to avoid side effects
 - 📁 Test content of Makefile for complex commands to avoid recursion

@@ -7,7 +7,7 @@
 
 ## Package Management
 - `uv sync` - Install dependencies
-- `uv sync --group dev` - Install development dependencies 
+- `uv sync --group dev` - Install development dependencies
 - `uv add <package> && uv lock && uv sync` - Add new package (instead of pip install)
 
 ## Development Commands (via Makefile)

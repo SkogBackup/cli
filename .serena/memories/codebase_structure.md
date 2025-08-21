@@ -12,7 +12,7 @@
 - `memory.py` - Memory module (knowledge management, basic-memory wrapper)
 - `settings.py` - Configuration management (config command)
 - `script.py` - Script management and execution
-- `agent.py` - AI agent management 
+- `agent.py` - AI agent management
 - `decorators.py` - Utility decorators (error handling, explanations)
 - `completion.py` - CLI completion functionality
 - `default_settings.py` - Default configuration handling

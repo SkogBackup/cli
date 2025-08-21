@@ -242,10 +242,10 @@ describe('ComponentName', () => {
     it('should do something specific', () => {
       // Arrange
       const input = 'test';
-      
+
       // Act
       const result = functionUnderTest(input);
-      
+
       // Assert
       expect(result).toBe('expected');
     });
@@ -273,13 +273,13 @@ describe('ComponentName', () => {
  * @api {post} /users Create user
  * @apiName CreateUser
  * @apiGroup User
- * 
+ *
  * @apiParam {String} email User email
  * @apiParam {String} password User password
- * 
+ *
  * @apiSuccess {String} id User ID
  * @apiSuccess {String} email User email
- * 
+ *
  * @apiError {Object} 400 Validation error
  * @apiError {Object} 409 Email already exists
  */

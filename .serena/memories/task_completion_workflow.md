@@ -16,7 +16,7 @@
 1. **Run all tests**: `make test` or `./tests/run_tests.sh -v`
 2. **Run code quality checks**: `make all-checks`
    - Format: `make format` (black)
-   - Lint: `make lint` (black check + ruff) 
+   - Lint: `make lint` (black check + ruff)
    - Type check: `make type-check` (mypy)
    - Security: `make security` (bandit)
 3. **Run pre-commit hooks**: `make pre-commit`
@@ -35,7 +35,7 @@
 
 ## Verification Commands
 - Tests pass: `make test`
-- No linting issues: `make lint` 
+- No linting issues: `make lint`
 - No type errors: `make type-check`
 - No security issues: `make security`
 - Pre-commit hooks pass: `make pre-commit`
