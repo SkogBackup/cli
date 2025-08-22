@@ -116,16 +116,16 @@ describe('POST /api/users', () => {
 describe('User Login Flow', () => {
   it('should allow user to login', () => {
     cy.visit('/login');
-    
+
     cy.get('[data-test="email-input"]')
       .type('user@example.com');
-    
+
     cy.get('[data-test="password-input"]')
       .type('password123');
-    
+
     cy.get('[data-test="login-button"]')
       .click();
-    
+
     cy.url().should('include', '/dashboard');
     cy.contains('Welcome back!').should('be.visible');
   });
@@ -178,7 +178,7 @@ const testUser = createUser({ email: 'test@example.com' });
 jest.mock('../services/email');
 
 // Mock implementation
-emailService.send.mockImplementation(() => 
+emailService.send.mockImplementation(() =>
   Promise.resolve({ messageId: '123' })
 );
 

@@ -3,7 +3,7 @@
 ## Purpose
 SkogCLI is a Typer-based CLI tool for the SkogAI project that provides:
 - Knowledge management capabilities through a memory module
-- Configuration management 
+- Configuration management
 - Script management and execution
 - AI agent management
 - Test-driven development (TDD) and Documentation-driven design (DDD) approach
@@ -25,7 +25,7 @@ The CLI provides multiple entry points:
 
 ## Main Commands
 - `memory` - Knowledge management (create, read, search, list, sync, status)
-- `config` - Configuration management 
+- `config` - Configuration management
 - `script` - Script management and execution
 - `agent` - AI agent management
 - `version` - Show version information

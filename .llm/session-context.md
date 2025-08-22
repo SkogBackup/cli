@@ -1,7 +1,7 @@
 # Session Context
 
 ## Project State
-- Branch: feature/config-defaults  
+- Branch: feature/config-defaults
 - Main issue: Failing tests due to TDD methodology falling out of context
 - Key insight: Context management is critical for AI behavior consistency
 
@@ -18,7 +18,7 @@
 
 ## SkogAI Tag System
 - `[@action:params]` - dynamic execution (cannot be cached)
-- `$definition` - stored state/cached results  
+- `$definition` - stored state/cached results
 - Examples: `[@git:status]`, `[@claude:"prompt"]`
 - Config system tracks context: `$.claude.context:tdd`
 

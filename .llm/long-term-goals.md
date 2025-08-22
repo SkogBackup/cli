@@ -5,7 +5,7 @@
 ### pyproject.toml Enhancements
 - [ ] Add [tool.black] configuration section
   - Set up code formatting standards
-- [ ] Add [tool.mypy] configuration section  
+- [ ] Add [tool.mypy] configuration section
   - Configure type checking rules
 - [ ] Add [tool.ruff] configuration section
   - Set up linting rules and exclusions

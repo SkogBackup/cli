@@ -2,7 +2,7 @@
 
 ## General Python Style
 - Python 3.12+ required
-- Use type hints consistently 
+- Use type hints consistently
 - Follow PEP 8 naming conventions (snake_case for functions/variables)
 - Import organization: standard lib → third-party → local
 - Use f-strings for string formatting

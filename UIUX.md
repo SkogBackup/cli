@@ -221,7 +221,7 @@ function trapFocus(element) {
   );
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
-  
+
   element.addEventListener('keydown', (e) => {
     if (e.key === 'Tab') {
       if (e.shiftKey && document.activeElement === first) {

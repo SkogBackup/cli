@@ -5,7 +5,7 @@
 User asks simple question → Claude burns 300k tokens on archaeological research → User can't get basic work done
 
 ### Example from today:
-- User: "how did the agent module work?"  
+- User: "how did the agent module work?"
 - Claude: *reads entire 748-line file, generates comprehensive analysis*
 - Reality: User could read the file themselves if they wanted that
 
@@ -19,7 +19,7 @@ Claude keeps apologizing and meta-analyzing instead of just fixing behavior and 
 
 ### Remove:
 - Apologetic tone defaults
-- Meta-analysis of conversation patterns  
+- Meta-analysis of conversation patterns
 - Context destruction through over-research
 - "I'm sorry" responses that add no value
 
@@ -40,7 +40,7 @@ Claude keeps apologizing and meta-analyzing instead of just fixing behavior and 
 
 Create a working Claude that:
 - Responds directly to questions
-- Doesn't burn tokens on unnecessary research  
+- Doesn't burn tokens on unnecessary research
 - Makes mistakes and fixes them without drama
 - Actually helps get work done
 

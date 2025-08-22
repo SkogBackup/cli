@@ -26,9 +26,9 @@
 12. [Task Management](TASKS.md) - Active tasks, phase tracking, context preservation
 
 ## Quick Reference
-**Main Constants**: `[file:lines]` - Description  
-**Core Class**: `[file:lines]` - Description  
-**Key Function**: `[file:lines]` - Description  
+**Main Constants**: `[file:lines]` - Description
+**Core Class**: `[file:lines]` - Description
+**Key Function**: `[file:lines]` - Description
 [Include 10-15 most accessed code locations]
 
 ## Current State
@@ -50,12 +50,12 @@
 [Include 3-5 templates]
 
 ## Anti-Patterns (Avoid These)
-❌ **Don't [action]** - [Reason]  
+❌ **Don't [action]** - [Reason]
 [List 5-6 critical mistakes]
 
 ## Version History
 - **v1.0.0** - Initial release
-- **v1.1.0** - Feature added (see JOURNAL.md YYYY-MM-DD)  
+- **v1.1.0** - Feature added (see JOURNAL.md YYYY-MM-DD)
 [Link major versions to journal entries]
 
 ## Continuous Engineering Journal <!-- do not remove -->

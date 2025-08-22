@@ -9,7 +9,7 @@
 # Broken display
 uv run skogcli memory list
 
-# Working display  
+# Working display
 uv run skogcli memory list --format json
 ```
 
@@ -33,7 +33,7 @@ uv run skogcli memory list --format json
 ```bash
 # Don't trust existing docs - verify actual commands
 uv run skogcli --help
-uv run skogcli memory --help  
+uv run skogcli memory --help
 uv run skogcli config --help
 
 # Use CLI's built-in comprehensive documentation generator

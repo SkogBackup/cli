@@ -1,6 +1,6 @@
 # Current Tasks
 
-## Fixed Issues  
+## Fixed Issues
 - [x] Memory read command now returns exit code 1 when note not found
 - [x] Added TDD context permanently to CLAUDE.md includes
 - [x] Fixed context loss issue that caused erratic behavior
@@ -11,7 +11,7 @@
 
 ## In Progress
 
-## Pending  
+## Pending
 - [ ] Run full test suite to identify other failing tests
 - [ ] Verify all test expectations match documented TDD behavior
 - [ ] Fix config programming - reset/show-defaults/edit-defaults logic is broken

@@ -717,7 +717,7 @@ $ SkogCLI script templates [OPTIONS]
 Export a script to a JSON file that can be shared and imported by others.
 
     The export file contains the script&#x27;s code, metadata, and other information.
-    
+
 
 Export a script to a JSON file to share with others.
 
@@ -821,7 +821,7 @@ $ SkogCLI script generate [OPTIONS] NAME DESCRIPTION
 Import a script from a JSON export file created by the &#x27;script export&#x27; command.
 
     The export file contains the script&#x27;s code, metadata, and other information.
-    
+
 
 Import a script from an export file.
 
@@ -847,7 +847,7 @@ Import an existing script file into the scripts directory.
 
     This command copies a script file from anywhere on your filesystem into the SkogCLI
     scripts directory, making it available as a SkogCLI script.
-    
+
 
 Import an existing script file into the scripts directory.
 
@@ -928,7 +928,7 @@ Create script files for all existing agents.
 
     This command will create script files in the ./scripts directory for all
     configured agents, based on their current command templates.
-    
+
 
 Migrate all agents to use script files.
 
@@ -956,7 +956,7 @@ Send a message to an agent and display the response.
 
     Use a specific model:
       skogcli agent send &quot;Summarize this article&quot; --model custom-model
-    
+
 
 Send a message to an agent.
 
@@ -1009,7 +1009,7 @@ Create a new agent with the specified configuration.
 
     Create an agent with a system prompt:
       skogcli agent create assistant --system &quot;You are a helpful assistant.&quot;
-    
+
 
 Create a new agent.
 
@@ -1047,7 +1047,7 @@ Set a configuration value for an agent.
 
     Set a configuration directly:
       skogcli agent set agent.coder.model custom-model
-    
+
 
 Set a configuration value for an agent.
 
@@ -1083,7 +1083,7 @@ Get a configuration value for an agent.
 
     Get a configuration directly:
       skogcli agent get agent.coder.model
-    
+
 
 Get a configuration value for an agent.
 
@@ -1118,7 +1118,7 @@ Read information about an agent.
 
     Get raw output:
       skogcli agent read researcher --raw
-    
+
 
 Read information about an agent.
 
@@ -1147,7 +1147,7 @@ Open the agent&#x27;s script in your default editor.
 
     Edit an agent script:
       skogcli agent edit-script researcher
-    
+
 
 Edit the script for an agent.
 
@@ -1176,7 +1176,7 @@ Delete an agent and its configuration.
 
     Force delete without confirmation:
       skogcli agent delete researcher --force
-    
+
 
 Delete an agent.
 
