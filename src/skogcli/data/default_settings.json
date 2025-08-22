@@ -2,7 +2,7 @@
   "skogai": {
     "env": {
       "UV_LINK_MODE": "copy",
-      "SKOGAI": "/home/skogix/skogai",
+      "SKOGAI": "$SKOGAI",
       "PAGER": "cat"
     }
   },
@@ -66,7 +66,7 @@
     "cli": {
       "last-updated": 1753519117.9098947,
       "version": 1,
-      "storage_dir": "/home/skogix/skogai/config/"
+      "storage_dir": "$SKOGAI/config/"
     },
     "memory": {
       "page_size": 10,
@@ -81,9 +81,9 @@
       "last_updated": 1748305682.7457244
     },
     "script": {
-      "templates_dir": "/home/skogix/skogai/config/templates",
-      "user_scripts_dir": "/home/skogix/skogai/scripts",
-      "metadata_dir": "/home/skogix/skogai/config"
+      "templates_dir": "$SKOGAI/config/templates",
+      "user_scripts_dir": "$SKOGAI/scripts",
+      "metadata_dir": "$SKOGAI/config"
     },
     "chat": {
       "history_enabled": true,
@@ -92,7 +92,7 @@
       "message_id_counter": 1,
       "thread_id_counter": 1,
       "message": {
-        "storage_dir": "/home/skogix/skogai/settings/",
+        "storage_dir": "$SKOGAI/settings/",
         "format_pretty": true,
         "default_sender": "User",
         "default_recipient": "Assistant"
