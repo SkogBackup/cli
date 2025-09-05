@@ -1,4 +1,8 @@
-# Development Methodology: TDD/DDD
+# SkogCLI - Command Line Interface for SkogAI
+
+SkogCLI is a comprehensive CLI tool for SkogAI project management, providing memory management, script automation, configuration, and agent interaction capabilities.
+
+## Development Methodology: TDD/DDD
 
 This project follows Test-Driven Development (TDD) and Documentation-Driven Design (DDD) principles. Here are the key guidelines:
 

@@ -1,0 +1,19 @@
+{
+  "testModules": [
+    {
+      "moduleId": "tests/test_memory.py",
+      "tests": [
+        {
+          "name": "collection_error_tests/test_memory.py",
+          "fullName": "tests/test_memory.py",
+          "state": "failed",
+          "errors": [
+            {
+              "message": "tests/test_memory.py:30: in <module>\n    class TestMemoryFunctions:\ntests/test_memory.py:33: in TestMemoryFunctions\n    @patch(\"skogcli.memory.run_basic_memory\")\n     ^^^^^\nE   NameError: name 'patch' is not defined"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
