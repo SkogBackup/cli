@@ -34,3 +34,6 @@ dev = [
   "pytest-cov>=6.2.1",
   "ruff>=0.12.4",
 ]
+
+[tool.pytest.ini_options]
+tdd_guard_project_root = "/home/skogix/dev/cli-script-upgrade"
