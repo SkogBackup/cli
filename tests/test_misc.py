@@ -1,10 +1,11 @@
 """Tests for skogcli script functionality."""
 
+import json
 import subprocess
 import os
 import shutil
-import subprocess
 from datetime import datetime
+from pathlib import Path
 from skogcli.script import (
     get_metadata_file,
     get_script_names,

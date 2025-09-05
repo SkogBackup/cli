@@ -25,11 +25,23 @@ This project follows Test-Driven Development (TDD) and Documentation-Driven Desi
 - Documentation is the primary source of truth for requirements
 - Tests must match the documented behavior precisely
 
-run skogcli via "uv run skogcli"
+## Quick Start
 
-use "uv add <package> && uv lock && uv sync" instead of "pip install"
+```bash
+# Run SkogCLI
+uv run skogcli
 
-empty calls to a command should always return help - use the no_args_is_help=True parameter in typer.Typer() to enable this behavior
+# Install new dependencies
+uv add <package> && uv lock && uv sync
+
+# Run tests
+uv run pytest tests/
+```
+
+## CLI Design Principles
+
+- Empty calls to a command should always return help - use the `no_args_is_help=True` parameter in `typer.Typer()` to enable this behavior
+- All commands should provide comprehensive help text and examples
 
 # Typer Best Practices
 - Use docstrings for command descriptions
