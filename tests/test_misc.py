@@ -13,8 +13,6 @@ from skogcli.script import (
     get_user_scripts_dir,
     load_metadata,
     save_metadata,
-    get_script_names,
-    get_script_templates,
 )
 
 
