@@ -13,6 +13,7 @@ dependencies = [
   "pre-commit>=4.2.0",
   "pytest>=8.3.5",
   "smolagents[litellm]>=1.18.0",
+  "tdd-guard-pytest>=0.1.2",
   "tiktoken>=0.9.0",
   "typer>=0.15.2",
   "types-requests>=2.32.4.20250611",
