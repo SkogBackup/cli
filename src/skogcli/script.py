@@ -447,7 +447,7 @@ def run_script(
 def create_script(
     name: str = typer.Argument(..., help="Name for the new script"),
     type: str = typer.Option(
-        "python",
+        "shell",
         "--type",
         "-t",
         help="Script type (python or shell)",
@@ -1532,7 +1532,7 @@ def generate_script(
         ..., help="Description of what the script should do"
     ),
     type: str = typer.Option(
-        "python",
+        "shell",
         "--type",
         "-t",
         help="Script type (python or shell)",
