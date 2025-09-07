@@ -1,0 +1,56 @@
+$ id
+[@skogai-test:"a":"b"]
+true
+42
+"hello" 
+$ id
+null
+true
+false
+42
+52.0
+-123
+-45.67
+"hello"
+"world"
+""
+$ id
+$ entity.id
+$ entity.gen
+$ int
+$ unique
+"$ id"
+"$ entity.id"
+"$ entity.gen"
+$ entity.id * $ entity.gen
+$ int * $ unique
+[@hello:"Claude"]
+[1, 2, 3]
+[true, false, true]
+["a", "b", "c"]
+[null, 42, "test"]
+[]
+[$ int, $ id, $unique]
+[$ entity.id, $ entity.gen]
+[$ eid, $ id, $ unique]
+[$ int * $ id, $ entity.id * $ entity.gen]
+[1,$ claude, [@skogai-test:"a"]]
+[true, "$entity.id", $ int * $ unique]
+{"key": "value"}
+{"name": "John", "age": 30}
+{"active": true, "score": 95.5}
+{}
+{"id": $ int}
+{"entity": "$ entity.id", "generation": "$ entity.gen"}
+{"id": $ entity.id*$ entity.gen}
+{"composite": $ int*$ unique}
+{"definition": [@def:id]}
+{"id": $id, "action": [@skogai-test:"test"]}
+{"ref": "$ entity.id", "binary": $ int*$ unique}
+[{"id": 1, "ref": $ claude}, {"id": 2, "ref": $ eid}]
+[@skogai-test:"$ int"]
+{"message": {"eid": "$ eid", "from": "$ name", "to": "$ name", "content": "$ string"}}
+[[@cat:"/home/skogix/.local/src/skogparse/README.md"]]
+[[@rand:"100"],[@date:"now"]]
+[@curl:"https://tools.skogai.se/tools"]
+[@file:"/home/skogix/skogai/docs/lore/skogix-notation.md"]
