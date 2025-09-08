@@ -35,6 +35,11 @@ clean() {
   # find . -name "*.pyc" -delete
 }
 
+# @cmd Run tests
+test() {
+  uv run pytest tests/ --cov=skogcli --cov-report=html --cov-report=term-missing --ignore=tests/integration
+}
+
 # @cmd Format code
 format() {
   :

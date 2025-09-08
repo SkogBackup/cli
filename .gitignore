@@ -6,7 +6,7 @@ dist/
 wheels/
 *.egg-info
 *.so
-.coverage
+.coverage*
 htmlcov/
 .pytest_cache/
 .ruff_cache/

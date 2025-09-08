@@ -171,51 +171,6 @@
       ]
     },
     {
-      "moduleId": "tests/test_makefile.py",
-      "tests": [
-        {
-          "name": "test_makefile_exists",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_makefile_exists",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_help_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_help_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_install_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_install_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_test_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_test_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_format_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_format_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_lint_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_lint_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_clean_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_clean_command",
-          "state": "passed"
-        },
-        {
-          "name": "test_make_build_command",
-          "fullName": "tests/test_makefile.py::TestMakeCommands::test_make_build_command",
-          "state": "passed"
-        }
-      ]
-    },
-    {
       "moduleId": "tests/test_memory.py",
       "tests": [
         {
@@ -361,51 +316,6 @@
         {
           "name": "test_memory_command_without_basic_memory",
           "fullName": "tests/test_memory_cli.py::TestMemoryIntegration::test_memory_command_without_basic_memory",
-          "state": "passed"
-        }
-      ]
-    },
-    {
-      "moduleId": "tests/test_memory_functional.py",
-      "tests": [
-        {
-          "name": "test_complete_memory_workflow",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_complete_memory_workflow",
-          "state": "passed"
-        },
-        {
-          "name": "test_create_with_tags_and_search",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_create_with_tags_and_search",
-          "state": "passed"
-        },
-        {
-          "name": "test_list_shows_created_note",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_list_shows_created_note",
-          "state": "passed"
-        },
-        {
-          "name": "test_status_command_works",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_status_command_works",
-          "state": "passed"
-        },
-        {
-          "name": "test_sync_command_works",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_sync_command_works",
-          "state": "passed"
-        },
-        {
-          "name": "test_bm_passthrough_works",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_bm_passthrough_works",
-          "state": "passed"
-        },
-        {
-          "name": "test_read_nonexistent_note_fails",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_read_nonexistent_note_fails",
-          "state": "passed"
-        },
-        {
-          "name": "test_json_output_format",
-          "fullName": "tests/test_memory_functional.py::TestMemoryFunctional::test_json_output_format",
           "state": "passed"
         }
       ]
