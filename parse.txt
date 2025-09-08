@@ -2,7 +2,7 @@ $ id
 [@skogai-test:"a":"b"]
 true
 42
-"hello" 
+"hello"
 $ id
 null
 true

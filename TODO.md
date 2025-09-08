@@ -116,7 +116,7 @@ class MessageBus(Protocol):
 # History Management
 class HistoryStore(Protocol):
        async def append(self, message: SkogAIMessage) -> None: ...
-       async def query(self, 
+       async def query(self,
                       agent_ids: list[AgentId] = None,
                       time_range: tuple[datetime, datetime] = None,
                       limit: int = None) -> list[SkogAIMessage]: ...
@@ -131,13 +131,13 @@ class HistoryStore(Protocol):
 
    # Task Orchestration
    class WorkflowEngine(Protocol):
-       async def execute_sequential(self, 
-                                  agents: list[AgentId], 
+       async def execute_sequential(self,
+                                  agents: list[AgentId],
                                   task: TaskDefinition) -> dict[AgentId, str]: ...
-       async def execute_parallel(self, 
+       async def execute_parallel(self,
                                 agent_tasks: dict[AgentId, TaskDefinition]) -> dict[AgentId, str]: ...
-       async def execute_consensus(self, 
-                                 agents: list[AgentId], 
+       async def execute_consensus(self,
+                                 agents: list[AgentId],
                                  task: TaskDefinition,
                                  aggregator: AgentId) -> dict[str, Any]: ...
 
@@ -161,8 +161,8 @@ class HistoryStore(Protocol):
                return AIMessage(content=msg.content)
 
    def langchain_to_message(
-       lc_msg: BaseMessage, 
-       from_agent: AgentId, 
+       lc_msg: BaseMessage,
+       from_agent: AgentId,
        to_agent: AgentId
    ) -> SkogAIMessage:
        """Transform LangChain message to SkogAI format."""
@@ -176,14 +176,14 @@ class HistoryStore(Protocol):
        )
 
    def filter_messages_by_thread(
-       messages: list[SkogAIMessage], 
+       messages: list[SkogAIMessage],
        thread_id: str
    ) -> list[SkogAIMessage]:
        """Filter messages by thread ID."""
        return [msg for msg in messages if msg.thread_id == thread_id]
 
    def build_conversation_history(
-       messages: list[SkogAIMessage], 
+       messages: list[SkogAIMessage],
        agent_perspective: AgentId
    ) -> list[BaseMessage]:
        """Build conversation history from agent's perspective."""
@@ -240,7 +240,7 @@ class HistoryStore(Protocol):
        @abstractmethod
        def agent_id(self) -> AgentId: ...
 
-       @property 
+       @property
        @abstractmethod
        def capabilities(self) -> AgentCapabilities: ...
 
@@ -267,7 +267,7 @@ class HistoryStore(Protocol):
        @abstractmethod
        async def create_index(self, fields: list[str]) -> None: ...
 
-   # Configuration Provider Interface  
+   # Configuration Provider Interface
    class ConfigProvider(ABC):
        @abstractmethod
        async def get_agent_config(self, agent_id: AgentId) -> AgentConfig: ...
