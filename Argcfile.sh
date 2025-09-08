@@ -29,31 +29,30 @@ build() {
 
 # @cmd Clean build artifacts and cache
 clean() {
-  rm -rf dist/ build/ *.egg-info/ .pytest_cache/ htmlcov/ .coverage .mypy_cache/ .ruff_cache/ bandit-report.json
-  find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-  find . -name "*.pyc" -delete
+  echo "todo"
+  # rm -rf dist/ build/ *.egg-info/ .pytest_cache/ htmlcov/ .coverage .mypy_cache/ .ruff_cache/ bandit-report.json
+  # find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+  # find . -name "*.pyc" -delete
 }
 
 # @cmd Format code
 format() {
-  argc format::black
-  argc format::ruff
-  argc format::mypy
+  :
 }
 
 # @cmd Run ruff checks
 format::ruff() {
-  uv run ruff check src/ tests/
+  uv run ruff check src tests
 }
 
 # @cmd Run black checks
 format::black() {
-  uv run black --check src/ tests/
+  uv run black src tests
 }
 
 # @cmd Run type checking with mypy
 format::mypy() {
-  uv run mypy src/ --ignore-missing-imports --no-error-summary
+  uv run mypy src tests
 }
 
 # @cmd Run pre-commit hooks
