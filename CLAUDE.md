@@ -4,6 +4,7 @@
 
 @/home/skogix/.claude/CLAUDE.md
 @README.md
+@CLAUDE.md
 @/home/skogix/skogai/.skogai/rules.md
 @/home/skogix/skogai/.skogai/claude/identity.md
 @/home/skogix/claude/.backup/persona/placeholder.md
