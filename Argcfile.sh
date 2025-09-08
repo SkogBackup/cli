@@ -5,7 +5,6 @@ set -e
 # @describe SkogCLI src commands
 # @meta version 1.0.0
 # @meta dotenv .env
-# @env LLM_OUTPUT=/dev/stdout The output path
 
 # @cmd
 # @arg args~  Capture all remaining args
@@ -14,13 +13,13 @@ run() {
 }
 
 # @cmd Install dependencies
+# @flag --dev install development dependencies
 install() {
-  uv sync
-}
-
-# @cmd Install development dependencies
-install::dev() {
-  uv sync --group dev
+  if [[ -n "$argc_dev" ]]; then
+    uv sync --group dev
+  else
+    uv sync
+  fi
 }
 
 # @cmd Build the package
@@ -35,15 +34,21 @@ clean() {
   find . -name "*.pyc" -delete
 }
 
-# @cmd Format code with black
+# @cmd Format code
 format() {
-  uv run black src/ tests/
+  argc format::black
+  argc format::ruff
+  argc format::mypy
 }
 
-# @cmd Run linting checks
-format::lint() {
-  uv run black --check src/ tests/
+# @cmd Run ruff checks
+format::ruff() {
   uv run ruff check src/ tests/
+}
+
+# @cmd Run black checks
+format::black() {
+  uv run black --check src/ tests/
 }
 
 # @cmd Run type checking with mypy
