@@ -1,7 +1,10 @@
 """Tests for skogcli memory functionality."""
 
 import json
+import subprocess
+import pytest
 import typer
+from unittest.mock import patch, MagicMock
 from skogcli.memory import get_memory_folders, get_memory_projects, run_basic_memory
 
 

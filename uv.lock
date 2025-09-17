@@ -1156,7 +1156,9 @@ dependencies = [
     { name = "pip" },
     { name = "pre-commit" },
     { name = "pytest" },
+    { name = "skoglib" },
     { name = "smolagents", extra = ["litellm"] },
+    { name = "tdd-guard-pytest" },
     { name = "tiktoken" },
     { name = "typer" },
     { name = "types-requests" },
@@ -1179,7 +1181,9 @@ requires-dist = [
     { name = "pip", specifier = ">=25.1.1" },
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pytest", specifier = ">=8.3.5" },
+    { name = "skoglib", directory = "../skoglib" },
     { name = "smolagents", extras = ["litellm"], specifier = ">=1.18.0" },
+    { name = "tdd-guard-pytest", specifier = ">=0.1.2" },
     { name = "tiktoken", specifier = ">=0.9.0" },
     { name = "typer", specifier = ">=0.15.2" },
     { name = "types-requests", specifier = ">=2.32.4.20250611" },
@@ -1192,6 +1196,23 @@ dev = [
     { name = "mypy", specifier = ">=1.17.0" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "ruff", specifier = ">=0.12.4" },
+]
+
+[[package]]
+name = "skoglib"
+version = "0.1.0"
+source = { directory = "../skoglib" }
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "bandit", specifier = ">=1.8.6" },
+    { name = "coverage", extras = ["toml"], specifier = ">=7.3.2" },
+    { name = "mypy", specifier = ">=1.17.1" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "ruff", specifier = ">=0.12.12" },
 ]
 
 [[package]]
@@ -1232,6 +1253,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2a/5f/8418daad5c353300b7661dd8ce2574b0410a6316a8be650a189d5c68d938/stevedore-5.5.0.tar.gz", hash = "sha256:d31496a4f4df9825e1a1e4f1f74d19abb0154aff311c3b376fcc89dae8fccd73", size = 513878, upload-time = "2025-08-25T12:54:26.806Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/80/c5/0c06759b95747882bb50abda18f5fb48c3e9b0fbfc6ebc0e23550b52415d/stevedore-5.5.0-py3-none-any.whl", hash = "sha256:18363d4d268181e8e8452e71a38cd77630f345b2ef6b4a8d5614dac5ee0d18cf", size = 49518, upload-time = "2025-08-25T12:54:25.445Z" },
+]
+
+[[package]]
+name = "tdd-guard-pytest"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e4/82/204f333a4d9005d2b8bdd39108bd40542a342f7296451d332a48ccb32a5c/tdd_guard_pytest-0.1.2.tar.gz", hash = "sha256:5fafd89e0dac6140d7db46865d12c09075d0ed211b6aac7c300393994582be00", size = 8332, upload-time = "2025-07-28T08:33:43.63Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/c7/69e1e53cfc6e06776cfe633d806ac78f643fcf8474ec1bdbf6e374aeb214/tdd_guard_pytest-0.1.2-py3-none-any.whl", hash = "sha256:4ca9333315f859b841461c03760ff8fe5d3525ab2389230233e7ad594f90117e", size = 4427, upload-time = "2025-07-28T08:33:42.617Z" },
 ]
 
 [[package]]
