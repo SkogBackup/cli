@@ -4,7 +4,7 @@ version = "0.0.3"
 description = "CLI tool for the SkogAI-project"
 readme = "README.md"
 authors = [{ name = "Emil Skogsund", email = "emil@skogsund.se" }]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
   "black>=25.1.0",
   "click<8.2.0",
