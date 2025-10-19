@@ -424,23 +424,23 @@ def run_script(
             console.print(f"[bold red]Error:[/] {str(e)}")
     else:
         # Run shell script or executable
-        try:
-            # Make sure the script is executable
-            if not is_executable(script_path):
-                script_path.chmod(script_path.stat().st_mode | 0o755)
+        # Make sure the script is executable
+        if not is_executable(script_path):
+            script_path.chmod(script_path.stat().st_mode | 0o755)
 
-            # Run the script with arguments
-            cmd = [str(script_path)] + (args or [])
-            result = subprocess.run(cmd, check=True)
+        # Run the script with arguments
+        result = subprocess.run(
+            [script_path, *(args or [])],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
-            if result.returncode != 0:
-                console.print(
-                    f"[bold red]Error:[/] Script exited with code {result.returncode}"
-                )
-        except subprocess.CalledProcessError as e:
-            console.print(f"[bold red]Error:[/] {str(e)}")
-        except Exception as e:
-            console.print(f"[bold red]Error:[/] {str(e)}")
+        if result.returncode == 0:
+            print(result.stdout, end='')
+        else:
+            sys.stderr.write(result.stderr)
+            sys.exit(result.returncode)
 
 
 @script_app.command("create", help="Create a new custom script")
@@ -1015,22 +1015,12 @@ def batch_process(
                     console.print(f"[bold red]Error:[/] {str(e)}")
             else:
                 # Run shell script or executable
-                try:
-                    # Make sure the script is executable
-                    if not is_executable(script_path):
-                        script_path.chmod(script_path.stat().st_mode | 0o755)
+                # Make sure the script is executable
+                if not is_executable(script_path):
+                    script_path.chmod(script_path.stat().st_mode | 0o755)
 
-                    # Run the script with no arguments
-                    result = subprocess.run([str(script_path)], check=True)
-
-                    if result.returncode != 0:
-                        console.print(
-                            f"[bold red]Error:[/] Script exited with code {result.returncode}"
-                        )
-                except subprocess.CalledProcessError as e:
-                    console.print(f"[bold red]Error:[/] {str(e)}")
-                except Exception as e:
-                    console.print(f"[bold red]Error:[/] {str(e)}")
+                # Run the script with no arguments
+                subprocess.run([str(script_path)], check=True)
 
         elif command == "search" and pattern is not None:
             # Search for pattern in the script

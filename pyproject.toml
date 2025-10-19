@@ -12,7 +12,6 @@ dependencies = [
   "pip>=25.1.1",
   "pre-commit>=4.2.0",
   "pytest>=8.3.5",
-  "skoglib",
   "smolagents[litellm]>=1.18.0",
   "tdd-guard-pytest>=0.1.2",
   "tiktoken>=0.9.0",

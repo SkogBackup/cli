@@ -201,12 +201,22 @@
         {
           "name": "test_run_basic_memory_success",
           "fullName": "tests/test_memory.py::TestMemoryFunctions::test_run_basic_memory_success",
-          "state": "passed"
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory.TestMemoryFunctions object at 0x7fe13681ab10>\nmock_run = <MagicMock name='run' id='140605259250192'>\n\n    @patch(\"subprocess.run\")\n    def test_run_basic_memory_success(self, mock_run):\n        \"\"\"Test run_basic_memory when basic-memory is available.\"\"\"\n        # Setup mock\n        mock_result = MagicMock()\n        mock_result.returncode = 0\n        mock_result.stdout = \"test output\"\n        mock_run.return_value = mock_result\n    \n        # Call the function\n        result = run_basic_memory([\"test\", \"args\"])\n    \n        # Check the result\n        assert result.returncode == 0\n        assert result.stdout == \"test output\"\n>       mock_run.assert_called_once_with(\n            [\"uvx\", \"basic-memory\", \"test\", \"args\"],\n            capture_output=True,\n            text=True,\n            check=False,\n        )\n\ntests/test_memory.py:117: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/lib/python3.13/unittest/mock.py:991: in assert_called_once_with\n    return self.assert_called_with(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <MagicMock name='run' id='140605259250192'>\nargs = (['uvx', 'basic-memory', 'test', 'args'],)\nkwargs = {'capture_output': True, 'check': False, 'text': True}\nexpected = call(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=False)\nactual = call(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=True)\n_error_message = <function NonCallableMock.assert_called_with.<locals>._error_message at 0x7fe1368d9c60>\ncause = None\n\n    def assert_called_with(self, /, *args, **kwargs):\n        \"\"\"assert that the last call was made with the specified arguments.\n    \n        Raises an AssertionError if the args and keyword args passed in are\n        different to the last call to the mock.\"\"\"\n        if self.call_args is None:\n            expected = self._format_mock_call_signature(args, kwargs)\n            actual = 'not called.'\n            error_message = ('expected call not found.\\nExpected: %s\\n  Actual: %s'\n                    % (expected, actual))\n            raise AssertionError(error_message)\n    \n        def _error_message():\n            msg = self._format_mock_failure_message(args, kwargs)\n            return msg\n        expected = self._call_matcher(_Call((args, kwargs), two=True))\n        actual = self._call_matcher(self.call_args)\n        if actual != expected:\n            cause = expected if isinstance(expected, Exception) else None\n>           raise AssertionError(_error_message()) from cause\nE           AssertionError: expected call not found.\nE           Expected: run(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=False)\nE             Actual: run(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=True)\n\n/usr/lib/python3.13/unittest/mock.py:979: AssertionError"
+            }
+          ]
         },
         {
           "name": "test_run_basic_memory_not_found",
           "fullName": "tests/test_memory.py::TestMemoryFunctions::test_run_basic_memory_not_found",
-          "state": "passed"
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory.TestMemoryFunctions object at 0x7fe136848c00>\nmock_run = <MagicMock name='run' id='140605259249856'>\n\n    @patch(\"subprocess.run\")\n    def test_run_basic_memory_not_found(self, mock_run):\n        \"\"\"Test run_basic_memory when basic-memory is not found.\"\"\"\n        # Setup mock to raise FileNotFoundError\n        mock_run.side_effect = FileNotFoundError(\"No such file\")\n    \n        # Call the function and check for expected exception\n        with pytest.raises(typer.Exit) as excinfo:\n>           run_basic_memory([\"test\"])\n\ntests/test_memory.py:132: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nsrc/skogcli/memory.py:90: in run_basic_memory\n    return subprocess.run(cmd, capture_output=True, text=True, check=True)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/lib/python3.13/unittest/mock.py:1169: in __call__\n    return self._mock_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/lib/python3.13/unittest/mock.py:1173: in _mock_call\n    return self._execute_mock_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <MagicMock name='run' id='140605259249856'>, args = (['uvx', 'basic-memory', 'test'],)\nkwargs = {'capture_output': True, 'check': True, 'text': True}\neffect = FileNotFoundError('No such file')\n\n    def _execute_mock_call(self, /, *args, **kwargs):\n        # separate from _increment_mock_call so that awaited functions are\n        # executed separately from their call, also AsyncMock overrides this method\n    \n        effect = self.side_effect\n        if effect is not None:\n            if _is_exception(effect):\n>               raise effect\nE               FileNotFoundError: No such file\n\n/usr/lib/python3.13/unittest/mock.py:1228: FileNotFoundError"
+            }
+          ]
         },
         {
           "name": "test_get_activity_types",
@@ -311,12 +321,22 @@
         {
           "name": "test_missing_basic_memory_binary",
           "fullName": "tests/test_memory_cli.py::TestMemoryErrorHandling::test_missing_basic_memory_binary",
-          "state": "passed"
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory_cli.TestMemoryErrorHandling object at 0x7fe136880b90>\nmock_run = <MagicMock name='run' id='140605253374640'>\n\n    @patch(\"subprocess.run\")\n    def test_missing_basic_memory_binary(self, mock_run):\n        \"\"\"Test when basic-memory binary not found.\"\"\"\n        mock_run.side_effect = FileNotFoundError(\"basic-memory not found\")\n    \n        result = runner.invoke(\n            app, [\"memory\", \"write\", \"test\", \"notes\", \"--content\", \"test\"]\n        )\n    \n        assert result.exit_code == 1\n>       assert \"basic-memory not found\" in result.stdout\nE       AssertionError: assert 'basic-memory not found' in ''\nE        +  where '' = <Result FileNotFoundError('basic-memory not found')>.stdout\n\ntests/test_memory_cli.py:403: AssertionError"
+            }
+          ]
         },
         {
           "name": "test_memory_command_without_basic_memory",
           "fullName": "tests/test_memory_cli.py::TestMemoryIntegration::test_memory_command_without_basic_memory",
-          "state": "passed"
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory_cli.TestMemoryIntegration object at 0x7fe136880cd0>\n\n    def test_memory_command_without_basic_memory(self):\n        \"\"\"Test memory command when basic-memory is not in PATH.\"\"\"\n        with patch.dict(os.environ, {\"PATH\": \"/tmp/nonexistent\"}):\n            result = runner.invoke(app, [\"memory\", \"status\"])\n    \n            assert result.exit_code == 1\n>           assert \"basic-memory not found\" in result.stdout\nE           AssertionError: assert 'basic-memory not found' in ''\nE            +  where '' = <Result FileNotFoundError(2, 'No such file or directory')>.stdout\n\ntests/test_memory_cli.py:415: AssertionError"
+            }
+          ]
         }
       ]
     },

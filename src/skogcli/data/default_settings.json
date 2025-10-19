@@ -36,7 +36,7 @@
     ":": "to follow or continue something via [$@]",
     "=": "to be something | [$id=$id]",
     "->": "{$id1@$id2}",
-    "*": "$*$=$",
+    "*": "$id*$id=$id",
     "id": "$ int*$ unique",
     "self": "$self | [$id@$id]",
     "unique": "a thing which there only exists one of",
