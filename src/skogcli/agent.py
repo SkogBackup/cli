@@ -675,11 +675,8 @@ def edit_agent_script(
     import subprocess
 
     editor = os.environ.get("EDITOR", "vim")
-    try:
-        subprocess.run([editor, script_path])
-        console.print(f"[green]Edited script:[/] {script_path}")
-    except Exception as e:
-        console.print(f"[bold red]Error:[/] Failed to open editor: {str(e)}")
+    subprocess.run([editor, script_path], check=True)
+    console.print(f"[green]Edited script:[/] {script_path}")
 
 
 @agent_app.command("delete", help="delete an agent and its configuration")

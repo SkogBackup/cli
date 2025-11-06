@@ -87,23 +87,7 @@ def get_memory_projects() -> list[str]:
 def run_basic_memory(args: List[str]) -> subprocess.CompletedProcess:
     """Run basic-memory with the given arguments."""
     cmd = ["uvx", "basic-memory"] + args
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        return result
-    except FileNotFoundError:
-        console.print(
-            "[red]Error:[/] basic-memory not found. Please install it with 'uv add basic-memory'",
-            style="bold",
-        )
-        raise typer.Exit(code=1)
-    except subprocess.SubprocessError as e:
-        console.print(f"[red]Error running basic-memory:[/] {str(e)}", style="bold")
-        raise typer.Exit(code=1)
+    return subprocess.run(cmd, capture_output=True, text=True, check=True)
 
 
 @memory_app.callback(invoke_without_command=True, no_args_is_help=True)

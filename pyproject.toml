@@ -4,7 +4,7 @@ version = "0.0.3"
 description = "CLI tool for the SkogAI-project"
 readme = "README.md"
 authors = [{ name = "Emil Skogsund", email = "emil@skogsund.se" }]
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
   "black>=25.1.0",
   "click<8.2.0",
@@ -13,6 +13,7 @@ dependencies = [
   "pre-commit>=4.2.0",
   "pytest>=8.3.5",
   "smolagents[litellm]>=1.18.0",
+  "tdd-guard-pytest>=0.1.2",
   "tiktoken>=0.9.0",
   "typer>=0.15.2",
   "types-requests>=2.32.4.20250611",
@@ -34,3 +35,6 @@ dev = [
   "pytest-cov>=6.2.1",
   "ruff>=0.12.4",
 ]
+
+[tool.pytest.ini_options]
+tdd_guard_project_root = "/home/skogix/.local/src/cli"

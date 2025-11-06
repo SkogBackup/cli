@@ -1,0 +1,444 @@
+{
+  "testModules": [
+    {
+      "moduleId": "tests/test_cli_help.py",
+      "tests": [
+        {
+          "name": "test_no_args_equals_help",
+          "fullName": "tests/test_cli_help.py::test_no_args_equals_help",
+          "state": "passed"
+        },
+        {
+          "name": "test_memory_subcommand_no_args_equals_help",
+          "fullName": "tests/test_cli_help.py::test_memory_subcommand_no_args_equals_help",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_subcommand_no_args_equals_help",
+          "fullName": "tests/test_cli_help.py::test_config_subcommand_no_args_equals_help",
+          "state": "passed"
+        },
+        {
+          "name": "test_misc_subcommand_no_args_equals_help",
+          "fullName": "tests/test_cli_help.py::test_misc_subcommand_no_args_equals_help",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_config.py",
+      "tests": [
+        {
+          "name": "test_config_show",
+          "fullName": "tests/test_config.py::TestConfig::test_config_show",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_list",
+          "fullName": "tests/test_config.py::TestConfig::test_config_list",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_get",
+          "fullName": "tests/test_config.py::TestConfig::test_config_get",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_set_and_get",
+          "fullName": "tests/test_config.py::TestConfig::test_config_set_and_get",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_reset",
+          "fullName": "tests/test_config.py::TestConfig::test_config_reset",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_config_env_advanced.py",
+      "tests": [
+        {
+          "name": "test_config_env_source_command",
+          "fullName": "tests/test_config_env_advanced.py::TestConfigEnvAdvanced::test_config_env_source_command",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_env_clear_namespace",
+          "fullName": "tests/test_config_env_advanced.py::TestConfigEnvAdvanced::test_config_env_clear_namespace",
+          "state": "skipped"
+        },
+        {
+          "name": "test_config_env_import_from_file",
+          "fullName": "tests/test_config_env_advanced.py::TestConfigEnvAdvanced::test_config_env_import_from_file",
+          "state": "skipped"
+        },
+        {
+          "name": "test_config_env_with_agent_integration",
+          "fullName": "tests/test_config_env_advanced.py::TestConfigEnvAdvanced::test_config_env_with_agent_integration",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_env_validation",
+          "fullName": "tests/test_config_env_advanced.py::TestConfigEnvAdvanced::test_config_env_validation",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_config_env_export.py",
+      "tests": [
+        {
+          "name": "test_config_set_env_variable",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_set_env_variable",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_export_env_command_exists",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_export_env_command_exists",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_export_env_generates_export_statements",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_export_env_generates_export_statements",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_export_env_with_namespace_filter",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_export_env_with_namespace_filter",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_export_env_to_file",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_export_env_to_file",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_list_env_variables",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_list_env_variables",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_unset_env_variable",
+          "fullName": "tests/test_config_env_export.py::TestConfigEnvExport::test_config_unset_env_variable",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_config_no_dotconfig.py",
+      "tests": [
+        {
+          "name": "test_config_dir_should_not_use_dotconfig_fallback",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_config_dir_should_not_use_dotconfig_fallback",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_dir_uses_environment_variable",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_config_dir_uses_environment_variable",
+          "state": "passed"
+        },
+        {
+          "name": "test_config_dir_uses_storage_dir_setting",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_config_dir_uses_storage_dir_setting",
+          "state": "passed"
+        },
+        {
+          "name": "test_load_settings_requires_default_settings_file",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_load_settings_requires_default_settings_file",
+          "state": "passed"
+        },
+        {
+          "name": "test_environment_variables_override_file_settings",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_environment_variables_override_file_settings",
+          "state": "passed"
+        },
+        {
+          "name": "test_environment_variables_ui_theme_override",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_environment_variables_ui_theme_override",
+          "state": "passed"
+        },
+        {
+          "name": "test_no_config_directory_created_in_home",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_no_config_directory_created_in_home",
+          "state": "passed"
+        },
+        {
+          "name": "test_setting_operations_work_without_dotconfig",
+          "fullName": "tests/test_config_no_dotconfig.py::TestConfigNoDotConfig::test_setting_operations_work_without_dotconfig",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_memory.py",
+      "tests": [
+        {
+          "name": "test_memory_help",
+          "fullName": "tests/test_memory.py::test_memory_help",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_memory_folders_success",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_get_memory_folders_success",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_memory_folders_fallback",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_get_memory_folders_fallback",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_memory_projects_success",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_get_memory_projects_success",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_memory_projects_fallback",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_get_memory_projects_fallback",
+          "state": "passed"
+        },
+        {
+          "name": "test_run_basic_memory_success",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_run_basic_memory_success",
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory.TestMemoryFunctions object at 0x7fe13681ab10>\nmock_run = <MagicMock name='run' id='140605259250192'>\n\n    @patch(\"subprocess.run\")\n    def test_run_basic_memory_success(self, mock_run):\n        \"\"\"Test run_basic_memory when basic-memory is available.\"\"\"\n        # Setup mock\n        mock_result = MagicMock()\n        mock_result.returncode = 0\n        mock_result.stdout = \"test output\"\n        mock_run.return_value = mock_result\n    \n        # Call the function\n        result = run_basic_memory([\"test\", \"args\"])\n    \n        # Check the result\n        assert result.returncode == 0\n        assert result.stdout == \"test output\"\n>       mock_run.assert_called_once_with(\n            [\"uvx\", \"basic-memory\", \"test\", \"args\"],\n            capture_output=True,\n            text=True,\n            check=False,\n        )\n\ntests/test_memory.py:117: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n/usr/lib/python3.13/unittest/mock.py:991: in assert_called_once_with\n    return self.assert_called_with(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <MagicMock name='run' id='140605259250192'>\nargs = (['uvx', 'basic-memory', 'test', 'args'],)\nkwargs = {'capture_output': True, 'check': False, 'text': True}\nexpected = call(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=False)\nactual = call(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=True)\n_error_message = <function NonCallableMock.assert_called_with.<locals>._error_message at 0x7fe1368d9c60>\ncause = None\n\n    def assert_called_with(self, /, *args, **kwargs):\n        \"\"\"assert that the last call was made with the specified arguments.\n    \n        Raises an AssertionError if the args and keyword args passed in are\n        different to the last call to the mock.\"\"\"\n        if self.call_args is None:\n            expected = self._format_mock_call_signature(args, kwargs)\n            actual = 'not called.'\n            error_message = ('expected call not found.\\nExpected: %s\\n  Actual: %s'\n                    % (expected, actual))\n            raise AssertionError(error_message)\n    \n        def _error_message():\n            msg = self._format_mock_failure_message(args, kwargs)\n            return msg\n        expected = self._call_matcher(_Call((args, kwargs), two=True))\n        actual = self._call_matcher(self.call_args)\n        if actual != expected:\n            cause = expected if isinstance(expected, Exception) else None\n>           raise AssertionError(_error_message()) from cause\nE           AssertionError: expected call not found.\nE           Expected: run(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=False)\nE             Actual: run(['uvx', 'basic-memory', 'test', 'args'], capture_output=True, text=True, check=True)\n\n/usr/lib/python3.13/unittest/mock.py:979: AssertionError"
+            }
+          ]
+        },
+        {
+          "name": "test_run_basic_memory_not_found",
+          "fullName": "tests/test_memory.py::TestMemoryFunctions::test_run_basic_memory_not_found",
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory.TestMemoryFunctions object at 0x7fe136848c00>\nmock_run = <MagicMock name='run' id='140605259249856'>\n\n    @patch(\"subprocess.run\")\n    def test_run_basic_memory_not_found(self, mock_run):\n        \"\"\"Test run_basic_memory when basic-memory is not found.\"\"\"\n        # Setup mock to raise FileNotFoundError\n        mock_run.side_effect = FileNotFoundError(\"No such file\")\n    \n        # Call the function and check for expected exception\n        with pytest.raises(typer.Exit) as excinfo:\n>           run_basic_memory([\"test\"])\n\ntests/test_memory.py:132: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nsrc/skogcli/memory.py:90: in run_basic_memory\n    return subprocess.run(cmd, capture_output=True, text=True, check=True)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/lib/python3.13/unittest/mock.py:1169: in __call__\n    return self._mock_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/lib/python3.13/unittest/mock.py:1173: in _mock_call\n    return self._execute_mock_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <MagicMock name='run' id='140605259249856'>, args = (['uvx', 'basic-memory', 'test'],)\nkwargs = {'capture_output': True, 'check': True, 'text': True}\neffect = FileNotFoundError('No such file')\n\n    def _execute_mock_call(self, /, *args, **kwargs):\n        # separate from _increment_mock_call so that awaited functions are\n        # executed separately from their call, also AsyncMock overrides this method\n    \n        effect = self.side_effect\n        if effect is not None:\n            if _is_exception(effect):\n>               raise effect\nE               FileNotFoundError: No such file\n\n/usr/lib/python3.13/unittest/mock.py:1228: FileNotFoundError"
+            }
+          ]
+        },
+        {
+          "name": "test_get_activity_types",
+          "fullName": "tests/test_memory.py::TestMemoryHelperFunctions::test_get_activity_types",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_timeframe_options",
+          "fullName": "tests/test_memory.py::TestMemoryHelperFunctions::test_get_timeframe_options",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_note_identifiers_success",
+          "fullName": "tests/test_memory.py::TestMemoryHelperFunctions::test_get_note_identifiers_success",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_note_identifiers_fallback",
+          "fullName": "tests/test_memory.py::TestMemoryHelperFunctions::test_get_note_identifiers_fallback",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_memory_cli.py",
+      "tests": [
+        {
+          "name": "test_bm_passthrough",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_bm_passthrough",
+          "state": "passed"
+        },
+        {
+          "name": "test_write_command_success",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_write_command_success",
+          "state": "passed"
+        },
+        {
+          "name": "test_write_command_with_tags",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_write_command_with_tags",
+          "state": "passed"
+        },
+        {
+          "name": "test_write_command_with_project",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_write_command_with_project",
+          "state": "passed"
+        },
+        {
+          "name": "test_write_command_failure",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_write_command_failure",
+          "state": "passed"
+        },
+        {
+          "name": "test_read_command_success",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_read_command_success",
+          "state": "passed"
+        },
+        {
+          "name": "test_read_command_with_pagination",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_read_command_with_pagination",
+          "state": "passed"
+        },
+        {
+          "name": "test_read_command_failure",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_read_command_failure",
+          "state": "passed"
+        },
+        {
+          "name": "test_search_command_basic",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_search_command_basic",
+          "state": "passed"
+        },
+        {
+          "name": "test_search_command_with_filters",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_search_command_with_filters",
+          "state": "passed"
+        },
+        {
+          "name": "test_search_command_json_format",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_search_command_json_format",
+          "state": "passed"
+        },
+        {
+          "name": "test_list_command_default",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_list_command_default",
+          "state": "passed"
+        },
+        {
+          "name": "test_sync_command_basic",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_sync_command_basic",
+          "state": "passed"
+        },
+        {
+          "name": "test_status_command_default",
+          "fullName": "tests/test_memory_cli.py::TestMemoryCommands::test_status_command_default",
+          "state": "passed"
+        },
+        {
+          "name": "test_json_decode_error_handling",
+          "fullName": "tests/test_memory_cli.py::TestMemoryErrorHandling::test_json_decode_error_handling",
+          "state": "passed"
+        },
+        {
+          "name": "test_missing_basic_memory_binary",
+          "fullName": "tests/test_memory_cli.py::TestMemoryErrorHandling::test_missing_basic_memory_binary",
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory_cli.TestMemoryErrorHandling object at 0x7fe136880b90>\nmock_run = <MagicMock name='run' id='140605253374640'>\n\n    @patch(\"subprocess.run\")\n    def test_missing_basic_memory_binary(self, mock_run):\n        \"\"\"Test when basic-memory binary not found.\"\"\"\n        mock_run.side_effect = FileNotFoundError(\"basic-memory not found\")\n    \n        result = runner.invoke(\n            app, [\"memory\", \"write\", \"test\", \"notes\", \"--content\", \"test\"]\n        )\n    \n        assert result.exit_code == 1\n>       assert \"basic-memory not found\" in result.stdout\nE       AssertionError: assert 'basic-memory not found' in ''\nE        +  where '' = <Result FileNotFoundError('basic-memory not found')>.stdout\n\ntests/test_memory_cli.py:403: AssertionError"
+            }
+          ]
+        },
+        {
+          "name": "test_memory_command_without_basic_memory",
+          "fullName": "tests/test_memory_cli.py::TestMemoryIntegration::test_memory_command_without_basic_memory",
+          "state": "failed",
+          "errors": [
+            {
+              "message": "self = <tests.test_memory_cli.TestMemoryIntegration object at 0x7fe136880cd0>\n\n    def test_memory_command_without_basic_memory(self):\n        \"\"\"Test memory command when basic-memory is not in PATH.\"\"\"\n        with patch.dict(os.environ, {\"PATH\": \"/tmp/nonexistent\"}):\n            result = runner.invoke(app, [\"memory\", \"status\"])\n    \n            assert result.exit_code == 1\n>           assert \"basic-memory not found\" in result.stdout\nE           AssertionError: assert 'basic-memory not found' in ''\nE            +  where '' = <Result FileNotFoundError(2, 'No such file or directory')>.stdout\n\ntests/test_memory_cli.py:415: AssertionError"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_misc.py",
+      "tests": [
+        {
+          "name": "test_script_help",
+          "fullName": "tests/test_misc.py::test_script_help",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_user_scripts_dir",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_get_user_scripts_dir",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_metadata_file",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_get_metadata_file",
+          "state": "passed"
+        },
+        {
+          "name": "test_load_metadata",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_load_metadata",
+          "state": "passed"
+        },
+        {
+          "name": "test_save_metadata",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_save_metadata",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_script_names",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_get_script_names",
+          "state": "passed"
+        },
+        {
+          "name": "test_get_script_templates",
+          "fullName": "tests/test_misc.py::TestScriptFunctions::test_get_script_templates",
+          "state": "passed"
+        },
+        {
+          "name": "test_script_list_no_scripts",
+          "fullName": "tests/test_misc.py::TestScriptCommands::test_script_list_no_scripts",
+          "state": "passed"
+        },
+        {
+          "name": "test_script_create_and_list",
+          "fullName": "tests/test_misc.py::TestScriptCommands::test_script_create_and_list",
+          "state": "passed"
+        },
+        {
+          "name": "test_script_templates",
+          "fullName": "tests/test_misc.py::TestScriptCommands::test_script_templates",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_multi_namespace_export.py",
+      "tests": [
+        {
+          "name": "test_multiple_namespaces_comma_separated",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_multiple_namespaces_comma_separated",
+          "state": "passed"
+        },
+        {
+          "name": "test_multiple_namespaces_precedence_override",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_multiple_namespaces_precedence_override",
+          "state": "passed"
+        },
+        {
+          "name": "test_multiple_namespaces_with_spaces",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_multiple_namespaces_with_spaces",
+          "state": "passed"
+        },
+        {
+          "name": "test_multiple_namespaces_empty_namespace",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_multiple_namespaces_empty_namespace",
+          "state": "passed"
+        },
+        {
+          "name": "test_multiple_namespaces_to_file",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_multiple_namespaces_to_file",
+          "state": "passed"
+        },
+        {
+          "name": "test_three_namespaces_layered_config",
+          "fullName": "tests/test_multi_namespace_export.py::TestMultiNamespaceExport::test_three_namespaces_layered_config",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "moduleId": "tests/test_version.py",
+      "tests": [
+        {
+          "name": "test_version_command",
+          "fullName": "tests/test_version.py::test_version_command",
+          "state": "passed"
+        }
+      ]
+    }
+  ]
+}
