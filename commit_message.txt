@@ -1,0 +1,5 @@
+Upgrade claude script and docs
+
+Merge feature/script-upgrade-claude into develop
+Add functional map documentation
+Merge pull requests #2, #3, #4
