@@ -1,5 +1,3 @@
-Upgrade claude script and docs
+Add commit message file
 
-Merge feature/script-upgrade-claude into develop
-Add functional map documentation
-Merge pull requests #2, #3, #4
+Create a new file to store commit messages.
