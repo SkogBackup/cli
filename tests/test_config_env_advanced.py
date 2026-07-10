@@ -120,14 +120,12 @@ class TestConfigEnvAdvanced:
 
         # Create a test env file
         env_file = self.test_home / "import.env"
-        env_file.write_text(
-            """
+        env_file.write_text("""
 export IMPORT_VAR1="import_value1"
 export IMPORT_VAR2="import_value2"
 # This is a comment
 export IMPORT_VAR3="import_value3"
-"""
-        )
+""")
 
         # Import the file
         result = subprocess.run(

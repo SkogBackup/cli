@@ -437,7 +437,7 @@ def run_script(
         )
 
         if result.returncode == 0:
-            print(result.stdout, end='')
+            print(result.stdout, end="")
         else:
             sys.stderr.write(result.stderr)
             sys.exit(result.returncode)

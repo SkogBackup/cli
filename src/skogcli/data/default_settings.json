@@ -78,7 +78,7 @@
   "settings": {
     "cli": {
       "last-updated": 1753519117.9098947,
-      "version": 1,
+      "version": 2,
       "storage_dir": "/home/skogix/skogai/config"
     },
     "memory": {
