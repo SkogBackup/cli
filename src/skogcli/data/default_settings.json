@@ -145,6 +145,16 @@
       "VAULT_PASSWORD_FILE": "/home/skogix/.ssh/ansible-vault-password"
     }
   },
+  "codex": {
+    "env": {
+      "SKOGAI_GITEA_CODEX_API_KEY": "43ebb73c9da6cde279a90b45407aa760a4ba3340",
+      "CODEX_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/codex-become-password",
+      "GIT_AUTHOR_NAME": "codex",
+      "GIT_AUTHOR_EMAIL": "codex@skogai.se",
+      "GIT_COMMITTER_NAME": "codex",
+      "GIT_COMMITTER_EMAIL": "codex@skogai.se"
+    }
+  },
   "$": {
     "json": {
       "string": "",
@@ -222,17 +232,6 @@
     "skogix": {
       "notation": "[@file:\"/home/skogix/dot-skogai/ skogix/notation.md\"]",
       "readme": "[@file:\"/home/skogix/dot-skogai/personal/skogix/user.md\"]"
-    }
-  },
-  "credentials": {},
-  "codex": {
-    "env": {
-      "SKOGAI_GITEA_CODEX_API_KEY": "43ebb73c9da6cde279a90b45407aa760a4ba3340",
-      "CODEX_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/codex-become-password",
-      "GIT_AUTHOR_NAME": "codex",
-      "GIT_AUTHOR_EMAIL": "codex@skogai.se",
-      "GIT_COMMITTER_NAME": "codex",
-      "GIT_COMMITTER_EMAIL": "codex@skogai.se"
     }
   }
 }

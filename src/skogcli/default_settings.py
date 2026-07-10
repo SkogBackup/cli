@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Configuration version - increment when making breaking changes
-CONFIG_VERSION = 1
+CONFIG_VERSION = 2
 
 
 def get_default_settings_file() -> Path:
