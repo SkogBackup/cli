@@ -156,6 +156,7 @@
     }
   },
   "$": {
+    "SKOGAI": "/home/skogix/skogai",
     "json": {
       "string": "",
       "int": {
