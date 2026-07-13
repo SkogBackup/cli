@@ -47,10 +47,10 @@
       "last_updated": 1748305682.7457244
     },
     "script": {
-      "templates_dir": "./skogai/config/templates",
+      "templates_dir": ".skogai/config/templates",
       "user_scripts_dir": ".skogai/scripts",
       "global_scripts_dir": "./scripts",
-      "metadata_dir": "./skogai/config"
+      "metadata_dir": ".skogai/config"
     },
     "chat": {
       "history_enabled": true,
