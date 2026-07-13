@@ -36,8 +36,7 @@
       "OLLAMA_HOST": "0.0.0.0:11434",
       "SKOGAI_LORE": "/home/skogix/lore",
       "SKOGAI_ANSIBLE_VAULT_PASSWORD_FILE": "/home/skogix/.ssh/ansible-vault-password",
-      "SKOGAI_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/ansible-become-password",
-      "SKOGAI_CLAUDE_OMNIROUTE_BASE_URL": "https://omniroute.aldervall.se/v1"
+      "SKOGAI_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/ansible-become-password"
     }
   },
   "claude": {
@@ -70,16 +69,12 @@
   },
   "librarian": {},
   "blacksmith": {},
-  "letta": {
-    "env": {
-      "LETTA_API_KEY": "sk-let-ODA5YTk4ZDEtOTUxNi00ODJjLThhYjUtYjQyZGJkMzRmNjAwOmE4NzE4NjZjLTBlNWYtNDgzNi04YWJiLTEzZGQ4NDJmYzU5ZQ=="
-    }
-  },
+  "letta": {},
   "settings": {
     "cli": {
       "last-updated": 1753519117.9098947,
       "version": 2,
-      "storage_dir": "/home/skogix/skogai/config"
+      "storage_dir": ".skogai/config"
     },
     "memory": {
       "page_size": 10,
