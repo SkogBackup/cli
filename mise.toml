@@ -1,8 +1,0 @@
-[tools]
-usage = "latest"
-uv = "latest"
-
-[tasks.all]
-
-[tasks.uv-tool-install]
-run = "exec uv -- uv tool install --link-mode copy --cache-dir /mnt/sda1/uv ."
