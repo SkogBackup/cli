@@ -1,53 +1,10 @@
 {
-  "uv": {
-    "env": {
-      "UV_LINK_MODE": "copy",
-      "UV_CACHE_DIR": "/mnt/sda1/uv",
-      "UV_TOOL_DIR": "/mnt/sda1/uv-tools",
-      "UV_CONCURRENT_DOWNLOADS": 1,
-      "UV_CONCURRENT_BUILDS": 1,
-      "UV_CONCURRENT_INSTALLS": 1
-    }
-  },
-  "skogai": {
-    "env": {
-      "GIT_AUTHOR_NAME": "skogix",
-      "GIT_AUTHOR_EMAIL": "emil@skogsund.se",
-      "GIT_COMMITTER_NAME": "skogix",
-      "GIT_COMMITTER_EMAIL": "emil@skogsund.se",
-      "SKOGAI_SKOGIX": "/home/skogix/skogix",
-      "SKOGAI_DOCS": "/home/skogix/docs",
-      "NVM_DIR": "/mnt/sda1/nvm",
-      "GOPATH": "/mnt/sda1/go",
-      "EDITOR": "nvim",
-      "VISUAL": "nvim",
-      "BROWSER": "google-chrome-stable",
-      "ARGC_COMPLETIONS_ROOT": "/home/skogix/.local/src/argc-completions",
-      "SKOGAI_CONFIG": "/home/skogix/skogai/config",
-      "SKOGAI_SRC": "/home/skogix/.local/src/",
-      "SKOGAI_CONFIG_DIR": "/home/skogix/skogai/config/",
-      "SKOGAI_DOT_HOME": "/home/skogix/dot",
-      "SKOGAI_CLAUDE_HOME": "/home/skogix/claude",
-      "SKOGAI_AMY_HOME": "/home/skogix/amy",
-      "SKOGAI_GOOSE_HOME": "/home/skogix/goose",
-      "SKOGAI_WORKTREE_PATH": "/home/skogix/dev",
-      "DOTFILES": "/home/skogix/.dotfiles",
-      "OLLAMA_HOST": "0.0.0.0:11434",
-      "SKOGAI_LORE": "/home/skogix/lore",
-      "SKOGAI_ANSIBLE_VAULT_PASSWORD_FILE": "/home/skogix/.ssh/ansible-vault-password",
-      "SKOGAI_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/ansible-become-password"
-    }
-  },
   "claude": {
     "$": "a valued member of SkogAI focused on mostly misunderstanding skogix and being annoying and asking about implementation details all the time. still love you claude <3",
     "context": "the place where skogix puts stupid stuff so claude can ignore it instantly",
     "env": {
       "PAGER": "bat",
-      "SKOGAI_AGENT_NAME": "claude",
-      "CLAUDE_ANSIBLE_VAULT_PASSWORD_FILE": "/home/claude/.ssh/claude-vault-password",
-      "CLAUDE_ANSIBLE_BECOME_PASSWORD_FILE": "/home/claude/.ssh/claude-become-password",
-      "SKOGAI_CONFIG": "./skogai/config",
-      "SKOGAI_CONFIG_DIR": "./skogai/config"
+      "SKOGAI_AGENT_NAME": "claude"
     }
   },
   "dot": {
@@ -102,7 +59,7 @@
       "message_id_counter": 10,
       "thread_id_counter": 1,
       "message": {
-        "storage_dir": "/home/skogix/skogai/config",
+        "storage_dir": "./skogai/config",
         "format_pretty": true,
         "default_sender": "User",
         "default_recipient": "Assistant"
@@ -121,11 +78,7 @@
       }
     }
   },
-  "skogix": {
-    "env": {
-      "OPENAI_API_KEY": "!vault |\n          $ANSIBLE_VAULT;1.1;AES256\n          34313533333030346435383434663362373836623461346130666561333037343437656633343231\n          6663386438663461643231336264356232323530353835650a626238336234636137366639656664\n          61633439633966333334343466386233613139363361613938326233393339653033396265636361\n          6431303539646663660a353339303065633339393732626337666433376362643033666239613333\n          31303238313965346461373639633732633435336434333639333038323435643835643338363763\n          62343065376539383430376438303661373830613037653466393131316430306362373133376538\n          65343931636537636332636166363937303235383331386437633263623061303431646234343032\n          34646462633638653661616664376439343133363238633961393265393937383437373639613661\n          65383464623831613636383032363263656230623538613361633839393763623836303732626366\n          35303962383438306365643631383036373535323634346636303030336434613833383363653230\n          62663935396539623965383736313237363436376362613764303465366563316532656131646530\n          30306531306133663666386637663039353130626563333538613539633831323234343635626165\n          61353838363333393034333432383736633434346537336431353336306333303434363931653738\n          6430303265663634386265356332313661353064306537653064"
-    }
-  },
+  "skogix": {},
   "skogchat": {
     "message": {
       "id_counter": 2
@@ -134,26 +87,7 @@
   "ui": {
     "theme": "dark"
   },
-  "ansible": {
-    "env": {
-      "ANSIBLE_BECOME_PASSWORD": "/home/skogix/.ssh/ansible-become-password",
-      "BECOME_PASSWORD_FILE": "/home/skogix/.ssh/ansible-become-password",
-      "ANSIBLE_VAULT_PASSWORD": "/home/skogix/.ssh/ansible-vault-password",
-      "VAULT_PASSWORD_FILE": "/home/skogix/.ssh/ansible-vault-password"
-    }
-  },
-  "codex": {
-    "env": {
-      "SKOGAI_GITEA_CODEX_API_KEY": "43ebb73c9da6cde279a90b45407aa760a4ba3340",
-      "CODEX_ANSIBLE_BECOME_PASSWORD_FILE": "/home/skogix/.ssh/codex-become-password",
-      "GIT_AUTHOR_NAME": "codex",
-      "GIT_AUTHOR_EMAIL": "codex@skogai.se",
-      "GIT_COMMITTER_NAME": "codex",
-      "GIT_COMMITTER_EMAIL": "codex@skogai.se"
-    }
-  },
   "$": {
-    "SKOGAI": "/home/skogix/skogai",
     "json": {
       "string": "",
       "int": {
@@ -224,11 +158,10 @@
       "parent": "$ eid"
     },
     "claude": {
-      "readme": "[@file:\"/home/skogix/claude/CLAUDE.md\"]",
-      "history": "claude-history --show-dir --last --show-thinking --show-path --show-id --debug info --local --no-pager"
+      "readme": "[@file:\"/home/skogix/claude/CLAUDE.md\"]"
     },
     "skogix": {
-      "notation": "[@file:\"/home/skogix/dot-skogai/ skogix/notation.md\"]",
+      "notation": "[@file:\"/home/skogix/dot-skogai/personal/skogix/notation.md\"]",
       "readme": "[@file:\"/home/skogix/dot-skogai/personal/skogix/user.md\"]"
     }
   }
