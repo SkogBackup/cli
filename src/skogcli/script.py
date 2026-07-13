@@ -102,7 +102,14 @@ def list_available_templates() -> Dict[str, List[str]]:
 
 def get_global_scripts_dir() -> Path:
     """Get the global scripts directory, creating it if it doesn't exist."""
-    # Check for SKOGAI global scripts directory first
+    # Check config setting first
+    from .settings import get_setting
+
+    scripts_dir_setting = get_setting("script.global_scripts_dir")
+    if scripts_dir_setting:
+        return Path(scripts_dir_setting)
+
+    # Check for SKOGAI global scripts directory
     skogai_global_scripts_dir = os.getenv("SKOGAI_SCRIPTS_GLOBAL_DIR")
     if skogai_global_scripts_dir:
         return Path(skogai_global_scripts_dir)

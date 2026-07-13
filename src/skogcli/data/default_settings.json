@@ -96,6 +96,7 @@
     "script": {
       "templates_dir": "/home/skogix/skogai/config/templates",
       "user_scripts_dir": "/home/skogix/skogai/scripts/",
+      "global_scripts_dir": ".skogai/scripts/",
       "metadata_dir": "/home/skogix/skogai/config"
     },
     "chat": {
