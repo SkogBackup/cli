@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [{ name = "Emil Skogsund", email = "emil@skogsund.se" }]
 requires-python = ">=3.13"
 dependencies = [
+  "basic-memory>=0.22.1",
   "black>=25.1.0",
   "click<8.2.0",
   "pip>=25.1.1",
@@ -32,6 +33,9 @@ dev = [
   "pytest-cov>=6.2.1",
   "ruff>=0.12.4",
 ]
+
+[tool.setuptools.package-data]
+skogcli = ["data/**/*"]
 
 [tool.pytest.ini_options]
 tdd_guard_project_root = "/home/skogix/.local/src/cli"
