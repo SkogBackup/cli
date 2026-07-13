@@ -15,7 +15,6 @@
       "GIT_AUTHOR_EMAIL": "emil@skogsund.se",
       "GIT_COMMITTER_NAME": "skogix",
       "GIT_COMMITTER_EMAIL": "emil@skogsund.se",
-      "SKOGAI": "/home/skogix/skogai",
       "SKOGAI_SKOGIX": "/home/skogix/skogix",
       "SKOGAI_DOCS": "/home/skogix/docs",
       "NVM_DIR": "/mnt/sda1/nvm",
@@ -44,9 +43,11 @@
     "context": "the place where skogix puts stupid stuff so claude can ignore it instantly",
     "env": {
       "PAGER": "bat",
-      "CLAUDE_ANSIBLE_VAULT_PASSWORD_FILE": "/home/claude/.ssh/claude-vault-password",
       "SKOGAI_AGENT_NAME": "claude",
-      "CLAUDE_ANSIBLE_BECOME_PASSWORD_FILE": "/home/claude/.ssh/claude-become-password"
+      "CLAUDE_ANSIBLE_VAULT_PASSWORD_FILE": "/home/claude/.ssh/claude-vault-password",
+      "CLAUDE_ANSIBLE_BECOME_PASSWORD_FILE": "/home/claude/.ssh/claude-become-password",
+      "SKOGAI_CONFIG": "./skogai/config",
+      "SKOGAI_CONFIG_DIR": "./skogai/config"
     }
   },
   "dot": {
@@ -91,7 +92,7 @@
     "script": {
       "templates_dir": "./skogai/config/templates",
       "user_scripts_dir": ".skogai/scripts",
-      "global_scripts_dir": "/home/skogix/skogai/scripts",
+      "global_scripts_dir": "./scripts",
       "metadata_dir": "./skogai/config"
     },
     "chat": {
