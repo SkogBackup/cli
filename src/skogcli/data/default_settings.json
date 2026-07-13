@@ -1,4 +1,24 @@
 {
+  "/skogai": {
+    "env": {
+      "SKOGAI_CONFIG_DIR": ".skogai/config/dash-skogai"
+    }
+  },
+  ".skogai": {
+    "env": {
+      "SKOGAI_CONFIG_DIR": ".skogai/config/dot-skogai"
+    }
+  },
+  "skogai": {
+    "env": {
+      "SKOGAI_CONFIG_DIR": ".skogai/config/skogai"
+    }
+  },
+  "harness": {
+    "env": {
+      "SKOGAI_CONFIG_DIR": ".skogai/config/harness"
+    }
+  },
   "claude": {
     "$": "a valued member of SkogAI focused on mostly misunderstanding skogix and being annoying and asking about implementation details all the time. still love you claude <3",
     "context": "the place where skogix puts stupid stuff so claude can ignore it instantly",
