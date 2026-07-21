@@ -1,10 +1,10 @@
 {
-  "/skogai": {
+  "dash-skogai": {
     "env": {
       "SKOGAI_CONFIG_DIR": ".skogai/config/dash-skogai"
     }
   },
-  ".skogai": {
+  "dot-skogai": {
     "env": {
       "SKOGAI_CONFIG_DIR": ".skogai/config/dot-skogai"
     }
